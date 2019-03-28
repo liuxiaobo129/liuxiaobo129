@@ -1,0 +1,890 @@
+https://blog.csdn.net/chq1988/article/details/76545987
+首页
+博客
+学院
+下载
+图文课
+论坛
+APP
+问答
+商城
+VIP会员
+活动
+招聘
+ITeye
+GitChat
+搜博主文章
+写博客 小程序 消息 登录注册
+原
+Activiti学习之根据条件判断流程走向
+2017年08月01日 16:48:24 程诺 阅读数：15701
+ 版权声明：本文为博主原创文章，未经博主允许不得转载。	https://blog.csdn.net/chq00788/article/details/76545987
+在流程设计当中经常会遇到根据条件来判断流程走向的问题，Activiti中也给出了相应的实现方法：网关。 
+网关（Gateway）用于控制流程走向（在BPMN2.0规范中称为“执行令牌”）。根据功能不同可以划分为以下四种网关： 
+- 排他网关 
+- 并行网关 
+- 包容网关 
+- 事件网关 
+其中，排他网关（Exclusive Gateway）用来对流程中的走向进行建模。流程执行到该网关时，Activiti 根据设置的条件进行计算，当条件计算结果为true时，执行当前网关的输出流。
+
+小提示：如果多个线路计算结果都为true，那么只会执行第一个，如果没有为true的值，会抛出异常。
+
+排他网关在流程图当中的形象如下图所示：
+
+排他网关
+
+下面介绍一下排他网关的使用方法。
+
+1、绘制流程图
+ExclusiveProcess.bpmn如下所示： 
+这里写图片描述 
+其中排他网关的三个输出线分别设置Condition值为：
+
+${type == 1}
+${type == 2}
+${type == 3}
+1
+2
+3
+当表达式判断结果为true时会执行后面的系统任务。 
+三个系统任务分别设置成如图所示： 
+这里写图片描述 
+三个系统任务的Task type 设为Expression，Expression选项中分别填入
+
+${resumeService.showTask1()}
+${resumeService.showTask2()}
+${resumeService.showTask3()}
+1
+2
+3
+流程图的XML代码如下：
+
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="exclusiveProcess" name="ExclusiveProcess.bpmn" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="exclusivegateway1"></sequenceFlow>
+    <serviceTask id="servicetask1" name="Service Task1" activiti:expression="${resumeService.showTask1()}"></serviceTask>
+    <sequenceFlow id="flow2" sourceRef="exclusivegateway1" targetRef="servicetask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${type == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="servicetask3" name="Service Task3" activiti:expression="${resumeService.showTask3()}"></serviceTask>
+    <sequenceFlow id="flow3" sourceRef="exclusivegateway1" targetRef="servicetask3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${type == 3}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="servicetask2" name="Service Task2" activiti:expression="${resumeService.showTask2()}"></serviceTask>
+    <sequenceFlow id="flow4" sourceRef="exclusivegateway1" targetRef="servicetask2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${type == 2}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow5" sourceRef="servicetask2" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="servicetask1" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow7" sourceRef="servicetask3" targetRef="endevent1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_exclusiveProcess">
+    <bpmndi:BPMNPlane bpmnElement="exclusiveProcess" id="BPMNPlane_exclusiveProcess">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="60.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="140.0" y="138.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="260.0" y="40.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask3" id="BPMNShape_servicetask3">
+        <omgdc:Bounds height="55.0" width="105.0" x="269.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask2" id="BPMNShape_servicetask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="260.0" y="131.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="480.0" y="141.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="95.0" y="157.0"></omgdi:waypoint>
+        <omgdi:waypoint x="140.0" y="158.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="160.0" y="138.0"></omgdi:waypoint>
+        <omgdi:waypoint x="160.0" y="67.0"></omgdi:waypoint>
+        <omgdi:waypoint x="260.0" y="67.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="160.0" y="178.0"></omgdi:waypoint>
+        <omgdi:waypoint x="160.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="269.0" y="247.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="180.0" y="158.0"></omgdi:waypoint>
+        <omgdi:waypoint x="260.0" y="158.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="365.0" y="158.0"></omgdi:waypoint>
+        <omgdi:waypoint x="480.0" y="158.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="365.0" y="67.0"></omgdi:waypoint>
+        <omgdi:waypoint x="497.0" y="67.0"></omgdi:waypoint>
+        <omgdi:waypoint x="497.0" y="141.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="374.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="497.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="497.0" y="176.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+2、部署流程
+将流程图文件放到项目当中的resources下的processes文件夹，运行程序 。
+
+3、编写代码
+新建spring boot 项目，在项目中实现一个service，并且在service中实现三个方法，代码如下： 
+ResumeService接口
+
+public interface ResumeService {
+
+    void showTask1();
+
+    void showTask2();
+
+    void showTask3();
+}
+1
+2
+3
+4
+5
+6
+7
+8
+ResumeServiceImpl实现类
+
+@Service("resumeService")
+public class ResumeServiceImpl implements ResumeService {
+
+    @Override
+    public void showTask1() {
+        System.out.println("#############################执行任务1");
+    }
+
+    @Override
+    public void showTask2() {
+        System.out.println("#############################执行任务2");
+    }
+
+    @Override
+    public void showTask3() {
+        System.out.println("#############################执行任务3");
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+利用spring boot 单元测试来实现流程： 
+ExclusiveProcessTest测试类
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = SpringBootActivitiApplication.class)
+public class ExclusiveProcessTest {
+
+    @Autowired
+    RuntimeService runtimeService;
+
+    /**
+     * 启动流程，并给流程传入参数type，排他网关根据参数type来判断流程走向
+     */
+    @Test
+    public void testStartProcess() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 3);
+        runtimeService.startProcessInstanceByKey("exclusiveProcess", map);
+
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+4、执行结果
+运行单元测试，执行结果如下： 
+这里写图片描述
+
+小知识点：排他网关中有一个属性为default，当所有条件都不满足时，排他网关默认执行default属性制定的流程。
+
+<exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway" default="flow1"></exclusiveGateway>
+1
+消防工程师还有这个用处？2019考个消防工程师，挑战高薪！
+优乐 · 鹓鶵
+ 
+想对作者说点什么
+ stone_yw
+淹不死的水： 不知道楼主有没有遇见过这个问题：有多台机器运行activiti的项目，这次在其中一个流程中增加了分支，在部署时是先部署一台机器，然后再部署另外5台机器。但是发现，当部署完第一台机器后，另外5台机器报错，无法解析${flow_a}属性，该属性是本次新增的，很奇怪那些还没部署新应用的项目为啥能够加载刚刚部署的流程呢？？？(7个月前#1楼)
+0
+如何实现Activiti的分支条件的自定义配置
+阅读数 173
+
+一、Activiti的流程分支条件的局限Activiti的流程分支条件目前是采用脚本判断方式，并且需要在流程定义中进行分支条件的设定，如下图所示： &amp;lt;sequenceFlowid=&qu...
+博文
+来自：	u013604967的博客
+Activiti 工作流引擎的初步使用
+阅读数 291
+
+最近领导让我研究下工作流，于是查啊查就查到了Activiti，特么刚开始一直查的是Activity，查出来一堆Android的东西，我也是醉了。话不多说，下面就记录下这2天的研究成果吧。所用环境Mav...
+博文
+来自：	licsdnnet的博客
+Activiti基础 condition expression returns non-Boolean 解决方案
+阅读数 1134
+
+在工作流网关判断的时候,报了如下图的错误conditionexpressionreturnsnon-Boolean 主要原因是:在判断的表达式 $(submitType==&quot;y&quot;|...
+博文
+来自：	java持续实践
+ 
+activiti学习笔记(三)
+阅读数 82
+
+网关排他网关条件解析为true的顺序流（或者没有设置条件，概念上在顺序流上定义了一个’true’）会被选中，让流程继续运行。对应的XML内容:&amp;lt;exclusiveGatewayid=&q...
+博文
+来自：	qq_35489188的博客
+【应用篇】Activiti外置表单简单应用（三）
+阅读数 1万+
+
+Activiti的简单应用，使用外置表单的方式将业务页面绑定到工作流的结点上，当执行到当前结点时，打印出绑定表单的内容。 新建4个form页面，页面内容随便写些内容即可：按照下图的方式依次绑定：流程变...
+博文
+来自：	何静媛
+activiti 配置节点 连线信息获取
+阅读数 1万+
+
+1.1.1. 前言当使用eclipse插件进行流程设计的时候，部署流程之后，我们如何获取我们定义的所有的节点、连线、关口等配置信息呢？有的人看到这个需求，不免窃喜，这不很简单嘛，重新打来bmpn中定义...
+博文
+来自：	分享牛
+Activiti User Guide（Activiti用户指南)-Chapter 7. BPMN
+阅读数 90
+
+5.4的有中文，下载见附件有总比没有看，大部分都看得懂，凑合看吧原文网址：http://www.blogjava.net/lewhwa/archive/2010/12/05/339819.html这里...
+博文
+来自：	whxhz的专栏
+Activiti进阶（六）——连线（SequenceFlow）
+阅读数 1万+
+
+这篇博文为大家简单的介绍一下Activiti中的连线，还是和平时一样，我们放在例子中吧。   一、流程图                                             图1 ...
+博文
+来自：	周江霄
+股票“三不卖七不买“6字黄金口诀，只买井喷股 赢数百万身家！
+指南.针 · 顶新
+Activiti进阶(三)---Judge(流程判断) - qq_42112846的..._CSDN博客
+11-22
+
+Activiti学习之根据条件判断流程走向- 程诺 08-01 1.3万 在流程设计当中经常会遇到根据条件来判断流程走向的问题,Activiti中也给出了相应的实现方法:网关。 网...
+
+activiti 排他网管 :判断流程走向(十四) - hichinamobi..._CSDN博客
+11-3
+
+工作流引擎 Activiti 中获取下一节点
+阅读数 64
+
+最近公司需要使用工作流引擎，选用了activiti。需求中提到的流程比较简单，也就3级审核，送审时需要选择下一节点的用户，所以必须在流程中需要获取当前节点的下一个节点。代码如下：[code=&quot...
+博文
+来自：	iteye_12369的博客
+Activiti任务退回、任意跳转（任务调度）功能实现及思路（简版）
+阅读数 1031
+
+Activiti任务退回、任意跳转（任务调度）功能实现及思路（简版）原创文章：转载请备注：原创文章地址需求：         1.在当前任务节点退回至上一节点；         2.需要跳过某一个或者...
+博文
+来自：	qq372854822的博客
+Activiti 学习笔记十:开始活动节点(判断流程是否结束及..._CSDN博客
+10-23
+
+Activiti学习之根据条件判断流程走向 08-01 1.2万 在流程设计当中经常会遇到...根据功能不同... 来自: 程诺 工作流学习——Activiti流程实例、任务管理四步...
+
+Activiti学习之监听器 - 程诺 - CSDN博客
+11-5
+
+执行监听器主要功能为监听流程的启动、结束和节点连接线的流经。 任务监听器主要...Activiti学习之根据条件判断流程走向 - 程诺 08-01 1.2万 在流程设计当中...
+
+衣舞晨风关注
+衣舞晨风
+1130篇文章
+
+排名:146
+
+小垣关注
+小垣
+88篇文章
+
+排名:千里之外
+
+qq_26668923关注
+qq_26668923
+4篇文章
+
+排名:千里之外
+
+梦夕梦兮关注
+梦夕梦兮
+9篇文章
+
+排名:千里之外
+
+8.3 顺序流
+阅读数 236
+
+SequenceFlow顺序流Description描述顺序流是连接两个流程节点的连线。流程执行完一个节点后，会沿着节点的所有外出顺序流继续执行。就是说，BPMN2.0默认的行为就是并发的：两个外出顺...
+博文
+来自：	鱼丶儿的博客
+Activiti 用juel 进行条件分支判断 - 博学之,审问之,慎..._CSDN博客
+11-13
+
+Activiti流程变量 - GaoChenXi - CSDN博客
+11-11
+
+Activiti 流程部署方式 activi 动态部署（高级源码篇）
+阅读数 4万+
+
+欢迎加入我们的学习提升群523988350，里面有京东、美团网的技术人员，可以相互交流Activiti的流程部署方式有很多种方式，我们可以根据activit工作流引擎提供的ap方式进行部署。当然了实际...
+博文
+来自：	分享牛
+工作流Activiti的学习总结（八）Activiti自动执行的应用
+阅读数 35
+
+  工作流activiti自动执行任务的开发应用 工作流模拟某公司请假流程情景如下：  1.开发人员请假流程，如果开发人员请假，如果请假天数小于3天，组长批准，人事批准即可请假。  2.如果请假大约三...
+博文
+来自：	topMan'blog
+activiti根据流程id判断任务是否结束 - 大表哥 - CSDN博客
+12-10
+
+Activiti学习之根据条件判断流程走向 08-01 1.3万 在流程设计当中经常会遇到...来自: 程诺 工作流activiti之根据taskId查询连线集合、批注信息 05-25 900 ...
+
+Activiti根据Flowname进行转向 - 写博客只为学习 - CSDN博客
+11-9
+
+后悔知道晚了，降血糖的方法现在才知道，之前白花了那么多钱！
+维克利 · 鹓鶵
+异常点/离群点检测算法——LOF
+阅读数 6万+
+
+局部异常因子算法-LocalOutlierFactor(LOF)　　在数据挖掘方面，经常需要在做特征工程和模型训练之前对数据进行清洗，剔除无效数据和异常数据。异常检测也是数据挖掘的一个方向，用于反作弊...
+博文
+来自：	wangyibo0201的博客
+Activiti之条件表达式 - 转错的弯,走错的路 - CSDN博客
+11-14
+
+Activiti学习之根据条件判断流程走向 - 程诺 08-01 1.2万 在流程设计当中经常会遇到根据条件来判断流程走向的问题,Activiti中也给出了相应的实现方法:网关。 ...
+
+Activiti 学习笔记十：开始活动节点（判断流程是否结束及查询历史）
+阅读数 9851
+
+一、流程图二、演示代码packagejiankunking.start;importjava.io.InputStream;importorg.activiti.engine.ProcessEngin...
+博文
+来自：	衣舞晨风
+Activiti学习——BPMN2.0规范说明
+阅读数 1万+
+
+ActivitiBPMN2.0规范说明
+博文
+来自：	flygoa的专栏
+Activiti学习笔记二：简单顺序流演示demo
+阅读数 2211
+
+packagejiankunking.helloworld;importjava.util.List;importorg.activiti.engine.ProcessEngine;importorg...
+博文
+来自：	衣舞晨风
+条件表达式
+阅读数 535
+
+有时候会遇到这样的问题，鼠标在同一个元素上面移入移出，移入一个样式，移出一个样式；我经常是使用if,else,后来遇见了条件表达式这中高大上的东西,以前学C的时候用过；今天联系了播放列表的收缩，这里就...
+博文
+来自：	TheFoma的专栏
+良心记者揭露上海蜂蜜市场黑幕！亲赴深山，发现惊人真相！
+新钥 · 顶新
+阮一峰--《如何变得有思想》
+阅读数 764
+
+等待戈多》是诺贝尔文学奖得主、爱尔兰作家塞缪尔·贝克特（SamuelBeckett，1906-1989）的代表作。它的情节很简单，两个流浪汉等待一个叫戈多的人。书中完全没提戈多是谁，以及流浪汉为什么要...
+博文
+来自：	mj3989646的专栏
+activiti学习资料(获取节点类型,判断是否为开始结束节点)
+阅读数 5618
+
+Activiti学习资料，获取各种节点的类型，判断是否为任务节点，开始时间，结束事件测试的流程定义，如图：java代码如下：ProcessDefinitionEntitydef=(ProcessDef...
+博文
+来自：	不了了之专栏
+activiti 实现驳回功能
+阅读数 3941
+
+activiti功能上很多时候需要驳回，如请假单领导不同意驳回重写。有多种方式可以实现。一、流程图上任务节点使用assigness或者candidateusers动态的指定用户如使用变量${input...
+博文
+来自：	zhangkang65的专栏
+Activiti 个人任务（三种指派方式）
+阅读数 9155
+
+Activiti用户任务需要用户手动来完成的任务，可以直接分配给一个用户，也可以指定用户组，再由用户认领。本文我们来介绍一下如何将任务指派给个人...
+博文
+来自：	蛾子
+activiti实战二（请假bpmn）
+阅读数 1059
+
+这个请假流程比较简单，主要是云租户申请时，通过排他网关，箭头线的配置为${roleName=="云租户"}，就会到云管理员审批任务，该task的执行用候选组来做，候选组为固定的云管理员（只要角色是云管...
+博文
+来自：	牵佳一诺的博客
+三月最新股坛快讯，3000多支股票测评结果一网打尽！
+君银证券 · 顶新
+Activiti 6.0 之SkipExpression
+阅读数 1379
+
+惭愧惭愧，这么一个小小的功能整了这么久。​还是先说一下业务场景吧。在工作流中，我们难免会遇到这样的情况，即一个流程的发起者的身份问题。举个详细的例子。就拿一个公司的报销流程来讲。可能是这样的。没有优...
+博文
+来自：	轩少学习之路
+activiti工作流获取下一节点实例
+阅读数 7286
+
+第一个方法getTaskDefinitionList用于包装下面两个方法：/**	*	*@author:Longjun	*@Description:根据实例编号获取下一个任务节点实例集合	*@date...
+博文
+来自：	龙井的专栏
+activiti用字符串的方式部署流程
+阅读数 165
+
+首先要用activiti-explorer画好流程图，设置好相关配置，并且导出模板，我这里导出出来是一个名为process001.bpmn20.xml的文件，首先是调用的activi的接口我这里是把a...
+博文
+来自：	qq_26668923的博客
+Activiti生成流程图
+阅读数 5167
+
+1.摘要[原文](http://chenzhiguo.cn/archives/activiti_diagram?utm_source=tuicool&utm_medium=referral)，由于新的...
+博文
+来自：	梦夕梦兮的专栏
+疯狂Activiti6连载（11）Activiti6的流程控制逻辑
+阅读数 269
+
+本文节选自《疯狂工作流讲义（第2版）》流程控制逻辑本小节将以一个简单的例子，讲述Activiti关于流程处理的逻辑。概述在Activiti5以及jBPM4，对流程的控制使用的是流程虚拟机这套API，英...
+博文
+来自：	杨大仙的程序空间
+股市彻底变天了，不看你就亏大了！
+紫慧鑫 · 鹓鶵
+Activiti之条件表达式
+阅读数 4614
+
+UEL是javaEE6规范的一部分，UEL（UnifiedExpressionLanguage）即统一表达式语言，activiti支持两个UEL表达式：UEL-value和UEL-method。流程示...
+博文
+来自：	转错的弯，走错的路
+activiti 排他网管 ：判断流程走向（十四）
+阅读数 2490
+
+packagecom.base.pf.m150workflow.f070task.controller;importorg.activiti.engine.delegate.DelegateExecu...
+博文
+来自：	hichinamobile的博客
+activiti5学习资料(expression表达式)
+阅读数 5576
+
+activiti5学习资料(expression表达式)1.版本5.122.描述activiti5使用UEL表达式，UEL(UnifiedExpressionLanguage )是统一表达式语言，是E...
+博文
+来自：	不了了之之了之
+(4)activiti工作流引擎之uel表达式
+阅读数 4653
+
+有了前面几章，我们肯定有一定的困惑，activiti如何与实际业务整合，比如一条采购单，如何跟一个流程实例互相关联起来？这里就需要使用到activiti启动流程实例时设置一个流程实例的business...
+博文
+来自：	tmchongye的专栏
+activiti中juel表达式的写法
+阅读数 222
+
+${managerTask.test(execution,“30210”)}
+博文
+来自：	weixin_38441551的博客
+成人用品加盟店,无需人工,四季来财！
+卡卡咧 · 顶新
+Activiti根据Flowname进行转向
+阅读数 11
+
+[color=red]转向问题需要注意的是每次转向到其他节点时要把其他Transition给删掉，任务完成后要把删掉的Transition还原回去。[/color][code=&quot;java&q...
+博文
+来自：	写博客只为学习
+activiti工作流的驳回等功能的封装
+阅读数 1万+
+
+中国人的流程习惯是有来有往，能审批通过就应该能驳回。即可驳回到流程线上任意一节点，而国外的流程引擎思想这点与国内差别很大，为了满足国内的项目需要，就必须对这些流程引擎进行封装或改造。我们采用的是act...
+博文
+来自：	X9X9X9X9的专栏
+activiti工作流,驳回问题详细解析(尤其会签的驳回问题)
+阅读数 1万+
+
+最近因为项目需要,所以研究了一下工作流,然而,我们都知道,国外的工作流框架,是不支持驳回问题的!这是其一!第二!项目的工作流要实现任意节点的流转,这也是国外工作流框架所不具备的!因此,国外的工作流框架...
+博文
+来自：	zhangpan_soft的博客
+Activiti设计解析-PVM执行树
+阅读数 639
+
+Activiti设计解析-PVM执行树Activiti设计解析-PVM执行树核心理念PVM对流程定义期的描述PVM对流程运行期的描述PVM综述ActivitiImpl与作用域ExecutionEnti...
+博文
+来自：	kuangzhanshatian的专栏
+Activiti第三篇【连接、排他网关、指定任务处理人、组任务】
+阅读数 2762
+
+连线上面我们已将学过了流程变量了，可以在【任务服务、运行时服务、流程开始、完成某个任务时设置流程变量】，而我们的连接就是流程变量的实际应用了….定义流程图我们并不是所有的流程都是按一条的路径来走的，我...
+博文
+来自：	zhong_fucheng
+一刀一怪随便点，装备满地随便捡！
+
+activiti 工作流会签 / 多人审批时若一人通过即可
+阅读数 2万+
+
+activiti工作流会签时为所有的都审批通过才可进入下一环节：1.编写监听类publicclassMyTaksListenerimplementsTaskListener{   publicvoid...
+博文
+来自：	artaganan8的博客
+优雅的实现Activiti动态调整流程（自由跳转、前进、后退、分裂、前加签、后加签等），含范例代码！
+阅读数 3万+
+
+最近对Activiti做了一些深入的研究，对Activiti的流程机制有了些理解，对动态调整流程也有了一些实践方法。现在好好总结一下，一来是对这段时间自己辛苦探索的一个记录，二来也是为后来者指指路~~...
+博文
+来自：	白乔专栏
+Activiti排他网关
+阅读数 3346
+
+执行到该网关，根据条件只能走一条执行线路；根据请假天数，来具体让谁来审批，请假天数小于3天，项目组长审批；请假天数小于7天，大于等于3天，项目经理审批；请假天数大于等于7天，部门总监审批；依然用表达式...
+博文
+来自：	太年轻的博客
+Activiti 学习笔记九：并行网关(parallelGateWay)
+阅读数 6092
+
+一、流程图二、演示代码packagejiankunking.parallelGateWay;importjava.io.InputStream;importjava.util.List;importo...
+博文
+来自：	衣舞晨风
+activiti根据流程节点所有流向线路信息获取办理人
+阅读数 1260
+
+publicList&amp;lt;?&amp;gt;transitionUserTaskList(List&amp;lt;PvmTransition&amp;gt;outTransitions,Li...
+博文
+来自：	lianghaigui的博客
+下载遨游浏览器，一键拦截所有网页广告
+
+activiti获取下一个节点信息
+阅读数 31
+
+   在实际的工作流业务开发中,当用户完成当前用户任务时,需要指定下一个用户任务的审核人。此时我们需要获取下一个节点的一些信息,来确定下一个用户任务的审核人有哪些。       在实际工作流程中,当前...
+博文
+来自：	u014214098的博客
+activiti根据流程id判断任务是否结束
+阅读数 478
+
+部署流程=====》启动流程实例=======》查询 SELECT*FROM`act_ru_task`（任务表）       SELECT*FROM`act_ru_execution` #正在执行的对...
+博文
+来自：	大表哥
+Activiti历史流程操作
+阅读数 1236
+
+本质就是查询历史流程实例表act_hi_procinst：这个表的id和流程实例id始终是一样的。所以Activiti没有提供获取流程实例id的接口；因为直接getId()获取的值和流程实例Id是一样...
+博文
+来自：	太年轻的博客
+Activiti获取当前任务后续路径，动态生成执行路径按钮
+阅读数 1079
+
+需求：我们要在人工任务操作界面，动态生成后续路径选择按钮，选择对应按钮执行相应路径流程实现方式：流程定义路径处条件如下图所示:nextbrach等于对应路径id,用于前台选择对应路径时执行。1、JAV...
+博文
+来自：	学习笔记
+Activiti 用juel 进行条件分支判断
+阅读数 1360
+
+处理工作流时会遇到分支情况，每个分支为个条件或表达式。需要程序去根据条件做分支判断。这时候Activiti使用juel处理表达式。对表达式的支持非常丰富。多条件表达式，以及多变量，多数据类型，等支持完...
+博文
+来自：	博学之,审问之,慎思之,明辨之,笃行之
+上线能挂机，回收秒到账，装备元宝在等你，开局就是土豪！
+
+Activiti中条件分支根据日期类型进行判断的特殊处理
+阅读数 1108
+
+审批流需求要求根据条件分支从而控制流程跳转。如果在条件分支中添加的el表达式中的字段类型是日期型的数据。在单据进行提交时，需要将单据对应的日期字段的值设置转为日期类型的。测试发现设置日期的格式为yyy...
+博文
+来自：	JaneApple820的博客
+条件表达式a?b:c是什么意思
+阅读数 2万+
+
+a?b:c是什么意思这个是条件表达式,表示如果a为真,则表达式值为b,如果a为假,则表达式值为c条件表达式具体说明如下条件语句：if(a>b)max=a;elsemax=b;可用条件表达式写为max=...
+博文
+来自：	唐策的博客
+用Java SPI实现可插拔
+阅读数 7029
+
+前言：  在软件系统的设计中，可插拔是一个重要特性。它意味着给系统添加新功能时候（或者将原来功能的实现替换成新的实现而保持功能不变），不改变系统已有功能。这样的可插拔的功能模块被称为插件。插件(plu...
+博文
+来自：	tonyhuang_google_com的专栏
+Gtest/Gmock探究（二）--TEST宏分析
+阅读数 2314
+
+刚开始看Gtest/Gmock使用方法的时候，自己写了一些测试代码，能工作，但是总觉得有些抽象。你可能会跟我一样有如下疑问：     • 为什么写了TEST宏，我们自定义的测试就能被运行   ...
+博文
+来自：	Mr.H的专栏
+QT选择目录等常用文件/文件夹操作
+阅读数 1万+
+
+QT 创建文件夹 bool QDir::mkdir ( const QString &amp; dirName ) const 创建一个子目录名为目录名。[喝小酒的网摘]http://blog....
+博文
+来自：	K7的专栏
+.NET和java的RSA互通，仅此而已
+阅读数 3万+
+
+RSA .net jva 互通 解决不能互通的问题
+博文
+来自：	lubiaopan的专栏
+STM32IAP升级------IAP升级功能编写初期的一些困惑与疑问---完成功能后的总结
+阅读数 9396
+
+IAP升级功能编写初期的一些困惑与疑问---完成功能后的总结 一，网上下载的例程，跳转部分的代码有差异，尤其是用的汇编那句 二，关于跳转部分的代码的理解（转） 三，关于跳转时能否不用按键，用软件标志位...
+博文
+来自：	Super_Demo的专栏
+【小程序】微信小程序开发实践
+阅读数 24万+
+
+帐号相关流程注册范围 企业 政府 媒体 其他组织换句话讲就是不让个人开发者注册。 :)填写企业信息不能使用和之前的公众号账户相同的邮箱,也就是说小程序是和微信公众号一个层级的。填写公司机构信息,对公账...
+博文
+来自：	小雨同学的技术博客
+YOLOv2训练自己的数据集（VOC格式）
+阅读数 4万+
+
+最近在用yolo来做视频中的人员检测，选择YOLO是从速度考虑，在训练数据集的过程中碰到很多坑，并且现在yolo又到了v2的版本，在网络和命令中都有区别...
+博文
+来自：	ch_liu23的博客
+logistic回归模型【求解参数方法汇总】
+阅读数 2383
+
+此文引至：http://blog.csdn.net/u014664226/article/details/51685567 1.logistic回归模型 logistic回归是用线性模型解决分...
+博文
+来自：	TaoTaoFu的博客
+Java设计模式11——享元模式
+阅读数 4740
+
+一、适用场景　　内存属于稀缺资源，不能随意浪费。如果在一个系统中有很多个完全相同或相似的对象，我们就可以使用享元模式，让他们共享一份内存即可，不必每个都去实例化对象，从而节省内存空间。二、模式核心 享...
+博文
+来自：	小小本科生成长之路
+ArcGIS读取天地图2.0
+阅读数 3万+
+
+天地图2.0（http://www.chinaonmap.com）于2013年3月份上线，基本情况如下： 1)     基于OGC的WMTS 1.0.0版本； 2)     提供矢量地图、影像地图和地...
+博文
+来自：	ArcGIS产品与技术专栏
+linux上安装Docker(非常简单的安装方法)
+阅读数 18万+
+
+最近比较有空，大四出来实习几个月了，作为实习狗的我，被叫去研究Docker了，汗汗！ Docker的三大核心概念：镜像、容器、仓库 镜像：类似虚拟机的镜像、用俗话说就是安装文件。 容器：类似一个轻量...
+博文
+来自：	我走小路的博客
+人脸检测工具face_recognition的安装与应用
+阅读数 4万+
+
+人脸检测工具face_recognition的安装与应用
+博文
+来自：	roguesir的博客
+plsql的命令（command）窗口与sql窗口有什么区别20170620
+阅读数 2万+
+
+command窗口是命令窗口，即为sqplus窗口，有命令提示符，识别sqlplus命令，基本的命令都可以执行 sql仅可执行DDL、select、DML等...
+博文
+来自：	Ape55的博客
+将Excel文件导入数据库（POI+Excel+MySQL+jsp页面导入）第一次优化
+阅读数 2万+
+
+本篇文章是根据我的上篇博客，给出的改进版，由于时间有限，仅做了一个简单的优化。相关文章：将excel导入数据库2018年4月1日，新增下载地址链接：点击打开源码下载地址十分抱歉，这个链接地址没有在这篇...
+博文
+来自：	Lynn_Blog
+何为数据库连接池？其工作原理是什么？
+阅读数 3万+
+
+连接池用于创建和管理数据库连接的缓冲池技术，缓冲池中的连接可以被任何需要他们的线程使用。当一个线程需要用JDBC对一个数据库操作时，将从池中请求一个连接。当这个连接使用完毕后，将返回到连接池中，等待为...
+博文
+来自：	Napoleon的专栏
+SNMP协议详解<二>
+阅读数 12万+
+
+上一篇文章讲解了SNMP的基本架构，本篇文章将重点分析SNMP报文，并对不同版本（SNMPv1、v2c、v3）进行区别！ 四、SNMP协议数据单元 在SNMP管理中，管理站（NMS）和代理（Age...
+博文
+来自：	假装在纽约
+jquery/js实现一个网页同时调用多个倒计时(最新的)
+阅读数 42万+
+
+jquery/js实现一个网页同时调用多个倒计时(最新的) 最近需要网页添加多个倒计时. 查阅网络,基本上都是千遍一律的不好用. 自己按需写了个.希望对大家有用. 有用请赞一个哦! //js ...
+博文
+来自：	Websites
+使用Fuse编写文件系统
+阅读数 5690
+
+FUSE的全称是”Filesystem in Userspace”，即“用户空间的文件系统”，这是一个内核模块，能够让用户在用户空间实现文件系统并且挂载到某个目录，就像在内核实现的文件系统一样。使用F...
+博文
+来自：	不悔的青春
+ThreadLocal的设计理念与作用
+阅读数 5万+
+
+Java中的ThreadLocal类允许我们创建只能被同一个线程读写的变量。因此，如果一段代码含有一个ThreadLocal变量的引用，即使两个线程同时执行这段代码，它们也无法访问到对方的Thread...
+博文
+来自：	u011860731的专栏
+Android 增强版百分比布局库 为了适配而扩展
+阅读数 15万+
+
+转载请标明出处： http://blog.csdn.net/lmj623565791/article/details/46767825； 本文出自:【张鸿洋的博客】 一 概述 上周一...
+博文
+来自：	Hongyang
+webService学习（二）—— 调用自定义对象参数
+阅读数 1万+
+
+webService学习（二）—— 调用自定义对象参数 本文主要内容： 1、如何通过idea进行webService Client的简单实现（不再使用wsimport的方式，其实是ide帮我们做了...
+博文
+来自：	止水的专栏
+Java WEB 分页实现
+阅读数 2万+
+
+分页实现的效果：      /**/ 组图0-1.分页实现效果图一       /**/ 组图0-2.分页实现效果图二 一、从效果可以看出内容由两部分组成： 1.学生信息     数据库中插入一些记录...
+博文
+来自：	niaonao
+使用Validator做SpringMVC的验证框架 - 配置SpringMVC环境
+阅读数 5893
+
+让我们用Validator框架来给SpringMVC实现验证功能吧 Validator框架源码地址：https://github.com/devefx/validator 完成这一章教程的要求 熟...
+博文
+来自：	devefx的博客
+神经网络为什么要有激活函数，为什么relu 能够防止梯度消失
+阅读数 1万+
+
+第一个问题：为什么引入非线性激励函数？ 如果不用激励函数（其实相当于激励函数是f(x) = x），在这种情况下你每一层输出都是上层输入的线性函数，很容易验证，无论你神经网络有多少层，输出都是输入的线...
+博文
+来自：	u014114990的专栏
+Nginx配置SSL证书部署HTTPS网站（介绍）
+阅读数 793
+
+简述SSL证书通过在客户端浏览器和Web服务器之间建立一条SSL安全通道（Secure socket layer(SSL); 简述作用：1、身份验证（网站真实性）；2、数据加密（避免用户信息泄露）；...
+博文
+来自：	odelia的博客
+23种开发设计模式总结，追求高内聚低耦合的编程思想。
+阅读数 2352
+
+一、概述 二、7个设计原则 三、创建型模式(5种) 四、结构型模式(7种) 五、行为型模式(11种) 六、总结 前言：熟练地掌握设计模式，并能在实际编程开发中灵活运用它们，不仅能使代码更规范，重用性...
+博文
+来自：	csdn_aiyang的博客
+Java设计模式学习08——组合模式
+阅读数 1万+
+
+一、组合模式适用场景把部分和整体的关系用树形结构来表示，从而使客户端可以使用统一的方式对部分对象和整体对象进行管理。二、组合模式结构 抽象构件(Conponent)角色：所有类的共有接口，定义了叶子和...
+博文
+来自：	小小本科生成长之路
+centos 查看命令源码
+阅读数 6万+
+
+# yum install yum-utils 设置源: [base-src] name=CentOS-5.4 - Base src - baseurl=http://vault.ce...
+博文
+来自：	linux/unix
+关于黑客，你了解多少？----黑客入门学习(常用术语+DOS操作)
+阅读数 9856
+
+关于黑客，你了解多少？----黑客入门学习(常用术语+DOS操作)       ·1.1·前言  黑客一次是由英语“Hacker”英译出来的，是指专门研究、发现计算机和网络漏洞的计算机爱好者，他们...
+博文
+来自：	ljheee的博客
+强连通分量及缩点tarjan算法解析
+
+
+ 
