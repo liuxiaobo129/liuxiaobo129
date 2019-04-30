@@ -1,0 +1,24 @@
+关于浏览器关闭后session是否被删除的问题
+2016年06月12日 11:08:27 苏坡叉叉 阅读数：3660
+版权声明：本文为博主原创文章，未经博主允许不得转载。	https://blog.csdn.net/qq_28701323/article/details/51644736
+先上结论:session不会因为浏览器的关闭而消失!!!!!!
+
+session的生命周期:
+
+创建: 当某一用户调用了servlet的request.getsession(true)时,session被创建,并把session对象被保存在服务器中
+
+销毁: 当发生以下三种情况时 session对象被销毁
+
+                     (1)  用户距离上次发出请求的时间大于session的存活时间(session.setMaxInactiveInterval(interval))
+
+                     (2)  调用session的 invalidate()方法
+
+                     (3)  服务器关闭
+
+http是无状态的连接,服务器并不知道浏览器什么时候关闭的,所以也不会根据浏览器的状态来做出相应
+
+但为什么又会出现关闭浏览器后session被销毁的假象呢?
+
+这是由于session是基于cookie实现的,session在被创建后,会生成一个唯一的sessionid返回给浏览器 并保存在浏览器的cookie中,
+
+接下来客户再次调用getsession(),服务器便会从客户端发送过来的cookie中查找name为sessionid的cookie是否存在, 若是存在 则通过该cookie的值来找到用户之前创建的session,若是不存在则创建一个新的session.然而保存sessionid的cookie默认是会话级别的,是保存在浏览器的内存中的,当浏览器关闭时这个cookie也就消失了,所以再次打开一个新的浏览器 由于这个时候并不存在名为sessionid的cookie,所以服务器便会创建一个新的session,但是原来的session还是存在的!也就是说 这时候服务器中一共存在两个session
