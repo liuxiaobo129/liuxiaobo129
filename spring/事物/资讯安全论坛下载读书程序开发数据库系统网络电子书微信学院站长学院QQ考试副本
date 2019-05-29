@@ -1,0 +1,515 @@
+资讯安全论坛下载读书程序开发数据库系统网络电子书微信学院站长学院QQ考试
+频道栏目
+软件开发| web前端| Web开发| 移动开发| 综合编程|
+登录注册
+首页 > 程序开发 > 软件开发 > Java > 正文
+spring事务-说说Propagation及其实现原理
+2016-11-05 10:02:24          来源：yanyan19880509的专栏   收藏   我要投稿
+前言
+spring目前已是java开发的一个事实标准，这得益于它的便利、功能齐全、容易上手等特性。在开发过程当中，操作DB是非常常见的操作，而涉及到db，就会涉及到事务。事务在平时的开发过程当中，就算没有注意到，程序正常执行不会有副作用，但如果出现了异常，而又没有处理好事务的话，可能就会出现意想不到的结果。spring在事务方面进行了各种操作的封装，特别是声明式事务的出现，让开发变得更加的舒心。spring对事务进行了扩展，支持定义多种传播属性，这也是本篇要说明的重点。
+ 
+
+事务是什么
+非严格的讲，一个事务是多个操作的简称，这些操作要么全部生效，要么一个都不生效（相当于没有执行过），一个通用的操作流程简化如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+try{
+    Connection conn = getConnection();
+    // 执行一些数据库操作
+}catch(Exception e){
+       conn.rollback();
+}finally{
+    conn.close();
+}
+从以上代码可以看出一些问题：
+
+太多无用的固定代码 如果一个请求需要调用多个服务接口，难以更精细的控制事务 跨多种底层数据层，如jdbc，mybatis，hibernate，jta，难以统一编码方式。
+spring提供了声明式事务，使得我们不用关注底层的具体实现，屏蔽了多种不同的底层实现细节，为了支持多种复杂业务对事务的精细控制，spring提供了事务的传播属性，结合声明式事务，成就了一大事务利器。
+
+ 
+
+spring事务传播属性示例分析
+在TransactionDefinition类中，spring提供了6种传播属性，接下来分别用简单示例来说明。
+
+温馨提醒：下文提到的加入当前事务，指的是底层使用同一个Connection，但是事务状态对象是可以重新创建的，并不影响。文章提到的当前只存在一个事务，表示的是共用底层的一个Connection，而不在乎创建了多少个事务状态对象(TransactionStatus)。
+ 
+
+1、PROPAGATION_REQUIRED
+
+说明： 如果当前已经存在事务，那么加入该事务，如果不存在事务，创建一个事务，这是默认的传播属性值。
+
+看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+@Transactional
+public void service(){
+    serviceA();
+    serviceB();
+}
+ 
+@Transactional
+serviceA();
+@Transactional
+serviceB();
+serviceA 和 serviceB 都声明了事务，默认情况下，propagation=PROPAGATION_REQUIRED，整个service调用过程中，只存在一个共享的事务，当有任何异常发生的时候，所有操作回滚。
+
+
+
+2、PROPAGATION_SUPPORTS
+
+说明：如果当前已经存在事务，那么加入该事务，否则创建一个所谓的空事务（可以认为无事务执行）。
+
+看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+public void service(){
+     serviceA();
+     throw new RunTimeException();
+}
+ 
+@Transactional(propagation=Propagation.SUPPORTS)
+serviceA();
+serviceA执行时当前没有事务，所以service中抛出的异常不会导致 serviceA回滚。
+
+再看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+public void service(){
+     serviceA();
+}
+ 
+@Transactional(propagation=Propagation.SUPPORTS)
+serviceA(){
+    do sql 1
+    1/0;
+    do sql 2
+}
+由于serviceA运行时没有事务，这时候，如果底层数据源defaultAutoCommit=true，那么sql1是生效的，如果defaultAutoCommit=false，那么sql1无效，如果service有@Transactional标签，serviceA共用service的事务(不再依赖defaultAutoCommit)，此时，serviceA全部被回滚。
+
+
+
+3、 PROPAGATION_MANDATORY
+
+说明：当前必须存在一个事务，否则抛出异常。
+
+看一个小例子,代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+public void service(){
+     serviceB();
+     serviceA();
+}
+serviceB(){
+    do sql
+}
+@Transactional(propagation=Propagation.MANDATORY)
+serviceA(){
+    do sql 
+}
+这种情况执行 service会抛出异常，如果defaultAutoCommit=true，则serviceB是不会回滚的，defaultAutoCommit=false，则serviceB执行无效。
+
+
+
+4、PROPAGATN_REQUIRES_NEW
+
+说明：如果当前存在事务，先把当前事务相关内容封装到一个实体，然后重新创建一个新事务，接受这个实体为参数，用于事务的恢复。更直白的说法就是暂停当前事务(当前无事务则不需要)，创建一个新事务。 针对这种情况，两个事务没有依赖关系，可以实现新事务回滚了，但外部事务继续执行。
+
+看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+@Transactional
+public void service(){
+    serviceB();
+    try{
+        serviceA();
+    }catch(Exception e){
+    }
+}
+serviceB(){
+    do sql
+}
+@Transactional(propagation=Propagation.REQUIRES_NEW)
+serviceA(){
+    do sql 1
+    1/0; 
+    do sql 2
+}
+当调用service接口时，由于serviceA使用的是REQUIRES_NEW，它会创建一个新的事务，但由于serviceA抛出了运行时异常，导致serviceA整个被回滚了，而在service方法中，捕获了异常，所以serviceB是正常提交的。 注意，service中的try … catch 代码是必须的，否则service也会抛出异常，导致serviceB也被回滚。
+
+
+
+5、Propagation.NOT_SUPPORTED
+
+说明：如果当前存在事务，挂起当前事务，然后新的方法在没有事务的环境中执行，没有spring事务的环境下，sql的提交完全依赖于 defaultAutoCommit属性值 。
+
+看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+@Transactional
+public void service(){
+     serviceB();
+     serviceA();
+}
+serviceB(){
+    do sql
+}
+@Transactional(propagation=Propagation.NOT_SUPPORTED)
+serviceA(){
+    do sql 1
+    1/0;
+    do sql 2
+}
+当调用service方法的时候，执行到serviceA方法中的1/0代码时，抛出了异常，由于serviceA处于无事务环境下，所以 sql1是否生效取决于defaultAutoCommit的值，当defaultAutoCommit=true时，sql1是生效的，但是service由于抛出了异常，所以serviceB会被回滚。
+
+
+
+6、 PROPAGATION_NEVER
+
+说明： 如果当前存在事务，则抛出异常，否则在无事务环境上执行代码。
+
+看一个小例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+public void service(){
+    serviceB();
+    serviceA();
+}
+serviceB(){
+    do sql
+}
+@Transactional(propagation=Propagation.NEVER)
+serviceA(){
+    do sql 1
+    1/0;
+    do sql 2
+}
+上面的示例调用service后，若defaultAutoCommit=true，则serviceB方法及serviceA中的sql1都会生效。
+
+
+
+7、 PROPAGATION_NESTED
+
+说明： 如果当前存在事务，则使用 SavePoint 技术把当前事务状态进行保存，然后底层共用一个连接，当NESTED内部出错的时候，自行回滚到 SavePoint这个状态，只要外部捕获到了异常，就可以继续进行外部的事务提交，而不会受到内嵌业务的干扰，但是，如果外部事务抛出了异常，整个大事务都会回滚。
+
+注意： spring配置事务管理器要主动指定 nestedTransactionAllowed=true，如下所示：
+
+?
+1
+2
+3
+4
+<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="dataTransactionManager">
+    <property name="dataSource" ref="dataDataSource">
+    <property name="nestedTransactionAllowed" value="true">
+</property></property></bean>
+看一个小例子，代码如下:
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+@Transactional
+public void service(){
+    serviceA();
+    try{
+        serviceB();
+    }catch(Exception e){
+    }
+}
+serviceA(){
+    do sql
+}
+@Transactional(propagation=Propagation.NESTED)
+serviceB(){
+    do sql1
+    1/0;
+    do sql2
+}
+serviceB是一个内嵌的业务，内部抛出了运行时异常，所以serviceB整个被回滚了，由于service捕获了异常，所以serviceA是可以正常提交的。
+
+再来看一个例子，代码如下：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+@Transactional
+public void service(){
+     serviceA();
+     serviceB();
+     1/0;
+}
+@Transactional(propagation=Propagation.NESTED)
+serviceA(){
+    do sql
+}
+serviceB(){
+    do sql
+}
+由于service抛出了异常，所以会导致整个service方法被回滚。（这就是跟PROPAGATION_REQUIRES_NEW不一样的地方了，NESTED方式下的内嵌业务会受到外部事务的异常而回滚。）
+
+ 
+
+实现浅析
+前面举例说明了spring事务提供的几种传播属性，用于满足多种不同的业务需求，大家可以依业务而定。接着我们再来看看spring实现这些传播属性最重要的技术依赖是什么。本小节列举 PROPAGATION_REQUIRES_NEW 和 Propagation.NESTED 分别进行简要说明。
+
+
+1、 PROPAGATION_REQUIRES_NEW 实现原理
+
+如下的代码调用：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+@Transactional
+public void service(){
+    serviceB();
+    try{
+        serviceA();
+    }catch(Exception e){
+    }
+}
+ 
+@Transactional(propagation=Propagation.REQUIRES_NEW)
+serviceA(){
+    do sql 1
+    1/0;
+    do sql 2
+}
+serviceB(){
+    do sql
+}
+
+
+执行原理图如下：
+
+a. 创建事务状态对象，获取一个新的连接，重置连接的 autoCommit，fetchSize，timeout等属性
+
+b. 把连接绑定到ThreadLocal变量
+
+c. 挂起当前事务，把当前事务状态对象，连接等信息封装成一SuspendedResources对象，可用于恢复
+
+d. 创建新的事务状态对象，重新获取新的连接，重置新连接的 autoCommit，fetchSize，timeout等属性，同时，保存SuspendedResources对象，用于事务的恢复，把新的连接绑定到ThreadLocal变量（覆盖操作）
+
+e. 捕获到异常，回滚ThreadLocal中的连接，恢复连接参数，关闭连接，恢复SuspendedResources
+
+f. 提交ThreadLocal变量中的连接(导致serviceB被提交)，还原连接参数，关闭连接，连接归还数据源
+
+所以程序执行的结果就是 serviceA被回滚了，serviceB成功提交了。
+
+2、 PROPAGATION_NESTED 实现原理
+如下的代码调用：
+
+?
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+@Transactional
+public void service(){
+    serviceA();
+    try{
+         serviceB();
+    }catch(Exception e){
+    }
+}
+serviceA(){
+    do sql
+}
+@Transactional(propagation=Propagation.NESTED)
+serviceB(){
+    do sql1
+    1/0;
+    do sql2
+}
+
+
+执行原理图如下：
+
+a. 创建事务状态对象，获取一个新的连接，重置连接的 autoCommit，fetchSize，timeout等属性
+
+b. 把连接绑定到ThreadLocal变量
+
+c. 标记使用当前事务状态对象，获取ThreadLocal连接对象，保存当前连接的SavePoint，用于异常恢复，此时的SavePoint就是执行完serviceA后的状态
+
+d. 捕获到异常，使用c中的SavePoint进行事务回滚，也就是把状态回滚到执行serviceA后的状态，serviceB方法所有执行不生效
+
+e. 获取ThreadLocal中的连接对象，提交事务，恢复连接属性，关闭连接
+
+ 
+
+其它
+spring在底层数据源的基础上，利用 ThreadLocal，SavePoint等技术点实现了多种事务传播属性，便于实现各种复杂的业务。只有理解了传播属性的原理才能更好的驾驭spring事务。Spring回滚事务依赖于对异常的捕获，默认情况下，只有抛出RuntimeException和Error才会回滚事务，当然可以进行配置，更多信息可以查看 @Transactional 这个注解。
+
+ 
+
+总结
+spring的声明式事务给我们带来了极大的便利，为了用好这把利器，理解底层的原理还是有必要的，本篇只是spring事务的冰山一角，读者可以在此基础上自行深入探索。
+
+点击复制链接 与好友分享!回本站首页
+相关TAG标签 spring事务 Propagation
+上一篇：Java的容器 List、Set、Map的区别
+下一篇：Java并发：ConcurrentHashMap01（Happens-Before规则）
+相关文章
+java开发spring的事务处理解析Spring事务管理-(tx:advice)标签Spring事务管理Spring - 事务
+热门专题推荐 python div+css css教程 html5 html教程 jquery Android SDK php mysql oracle
+图文推荐
+
+Java架构学习之线程池
+
+java.lang.NoSuchMet
+
+java中的Map接口实现
+
+java开发学习之Jetty
+
+文章推荐
+· Cassandra3.x官方文档_数据如何读取?· heartbeat+mysql双主复制实现高可用· Hibernate框架基础· DBA分布式数据库复习总结· HBaseGC的前生今世－身世篇· 在大学时的分布式数据库读书笔记拿出来· mongodb基础-索引· HiveORC和Parquet· win7激活工具· win10激活工具· win7激活工具旗舰版· office2010激活密钥· windows7激活密钥· office2010激活工具· 小马激活工具· win10激活工具
+点击排行
+
+关于我们 | 联系我们 | 广告服务 | 投资合作 | 版权申明 | 在线帮助 | 网站地图 | 作品发布 | Vip技术培训 | 举报中心
+
+版权所有: 红黑联盟--致力于做实用的IT技术学习网站

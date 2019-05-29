@@ -1,0 +1,451 @@
+Elar的博客
+博客园
+首页
+新随笔
+联系
+订阅
+管理
+随笔-227  文章-0  评论-149 
+异常处理反模式
+本文翻译自Tim McCune 的《Exception-Handling Anipatterns》
+
+ 
+
+　　应该抛出一个异常还是应该返回一个null？是抛出checked类型异常还是抛出unchecked类型异常？对于很多中级的开发人员而言，异常处理往往是一件事后才去考虑的事情。他们经常使用的异常处理方式是try/catch/printStackTrace()。当这些开发人员想要尝试更有新意的异常处理方式时，常常会陷入一些常见的异常处理反模式中。
+
+　　随着1998年《反模式:危机中软件、架构和项目的重构》（原版名为《AntiPatterns: Refactoring Software, Architectures, and Projects in Crisis》）的出版，反模式的概念逐渐在软件开发群体中流行起来。反模式利用现实的经验来定义经常发生的编程错误。它描述了坏模式的基本形式，定义了这些坏模式可能会带来的负面影响，规定了补救的方法，并且为每一个常见的坏模式定义了一个名称。
+
+ 
+
+异常的基本概念
+
+　　关于异常处理最重要的一个概念是了解在Java中有三种通用的throwable 类：checked异常、unchecked异常以及errors。
+
+　　Checked异常是那些必须使用throws语句来声明的异常。它们继承于Exception类，并且是一种“咄咄逼人”（in your face）的异常。一个checked类型的异常指出了一个预期的会在正常系统运行中产生的问题。举一些例子，如与外界系统的通信，或者与用户输入有关的问题等。要注意的是，根据你的代码预定义的功能不同，“用户输入”指的可能是用户界面上的输入，也可能是别人调用你代码API时传给你的参数。通常来说，对于一个checked类型异常的正确处理方式是“稍后再试”（try again later），或者提示用户修改他的输入。
+
+　　Unchecked异常是那些不必使用throws语句来声明的异常。它们继承于RuntimeException类。一个unchecked异常通常指预期之外发生的问题，而这些问题通常是由于代码中的bug产生的。最常见的例子就是NullPointerException。在JDK中有很多核心的异常是checked类型的异常，但它们真的不需要被定义成checked型异常，例如IllegalAccessException 和NoSuchMethodException。一个unchecked类型的异常不应该被重试，它的正确处理方式应该是什么都不做然后往上“冒泡”（bubble up），冒出所在的当前方法，并且冒出整个调用栈。（译者注：函数的一层层调用可以看做是压栈的行为，在此处作者的意思是应该让unchecked类型的异常从出错的位置开始，往上一直冒出整个调用栈，而不做任何处理）这就是为什么unchecked类型的异常不需要声明在throws语句中的原因。最终，这个异常应该被最高层的调用来记录（见下文）。
+
+　　Errors是几乎完全不可能恢复的严重问题。例如，OutOfMemoryError， LinkageError及StackOverflowError。
+
+ 
+
+创建自己的异常类
+
+　　大多数的软件包或系统组件应该包含自定义的异常类。有两种最主要的自定义异常的用法。
+
+　　一是当有问题发生时简单的抛出一个自定义异常，如：
+
+throw new MyObjectNotFoundException("Couldn't find
+    object id " + id);
+
+ 
+
+　　二是对某个异常进行包装然后抛出另一个异常，如：
+
+catch (NoSuchMethodException e) {
+  throw new MyServiceException("Couldn't process
+      request", e);
+}
+
+　　包装一个异常可以通过增加自己的消息来为用户提供额外的信息（见上述例子），同时保留了原来异常的堆栈跟踪。（译者注：如果使用的是直接抛出一个新的异常，那么堆栈就是从抛出的那一刻开始追踪，之前的异常来来源等信息就没有了）这种做法也能让你隐藏自己代码实现的细节，这是对异常进行包装的最重要的原因。例如Hibernate API。尽管Hibernate 在自己的实现中大量使用了JDBC，并且它所进行很多操作中都会抛出SQLException，但是Hibernate 并没有在它的API中泄露任何的SQLException。反而是将这些异常包装在HibernateException的各种子类中。使用这种方式可以让你改动模块的底层代码的时无需改动模块的公共API。
+
+ 
+
+异常与事务（Transaction）
+
+EJB 2
+
+EJB 2规范的创建者决定利用checked和unchecked异常之间的差异来判定是否回滚一个活动的事务（active transaction）。如果一个EJB抛出了一个checked异常，那么事务仍然正常提交（commit）。如果一个EJB抛出了一个unchecked异常，那么事务将回滚。通常来说大家都是希望发生exception时，事务回滚的，因此要注意这一点。
+
+EJB3
+
+为了在某种程度上缓解上述提到的回滚的问题，EJB 3为ApplicationException annotation 增加了一个rollback元数。这可以让你显示地控制你的异常（不管是checked还是unchecked）是否希望事务回滚。例如：
+
+@ApplicationException(rollback=true)
+public class FooException extends Exception
+...
+
+消息驱动Bean（Message-Driven Beans）
+
+需要注意的是，当使用队列驱动的消息驱动Bean时，如果对活动事务进行回滚会让正在处理的消息回滚到之前所在的消息队列中。这个消息稍后会被分派到另外的消息驱动Bean上，如果你使用的是服务器集群的话，之后接收消息的消息驱动Bean或许还会在另一台机子上。这种重试会一直持续下去，直到其次数超过应用服务器设定的上限，在这种情况下，消息将会被放入死信队列（dead letter queue）中。如果你的消息驱动Bean不想做这种重复的处理（比如处理的代价很高、开销很大时），可以调用消息的getJMSRedelivered()函数，当它被重定向时，只要把这个消息扔掉就可以了。
+
+ 
+
+记录日志（Logging）
+
+　　当遇到一个exception时，你的代码必须处理它，让它上浮、包装它或者记录（log）它。如果代码中可以以编程的方式处理一个异常（如在网络连接中进行重试），那么就处理它。如果不能，那么就应该让它上浮（对于unchecked异常）或包装它（对于checked异常）。然而，如果在调用栈中没有任何一处可以以编码的方式处理这个异常，那么对这个异常进行记录会最终落到某段代码的头上。这段对异常进行记录的代码应该尽可能地处于调用链的高层。例如MDB（message-driven bean）的onMessage()函数，或一个类中的main函数。当你捕获到一个异常时，应该对它进行适当地记录。
+
+　　尽管有Log4j这个常见的替代者，Java JDK中其实就含有java.util.logging包。另外，Apache 还提供了 Commons Logging 项目，它是很薄的一个软件层，允许用户使用插件的方式来替换不同的日志记录实现方法。上述提到的所有记录框架都拥有同样的基本分类层次：
+
+FATAL：用在极端的情形中，即必须马上获得注意的情况。这个程度的错误通常需要触发运维工程师的寻呼机。
+ERROR：显示一个错误，或一个通用的错误情况，但还不至于会将系统挂起。这种程度的错误一般会触发邮件的发送，将消息发送到alert list中，运维人员可以在文档中记录这个bug并提交。
+WARN：不一定是一个bug，但是有人可能会想要知道这一情况。如果有人在读log文件，他们通常会希望读到系统出现的任何警告。
+INFO：用于基本的、高层次的诊断信息。在长时间运行的代码段开始运行及结束运行时应该产生消息，以便知道现在系统在干什么。但是这样的信息不宜太过频繁。
+DEBUG：用于协助低层次的调试。
+　　如果你在使用commons-logging 或Log4j的话，要注意一个陷阱。在一个实现方式上，error，warn，info，和debug 方法需要你提供两个参数，一个是消息的内容，一个是Throwable对象。如果是想要记录一个异常被抛出的情况，那么记得要传递两个参数。在另一个实现方式上，只接收一个参数，那么将exception对象传递给它，它会隐藏异常的跟踪堆栈。
+
+　　当调用log.debug()方法时，一种比较好的习惯是将它放在一个log.isDebugEnabled()检查块中。当然，这个建议纯粹是为了代码优化。这是一个值得养成的好习惯。
+
+　　不要使用System.out 或System.err，而应该使用logger。Logger是可配置、灵活的，并且每一个输出目的地可以决定本次记录的严重程度（FATAL/ERROR/WARN/INFO/DEBUG）。向System.out打印一个消息是草率的，通常情况下这样的行为不可原谅。
+
+ 
+
+反模式（antipatterns）
+
+记录并抛出（log and throw）
+
+　　例如
+
+catch (NoSuchMethodException e) {
+  LOG.error("Blah", e);
+  throw e;
+}
+
+　　或者
+
+catch (NoSuchMethodException e) {
+  LOG.error("Blah", e);
+  throw new MyServiceException("Blah", e);
+}
+
+　　或者
+
+catch (NoSuchMethodException e) {
+  e.printStackTrace();
+  throw new MyServiceException("Blah", e);
+}
+
+　　这三种方式都是错误的。这类方式是最讨人厌的错误处理反模式。要么记录一个异常，要么抛出一个异常，但不要同时进行“抛出”和“记录”两种操作。同时进行这两类操作会对同一个问题产生多种log消息，这会给运维人员分析日志带来麻烦。
+
+抛出异常基类（Throwing Exception）
+
+　　看下面这个例子：
+
+　　public void foo() throws Exception {
+
+　　这样做是草率的，它完全违背了使用checked异常的目的。它告诉调用你代码的人“您现在调用的函数可能会出错哦”，虽然这有一些作用的，但千万别这么做。应该准确声明你的方法有可能会抛出的异常的类型。如果要抛出的异常有很多种，那么可以将它们包装到你定义的自定义异常中。（详见下文的"Throwing the Kitchen Sink"）
+
+Throwing the Kitchen Sink（这个不知道怎么翻译合适……）
+
+　　例如：
+
+public void foo() throws MyException,
+    AnotherException, SomeOtherException,
+    YetAnotherException
+{
+
+　　抛出多个checked类型的异常是可以的，只要函数调用者能针对不同的异常提供不同的处理方法即可。如果你抛出的几个checked异常对调用者而已差不多是同样的性质，那么应该将它们包装成一类单独的checked异常。
+
+捕获异常基类（Catching Exception）
+
+　　例如：
+
+try {
+  foo();
+} catch (Exception e) {
+  LOG.error("Foo failed", e);
+}
+
+　　这通常是错误的和草率的。这种方式下捕获了原本应该被抛出的异常。捕获异常基类的问题在于，如果你随后要调用别的函数，而这个函数含有一个checked类型的异常（函数开发者希望你处理这个特定的checked异常），那么由于你之间捕获了Exception基类（甚至是Throwable类），那么你或许永远不知道你的代码里有本应该处理但却没有处理异常，这样一来你的代码是错误的而你却无从知晓（IDE不会提示，因为Exception基类被捕获了）。
+
+破坏性的包装
+
+　　例子：
+
+catch (NoSuchMethodException e) {
+  throw new MyServiceException("Blah: " +
+      e.getMessage());
+}
+
+　　这种方式破坏了原本的异常对象e的追踪堆栈，使用这种包装方式你将无法追踪这个异常之前的传递路径。
+
+记录并抛出Null（Log and Return Null）
+
+　　例子：
+
+catch (NoSuchMethodException e) {
+  LOG.error("Blah", e);
+  return null;
+}
+
+　　或
+
+catch (NoSuchMethodException e) {
+  e.printStackTrace();
+  return null;
+}  // Man I hate this one
+
+　　并不是所有情况下这样处理都是错的，但通常它是不正确的处理方式。相比于返回null，抛出异常让该函数的调用者来处理会更好一些。只有在正常的情况下（非异常处理）才应该有返回null这样的语句出现。例如，当查找的字串不存在时返回null。
+
+捕获然后忽略（Catch and Ignore）
+
+　　例子：
+
+catch (NoSuchMethodException e) {
+  return null;
+}
+
+　　这种方式是阴险的，它不但不做任何处理而是返回null，并且还吞掉了原本的异常对象，使它丧失了所有的信息！！
+
+在finally中抛出异常
+
+　　例子：
+
+try {
+  blah();
+} finally {
+  cleanUp();
+}
+
+　　如果 cleanUp()不会抛出任何异常，那么这样写是没问题的。在上例中，如果blah()函数抛出了一个异常，然后在finally 语句块中cleanUp()又抛出一个异常，那么第二个异常将会被抛出，而第一个异常则完全消失了。如果finally 语句块中调用的函数会抛出异常，那么要么处理它，要么记录它，千万不要让它逃出finally 语句块的范围。
+
+一条消息分多行进行记录（Multi-Line Log Messages）
+
+　　例子：
+
+LOG.debug("Using cache policy A");
+LOG.debug("Using retry policy B");
+
+　　不管在那个代码层次上，都应该尝试将消息组织到一起，对于上面这个例子，正确的编码方式是：
+
+　　LOG.debug("Using cache policy A, using retry policy B");
+
+　　将统一组的日志记录到两个调用语句中，在测试用例的测试下或许看起来没什么问题。但是在多线程（假设有500个线程）的系统中，信息将喷涌般地被记录到log文件中，而讲一条语句拆做两条写可能会让这两条语句中间相差十万八千里，而它们本应该同时输出的。
+
+本应抛出UnsupportedOperation异常却抛出null（Unsupported Operation Returning Null）
+
+　　例子：
+
+public String foo() {
+  // Not supported in this implementation.
+  return null;
+}
+
+　　如果上述代码是用在一个抽象基类中，用来提供钩子（hooks）以供子类在重写的话，那么是可以的。若非如此，则应该抛出一个UnsupportedOperationException 而不是返回一个null。对于方法的调用者而已，如果你抛出了一个UnsupportedOperationException，那么他们会更容易知道自己的方法为什么没有正常工作。如果你是抛出null的话，函数的调用者可能就会接收到莫名其妙的NullPointerException了。
+
+忽略InterruptedException （Ignoring InterruptedException ）
+
+　　例子：
+
+while (true) {
+  try {
+    Thread.sleep(100000);
+  } catch (InterruptedException e) {}
+  doSomethingCool();
+}
+
+　　InterruptedException 是一个提示，用来告知代码不管现在在做什么，都停下。一个线程被中断的情况通常出现在事务处理时间耗尽或线程池被关闭。相比于忽略InterruptedException，代码中更应该做的是赶快完成现在在做的工作，并结束当前线程。所以，正确的写法应该是：
+
+while (true) {
+  try {
+    Thread.sleep(100000);
+  } catch (InterruptedException e) {
+    break;
+  }
+  doSomethingCool();
+}
+
+依靠getCause()函数（Relying on getCause()）
+
+　　例子：
+
+catch (MyException e) {
+  if (e.getCause() instanceof FooException) {
+    ...
+
+　　依赖于getCause()函数的结果会让你的代码变得脆弱。如果你调用的函数或者你所依赖的代码改变了它的底层实现，换了一种异常封装，而你却依赖之前的异常类型来进行判断，怎么办？其实你本意上是想判断这个异常最初的根源是什么，也就是cause's cause。现在Apache的 commons-lang提供了一个ExceptionUtils.getRootCause() 方法来轻松获得异常源。
+
+ 
+
+结论
+
+　　好的异常处理是搭建具有鲁棒性和可靠性系统的关键。避免出现上文中提出的反模式可以帮助你搭建一个可维护的、可适应变化的，且能与其他系统共同和谐工作的系统。
+
+ 
+
+参考资料：
+
+· "Best Practices for Exception Handling" 翻译见【解读《Best Practices for Exception Handling》】
+
+· "Three Rules for Effective Exception Handling"
+
+· "Handling Errors Using Exceptions" from the Java tutorial
+
+· Antipatternentry on Wikipedia
+
+· Log4j
+
+· Commons Logging
+
+· EJB specifications
+
+ 
+
+分类: 异常处理
+好文要顶 关注我 收藏该文    
+elar
+关注 - 22
+粉丝 - 273
++加关注
+3 0
+« 上一篇：开源数据库sharding
+» 下一篇：一个不错的学习Hadoop和MapReduce的个人博客
+posted @ 2012-12-24 16:54 elar 阅读(3773) 评论(4) 编辑 收藏
+评论列表
+   #1楼 2012-12-24 21:54 清風揚諰  
+很好，反模式很有价值
+支持(0)反对(0)
+   #2楼 2013-02-15 13:53 永远的阿哲  
+还是没有明白什么时候抛异常,什么时候返回null
+支持(0)反对(0)
+   #3楼[楼主] 2013-02-15 22:01 elar  
+@ 永远的阿哲
+如果你的代码是别人来调用，那么抛出UnsupportedOperation异常会比返回null好。
+如果你的代码有可能返回null的话，最好是让上层调用的人知道（比如文档里写明等）。不然别人的代码出现NullPointerException异常时有可能是因为调用你的代码导致的，而他却不知道，还以为是自己的程序有bug。
+支持(0)反对(0)
+   #4楼 2013-02-16 21:59 永远的阿哲  
+好的,谢谢!
+支持(0)反对(0)
+刷新评论刷新页面返回顶部
+注册用户登录后才能发表评论，请 登录 或 注册，访问网站首页。
+【推荐】超50万C++/C#源码: 大型实时仿真组态图形源码
+【推荐】Java工作两年，一天竟收到33份面试通知
+【推荐】程序员问答平台，解决您开发中遇到的技术难题
+
+相关博文：
+· 异常Throwable
+· 从零开始学Java 第12章 异常处理
+· Java中的异常处理：何时抛出异常，何时捕获异常，何时处理异常？
+· 关于JAVA异常处理的20个最佳实践
+· JAVA异常处理
+
+最新新闻：
+· 特斯拉官宣：5月31日Model 3在中国开启预订
+· 史上最小！纳米级无人机仅重27克，CNN自主导航，已开源！
+· 800万年的一颗超新星爆发最终导致人类直立行走
+· IEEE下令清理华为系审稿人！全球最大学术组织禁令邮件曝光
+· 华为“方舟”OS商标曝光！或为鸿蒙海外版
+» 更多新闻...
+公告
+昵称：elar
+园龄：8年6个月
+粉丝：273
+关注：22
++加关注
+<	2012年12月	>
+日	一	二	三	四	五	六
+25	26	27	28	29	30	1
+2	3	4	5	6	7	8
+9	10	11	12	13	14	15
+16	17	18	19	20	21	22
+23	24	25	26	27	28	29
+30	31	1	2	3	4	5
+搜索
+ 
+ 
+随笔分类(259)
+ceph(1)
+DaVinCi系列(6)
+DSP(30)
+ELK(3)
+golang(5)
+kubernetes(1)
+log tools(4)
+Machine Learning(15)
+NoSQL(1)
+openCV(1)
+PHP(4)
+QR码(7)
+Recommender System(14)
+Rook(1)
+WEB开发(40)
+百度地图(5)
+大数据处理(7)
+工作日志(35)
+基础知识(9)
+立体视觉(3)
+模式识别(11)
+其他(32)
+异常处理(3)
+云计算(21)
+随笔档案(227)
+2018年12月 (1)
+2018年10月 (1)
+2018年6月 (1)
+2018年4月 (1)
+2018年1月 (1)
+2017年12月 (2)
+2017年11月 (1)
+2017年10月 (4)
+2017年7月 (3)
+2017年6月 (2)
+2016年7月 (2)
+2014年1月 (1)
+2013年11月 (1)
+2013年9月 (4)
+2013年7月 (4)
+2013年6月 (2)
+2013年5月 (11)
+2013年4月 (10)
+2013年3月 (11)
+2013年2月 (5)
+2013年1月 (9)
+2012年12月 (9)
+2012年11月 (14)
+2012年10月 (32)
+2012年9月 (13)
+2012年8月 (6)
+2012年6月 (4)
+2012年4月 (7)
+2012年1月 (2)
+2011年12月 (5)
+2011年8月 (1)
+2011年7月 (24)
+2011年6月 (6)
+2011年5月 (3)
+2011年3月 (3)
+2011年2月 (2)
+2011年1月 (3)
+2010年12月 (8)
+2010年11月 (8)
+积分与排名
+积分 -	221192
+排名 -	1545
+最新评论
+1. Re:贝叶斯决策论
+讲的太棒了，可以用来理解机器学习7.1的贝叶斯决策论
+--jiuxian77
+2. Re:贝叶斯决策 实例
+nice
+--funnyZpC
+3. Re:[rook] rook的控制流
+您好，我有个问题想请教您。希望您给予指点。我用s3cmd put的时候出现超时现象。这个问题怎么解决啊。s3cmd put /tmp/rookObj --no-ssl --host=${AWS_HOS......
+--cz6059
+4. Re:用插值的方法进行直方图平滑
+@bookids这个就是取直方图上某点前后［－step／2，＋step／2］的范围取平均值替代掉该点的值得到。没有参考什么书，是我自己想的。...
+--elar
+5. Re:用插值的方法进行直方图平滑
+你好，这篇文档我很感兴趣，想请问一下，这个方法是出自什么书籍呢？万望告知。谢谢了。
+--bookids
+阅读排行榜
+1. 数据挖掘工程师笔试及答案整理(56171)
+2. ETL简介(37382)
+3. 几种重要的概率分布（下）(35998)
+4. Scala 学习笔记（一）(34770)
+5. 贝叶斯公式(29460)
+6. 【基础知识】 之 Binary Search Tree 二叉搜索树(25224)
+7. 简单的JSP分页显示(22316)
+8. Log4j2架构及概念简介(21968)
+9. 几种重要的概率分布（上）(20784)
+10. Log4j2之Appenders(15612)
+评论排行榜
+1. CCS3.3安装及560USB驱动安装(15)
+2. 数据挖掘工程师笔试及答案整理(11)
+3. 在业务层进行回滚操作时如何避免回滚指令冗余(10)
+4. Normal Equations(9)
+5. 响应式的WEB设计（一）(9)
+6. 极小化极大准则(minimax)(8)
+7. MVC层次的划分(6)
+8. Scala 学习笔记（一）(6)
+9. Java Exception 应用情景（一）(6)
+10. Log4j2架构及概念简介(5)
