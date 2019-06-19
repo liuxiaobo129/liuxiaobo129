@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://www.cnblogs.com/icysnow/p/4730266.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="origin">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <title>activiti网关 - icychen - 博客园</title>
+    <meta property="og:description" content="activiti中有两种网关：并行网关，排他网关。 排他网关用于任务选择等情况，流程图如下 bpnm代码如下 =500 &amp;&amp; money 1000}]]&gt; ...">
+    <link type="text/css" rel="stylesheet" href="./activiti网关 - icychen - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./activiti网关 - icychen - 博客园_files/bundle-Banlieue13.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./activiti网关 - icychen - 博客园_files/bundle-Banlieue13-mobile.css">
+    <link title="RSS" type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/icysnow/rss">
+    <link title="RSD" type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/icysnow/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/icysnow/wlwmanifest.xml">
+    <script src="./activiti网关 - icychen - 博客园_files/amp4ads-host-v0.js"></script><script src="./activiti网关 - icychen - 博客园_files/pubads_impl_rendering_2019061701.js"></script><script async="" src="./activiti网关 - icychen - 博客园_files/analytics.js"></script><script type="text/javascript" src="./activiti网关 - icychen - 博客园_files/encoder.js"></script><script src="./activiti网关 - icychen - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script>var currentBlogId=148913;var currentBlogApp='icysnow',cb_enable_mathjax=false;var isLogined=false;</script>
+    <script src="./activiti网关 - icychen - 博客园_files/blog-common.js" type="text/javascript"></script>
+<link rel="preload" href="./activiti网关 - icychen - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./activiti网关 - icychen - 博客园_files/f.txt"></script><script src="./activiti网关 - icychen - 博客园_files/pubads_impl_2019061701.js" async=""></script><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-33/html/container.html"></head>
+<body>
+<a name="top"></a>
+
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="https://www.cnblogs.com/icysnow/"><img id="blogLogo" src="./activiti网关 - icychen - 博客园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="https://www.cnblogs.com/icysnow/">icychen</a></h1>
+<h2></h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">博客园</a></li>
+	<li><a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/icysnow/">首页</a></li>
+	<li><a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+	<li><a id="blog_nav_contact" accesskey="9" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/icychen">联系</a></li>
+	<li><a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+	<li><a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/icysnow/rss">订阅</a>
+	<a id="blog_nav_rss_image" class="aHeaderXML" href="https://www.cnblogs.com/icysnow/rss"><img src="./activiti网关 - icychen - 博客园_files/xml.gif" alt="订阅"></a></li>
+</ul>
+
+
+			<div class="blogStats">
+				
+				<div id="blog_stats">
+<!--done-->
+随笔- 66&nbsp;
+文章- 0&nbsp;
+评论- 4&nbsp;
+</div>
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		
+        <div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/icysnow/p/4730266.html">activiti网关</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body" class="blogpost-body"><p>　　activiti中有两种网关：并行网关，排他网关。</p>
+<p>　　排他网关用于任务选择等情况，流程图如下</p>
+<p>　　<img src="./activiti网关 - icychen - 博客园_files/141556277856640.png" alt=""></p>
+<p>　　bpnm代码如下</p>
+<p>　　</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./activiti网关 - icychen - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">&lt;?</span><span style="color: #ff00ff;">xml version="1.0" encoding="UTF-8"</span><span style="color: #0000ff;">?&gt;</span>
+<span style="color: #0000ff;">&lt;</span><span style="color: #800000;">definitions </span><span style="color: #ff0000;">xmlns</span><span style="color: #0000ff;">="http://www.omg.org/spec/BPMN/20100524/MODEL"</span><span style="color: #ff0000;"> xmlns:xsi</span><span style="color: #0000ff;">="http://www.w3.org/2001/XMLSchema-instance"</span><span style="color: #ff0000;"> xmlns:activiti</span><span style="color: #0000ff;">="http://activiti.org/bpmn"</span><span style="color: #ff0000;"> xmlns:bpmndi</span><span style="color: #0000ff;">="http://www.omg.org/spec/BPMN/20100524/DI"</span><span style="color: #ff0000;"> xmlns:omgdc</span><span style="color: #0000ff;">="http://www.omg.org/spec/DD/20100524/DC"</span><span style="color: #ff0000;"> xmlns:omgdi</span><span style="color: #0000ff;">="http://www.omg.org/spec/DD/20100524/DI"</span><span style="color: #ff0000;"> typeLanguage</span><span style="color: #0000ff;">="http://www.w3.org/2001/XMLSchema"</span><span style="color: #ff0000;"> expressionLanguage</span><span style="color: #0000ff;">="http://www.w3.org/1999/XPath"</span><span style="color: #ff0000;"> targetNamespace</span><span style="color: #0000ff;">="http://www.activiti.org/test"</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">process </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="exclusiveGateWay"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="exclusiveGateWayProcess"</span><span style="color: #ff0000;"> isExecutable</span><span style="color: #0000ff;">="true"</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">startEvent </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="Start"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">startEvent</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="费用报销申请"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="王小五"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow1"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="审批【部门经理】"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="赵小六"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="财务"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="胡小八"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="审批【总经理】"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="田小七"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">exclusiveGateway </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="Exclusive Gateway"</span><span style="color: #ff0000;"> default</span><span style="color: #0000ff;">="默认执行财务"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">exclusiveGateway</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow2"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow3"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="金额小于等于1000，大于等于500"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">conditionExpression </span><span style="color: #ff0000;">xsi:type</span><span style="color: #0000ff;">="tFormalExpression"</span><span style="color: #0000ff;">&gt;</span><span style="color: #0000ff;">&lt;![CDATA[</span><span style="color: #808080;">${money&gt;=500 &amp;&amp; money&lt;=1000}</span><span style="color: #0000ff;">]]&gt;</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">conditionExpression</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="默认执行财务"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="默认执行财务"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow5"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="金额大于1000元"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">conditionExpression </span><span style="color: #ff0000;">xsi:type</span><span style="color: #0000ff;">="tFormalExpression"</span><span style="color: #0000ff;">&gt;</span><span style="color: #0000ff;">&lt;![CDATA[</span><span style="color: #808080;">${money&gt;1000}</span><span style="color: #0000ff;">]]&gt;</span><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">conditionExpression</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">endEvent </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="End"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">endEvent</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow6"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow7"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow8"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">process</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNDiagram </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="BPMNDiagram_exclusiveGateWay"</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNPlane </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="exclusiveGateWay"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNPlane_exclusiveGateWay"</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_startevent1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="340.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="50.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="305.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="140.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask2"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="80.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="390.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_endevent1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="340.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="560.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask3"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="305.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="390.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask4"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="550.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="380.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="exclusivegateway1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_exclusivegateway1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="337.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="260.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="85.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="140.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow2"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow2"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="195.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="260.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow3"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow3"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="300.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="132.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="390.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+          <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="42.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="100.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="-117.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="-35.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow5"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow5"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="300.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="602.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="380.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+          <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="14.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="84.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="16.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="-15.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow6"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow6"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="132.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="445.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="560.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow7"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow7"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="445.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="560.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow8"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow8"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="602.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="435.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="560.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="默认执行财务"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_默认执行财务"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="300.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="357.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="390.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+          <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="14.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="72.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="10.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="0.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNLabel</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNPlane</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNDiagram</span><span style="color: #0000ff;">&gt;</span>
+<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">definitions</span><span style="color: #0000ff;">&gt;</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./activiti网关 - icychen - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　并行网关如下图所示</p>
+<p>　　<img src="./activiti网关 - icychen - 博客园_files/141558229574554.png" alt=""></p>
+<p>　　bpnm代码如下</p>
+<p>　　</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./activiti网关 - icychen - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">&lt;?</span><span style="color: #ff00ff;">xml version="1.0" encoding="UTF-8"</span><span style="color: #0000ff;">?&gt;</span>
+<span style="color: #0000ff;">&lt;</span><span style="color: #800000;">definitions </span><span style="color: #ff0000;">xmlns</span><span style="color: #0000ff;">="http://www.omg.org/spec/BPMN/20100524/MODEL"</span><span style="color: #ff0000;"> xmlns:xsi</span><span style="color: #0000ff;">="http://www.w3.org/2001/XMLSchema-instance"</span><span style="color: #ff0000;"> xmlns:activiti</span><span style="color: #0000ff;">="http://activiti.org/bpmn"</span><span style="color: #ff0000;"> xmlns:bpmndi</span><span style="color: #0000ff;">="http://www.omg.org/spec/BPMN/20100524/DI"</span><span style="color: #ff0000;"> xmlns:omgdc</span><span style="color: #0000ff;">="http://www.omg.org/spec/DD/20100524/DC"</span><span style="color: #ff0000;"> xmlns:omgdi</span><span style="color: #0000ff;">="http://www.omg.org/spec/DD/20100524/DI"</span><span style="color: #ff0000;"> typeLanguage</span><span style="color: #0000ff;">="http://www.w3.org/2001/XMLSchema"</span><span style="color: #ff0000;"> expressionLanguage</span><span style="color: #0000ff;">="http://www.w3.org/1999/XPath"</span><span style="color: #ff0000;"> targetNamespace</span><span style="color: #0000ff;">="http://www.activiti.org/test"</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">process </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="parallelGateWay"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="parallelGateWayProcess"</span><span style="color: #ff0000;"> isExecutable</span><span style="color: #0000ff;">="true"</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">startEvent </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="Start"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">startEvent</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="付款"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="买家"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="发货"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="商家"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="收款"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="商家"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">userTask </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="收货"</span><span style="color: #ff0000;"> activiti:assignee</span><span style="color: #0000ff;">="买家"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">userTask</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">endEvent </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="End"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">endEvent</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">parallelGateway </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="parallelgateway1"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="Parallel Gateway"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">parallelGateway</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow1"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="parallelgateway1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow2"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="parallelgateway1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow3"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="parallelgateway1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow4"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow5"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">parallelGateway </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="parallelgateway2"</span><span style="color: #ff0000;"> name</span><span style="color: #0000ff;">="Parallel Gateway"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">parallelGateway</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow6"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="parallelgateway2"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow7"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="parallelgateway2"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">sequenceFlow </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="flow8"</span><span style="color: #ff0000;"> sourceRef</span><span style="color: #0000ff;">="parallelgateway2"</span><span style="color: #ff0000;"> targetRef</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">sequenceFlow</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">process</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNDiagram </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">="BPMNDiagram_parallelGateWay"</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNPlane </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="parallelGateWay"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNPlane_parallelGateWay"</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="startevent1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_startevent1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="380.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="50.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="180.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="210.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask2"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask2"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="510.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="210.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask3"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask3"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="180.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="350.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="usertask4"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_usertask4"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="55.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="105.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="510.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="350.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="endevent1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_endevent1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="35.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="380.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="530.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="parallelgateway1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_parallelgateway1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="377.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="130.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNShape </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="parallelgateway2"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNShape_parallelgateway2"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdc:Bounds </span><span style="color: #ff0000;">height</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> width</span><span style="color: #0000ff;">="40.0"</span><span style="color: #ff0000;"> x</span><span style="color: #0000ff;">="377.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="427.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdc:Bounds</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNShape</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow1"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow1"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="85.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="130.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow2"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow2"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="170.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="232.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="210.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow3"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow3"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="170.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="562.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="210.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow4"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow4"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="232.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="265.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="232.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="350.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow5"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow5"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="562.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="265.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="562.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="350.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow6"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow6"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="232.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="405.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="427.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow7"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow7"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="562.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="405.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="427.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">bpmndi:BPMNEdge </span><span style="color: #ff0000;">bpmnElement</span><span style="color: #0000ff;">="flow8"</span><span style="color: #ff0000;"> id</span><span style="color: #0000ff;">="BPMNEdge_flow8"</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="467.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+        <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">omgdi:waypoint </span><span style="color: #ff0000;">x</span><span style="color: #0000ff;">="397.0"</span><span style="color: #ff0000;"> y</span><span style="color: #0000ff;">="530.0"</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">omgdi:waypoint</span><span style="color: #0000ff;">&gt;</span>
+      <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNEdge</span><span style="color: #0000ff;">&gt;</span>
+    <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNPlane</span><span style="color: #0000ff;">&gt;</span>
+  <span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">bpmndi:BPMNDiagram</span><span style="color: #0000ff;">&gt;</span>
+<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">definitions</span><span style="color: #0000ff;">&gt;</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./activiti网关 - icychen - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　可以方便的使用流程设计器直接设计</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag">标签: <a href="https://www.cnblogs.com/icysnow/tag/activiti/">activiti</a></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(4730266,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;39328e75-cdab-e211-83e8-90b11c0b17d6&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./activiti网关 - icychen - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./activiti网关 - icychen - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/icysnow/" target="_blank"><img src="./activiti网关 - icychen - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/icysnow/">icychen</a><br>
+            <a href="https://home.cnblogs.com/u/icysnow/followees">关注 - 2</a><br>
+            <a href="https://home.cnblogs.com/u/icysnow/followers">粉丝 - 2</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;39328e75-cdab-e211-83e8-90b11c0b17d6&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(4730266,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(4730266,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="https://www.cnblogs.com/icysnow/p/4729938.html" class="p_n_p_prefix">« </a> 上一篇：<a href="https://www.cnblogs.com/icysnow/p/4729938.html" title="发布于2015-08-14 14:38">activiti 连线</a><br><a href="https://www.cnblogs.com/icysnow/p/4731506.html" class="p_n_p_prefix">» </a> 下一篇：<a href="https://www.cnblogs.com/icysnow/p/4731506.html" title="发布于2015-08-14 23:28">Activiti 接收任务活动</a><br></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2015-08-14 16:00</span> <a href="https://www.cnblogs.com/icysnow/">icychen</a> 阅读(<span id="post_view_count">2877</span>) 评论(<span id="post_comment_count">0</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=4730266" rel="nofollow">编辑</a> <a href="https://www.cnblogs.com/icysnow/p/4730266.html#" onclick="AddToWz(4730266);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=148913,cb_entryId=4730266,cb_blogApp=currentBlogApp,cb_blogUserGuid='39328e75-cdab-e211-83e8-90b11c0b17d6',cb_entryCreatedDate='2015/8/14 16:00:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</script>
+	
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/icysnow/p/4730266.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/icysnow/p/4730266.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-工控&#39;)">【推荐】超50万C++/C#源码: 大型实时仿真组态图形源码</a><br><a href="https://www.grapecity.com.cn/developer/spreadjs?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=SpreadJS&amp;utm_campaign=community" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-SpreadJS&#39;)">【前端】SpreadJS表格控件，可嵌入系统开发的在线Excel</a><br><a href="https://q.cnblogs.com/" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-博问&#39;)">【推荐】程序员问答平台，解决您开发中遇到的技术难题</a><br></div>
+<div id="opt_under_post"></div>
+<script async="async" src="./activiti网关 - icychen - 博客园_files/gpt.js"></script>
+<script>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</script>
+<script>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</script>
+<div id="cnblogs_c1" class="c_ad_block">
+    <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="CIDBo_W79eICFdG8lgodHRsOBQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./activiti网关 - icychen - 博客园_files/saved_resource.html"></iframe></div></div>
+</div>
+<div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a href="https://www.cnblogs.com/sudd/p/9922389.html" target="_blank" onclick="clickRecomItmem(9922389)">activiti流程管理排他网关</a><br>·  <a href="https://www.cnblogs.com/chenweichu/p/6959553.html" target="_blank" onclick="clickRecomItmem(6959553)">activiti排他网关</a><br>·  <a href="https://www.cnblogs.com/bude/p/6304490.html" target="_blank" onclick="clickRecomItmem(6304490)">activiti实战系列  并行网关(parallelGateWay)</a><br>·  <a href="https://www.cnblogs.com/bude/p/6304491.html" target="_blank" onclick="clickRecomItmem(6304491)">activiti实战系列 排他网关（ExclusiveGateWay）</a><br>·  <a href="https://www.cnblogs.com/albert-think/p/6595030.html" target="_blank" onclick="clickRecomItmem(6595030)">Activiti进阶（七）——排他网关（ExclusiveGateWay）</a><br></div></div>
+<div id="cnblogs_c2" class="c_ad_block">
+    <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="CNHHpPW79eICFdG8lgodHRsOBQ"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" data-google-container-id="2" data-load-complete="true" src="./activiti网关 - icychen - 博客园_files/saved_resource(1).html"></iframe></div></div>
+</div>
+<div id="under_post_kb"><div class="itnews c_ad_block"><b>最新新闻</b>：<br> ·  <a href="https://news.cnblogs.com/n/627094/" target="_blank">马化腾谈脸书加密货币Libra：不看技术看监管</a><br> ·  <a href="https://news.cnblogs.com/n/627092/" target="_blank">索尼告别平井一夫时代</a><br> ·  <a href="https://news.cnblogs.com/n/627091/" target="_blank">外媒指小米西班牙宣传图抄袭 极似彼得·塔卡作品</a><br> ·  <a href="https://news.cnblogs.com/n/627090/" target="_blank">微生物科学数据共享联盟在京成立</a><br> ·  <a href="https://news.cnblogs.com/n/627089/" target="_blank">CUDA支持Arm，谁将是最大的赢家？</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</script>
+</div>
+
+    
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/icysnow/">icychen</a><br>园龄：<a href="https://home.cnblogs.com/u/icysnow/" title="入园时间：2013-04-23">6年1个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/icysnow/followers/">2</a><br>关注：<a href="https://home.cnblogs.com/u/icysnow/followees/">2</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;39328e75-cdab-e211-83e8-90b11c0b17d6&#39;)">+加关注</a></div><script>getFollowStatus('39328e75-cdab-e211-83e8-90b11c0b17d6')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="calendar"><div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2019/05/01&#39;);return false;">&lt;</a></td><td align="center">2019年6月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2019/07/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td><td class="CalWeekendDay" align="center">1</td></tr><tr><td class="CalWeekendDay" align="center">2</td><td align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td align="center">7</td><td class="CalWeekendDay" align="center">8</td></tr><tr><td class="CalWeekendDay" align="center">9</td><td align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td class="CalWeekendDay" align="center">15</td></tr><tr><td class="CalWeekendDay" align="center">16</td><td align="center">17</td><td align="center">18</td><td class="CalTodayDay" align="center">19</td><td align="center">20</td><td align="center">21</td><td class="CalWeekendDay" align="center">22</td></tr><tr><td class="CalWeekendDay" align="center">23</td><td align="center">24</td><td align="center">25</td><td align="center">26</td><td align="center">27</td><td align="center">28</td><td class="CalWeekendDay" align="center">29</td></tr><tr><td class="CalWeekendDay" align="center">30</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<div class="catListLink">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/icysnow/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="https://www.cnblogs.com/icysnow/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="https://www.cnblogs.com/icysnow/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="https://www.cnblogs.com/icysnow/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="https://www.cnblogs.com/icysnow/tag/" title="我的博客的标签列表">我的标签</a></li>
+<li><a id="itemListLink" onclick="this.blur();WarpClass(&#39;itemListLink&#39;, &#39;itemListLin_con&#39;);return false;" href="https://www.cnblogs.com/icysnow/p/4730266.html#">更多链接</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div></div><div id="sidebar_toptags" class="sidebar-block">
+<div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/icysnow/tag/leetcode/">leetcode</a>(25)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E7%BC%96%E7%A8%8B%E4%B9%8B%E6%B3%95/">编程之法</a>(13)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E6%95%B0%E7%BB%84/">数组</a>(6)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E5%AD%97%E7%AC%A6%E4%B8%B2/">字符串</a>(6)</li><li><a href="https://www.cnblogs.com/icysnow/tag/php/">php</a>(6)</li><li><a href="https://www.cnblogs.com/icysnow/tag/activiti/">activiti</a>(6)</li><li><a href="https://www.cnblogs.com/icysnow/tag/yii2/">yii2</a>(2)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E6%94%AF%E4%BB%98%E5%AE%9D/">支付宝</a>(1)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E7%99%BB%E5%BD%95%E6%B3%A8%E5%86%8C/">登录注册</a>(1)</li><li><a href="https://www.cnblogs.com/icysnow/tag/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">动态规划</a>(1)</li><li><a href="https://www.cnblogs.com/icysnow/tag/">更多</a></li>
+</ul>
+</div></div><div id="sidebar_categories">
+<div class="catListPostArchive">
+<h3 class="catListTitle">随笔档案</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_0_Link_0" href="https://www.cnblogs.com/icysnow/archive/2018/01.html">2018年1月 (30)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_1" href="https://www.cnblogs.com/icysnow/archive/2017/12.html">2017年12月 (9)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_2" href="https://www.cnblogs.com/icysnow/archive/2017/11.html">2017年11月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_3" href="https://www.cnblogs.com/icysnow/archive/2017/10.html">2017年10月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_4" href="https://www.cnblogs.com/icysnow/archive/2017/05.html">2017年5月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_5" href="https://www.cnblogs.com/icysnow/archive/2016/09.html">2016年9月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_6" href="https://www.cnblogs.com/icysnow/archive/2016/07.html">2016年7月 (5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_7" href="https://www.cnblogs.com/icysnow/archive/2016/05.html">2016年5月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_8" href="https://www.cnblogs.com/icysnow/archive/2016/03.html">2016年3月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_9" href="https://www.cnblogs.com/icysnow/archive/2015/08.html">2015年8月 (9)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_10" href="https://www.cnblogs.com/icysnow/archive/2013/07.html">2013年7月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_11" href="https://www.cnblogs.com/icysnow/archive/2013/04.html">2013年4月 (5)</a> </li>
+
+</ul>
+
+</div>
+
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/icysnow/p/5512250.html#3435950">1. Re:yii2下使用支付宝</a></li>
+        <li class="recent_comment_body">@Amonk是的...</li>
+        <li class="recent_comment_author">--icychen</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/icysnow/p/5512250.html#3435949">2. Re:yii2下使用支付宝</a></li>
+        <li class="recent_comment_body">你的账号是在怎么申请的  用公司的吗</li>
+        <li class="recent_comment_author">--Amonk</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/icysnow/p/5512250.html#3435940">3. Re:yii2下使用支付宝</a></li>
+        <li class="recent_comment_body">@任意球是的 支付宝更新之后就是这样了...</li>
+        <li class="recent_comment_author">--icychen</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/icysnow/p/5512250.html#3435937">4. Re:yii2下使用支付宝</a></li>
+        <li class="recent_comment_body">即时到账是不是要企业才能用</li>
+        <li class="recent_comment_author">--任意球</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock"><ul><li><a href="https://www.cnblogs.com/icysnow/p/4726216.html">1. Activiti工作流 安装myeclipse activiti设计插件并生成数据库表(6606)</a></li><li><a href="https://www.cnblogs.com/icysnow/p/5512250.html">2. yii2下使用支付宝(4103)</a></li><li><a href="https://www.cnblogs.com/icysnow/p/4730266.html">3. activiti网关(2876)</a></li><li><a href="https://www.cnblogs.com/icysnow/p/5512523.html">4. yii2-user 一个好用的用户扩展(2395)</a></li><li><a href="https://www.cnblogs.com/icysnow/p/4726222.html">5. Activiti工作流引擎数据库表结构(1631)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="https://www.cnblogs.com/icysnow/p/5512250.html">1. yii2下使用支付宝(4)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap" style="display: none;">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2019 icychen
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+
+</body></html>
