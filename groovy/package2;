@@ -1,0 +1,36 @@
+package test;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
+
+public class groovyTest4 {
+	public static void main(String[] args) throws FileNotFoundException, NoSuchMethodException {
+        //String scriptFileName = "c:/test.js";
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("groovy");
+        
+        System.out.println(engine);
+        try {
+        	SimpleBindings bind=new SimpleBindings();
+        	bind.put("tt", 2);
+            Compilable comp = (Compilable) engine;
+            CompiledScript cScript1 = comp.compile("tt==0;");
+            Object oo = cScript1.eval(bind);
+            System.out.println(oo);
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
