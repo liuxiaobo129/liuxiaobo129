@@ -1,0 +1,30 @@
+package test;
+import javax.script.*;
+import java.io.*;
+public class GroovyTest2 {
+    public static void main(String[] args) throws FileNotFoundException, NoSuchMethodException {
+        //String scriptFileName = "c:/test.js";
+        FileInputStream inputStream = new FileInputStream("/Users/xiaobo/Desktop/GroovyDemo1.groovy");
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("groovy");
+        
+        System.out.println(engine);
+        try {
+        	
+            Reader scriptReader = new BufferedReader( new InputStreamReader(inputStream));
+//            Object o = engine.eval(scriptReader);
+//            Object oo = engine.eval("groovy.GroovyDemo obj = new groovy.GroovyDemo()");
+            Compilable comp = (Compilable) engine;
+            CompiledScript cScript = comp.compile(scriptReader);
+            CompiledScript cScript1 = comp.compile("groovy.GroovyDemo obj = new groovy.GroovyDemo()");
+            Object oo = cScript1.eval();
+            Invocable invoke = (Invocable)engine;
+            Object o1 = invoke.invokeMethod(oo, "add", 1,23);
+            //System.out.println(o);
+            System.out.println(o1);
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
