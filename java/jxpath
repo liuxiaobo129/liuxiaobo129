@@ -1,0 +1,1061 @@
+首页
+博客
+学院
+下载
+论坛
+APP
+问答
+商城
+活动
+VIP会员
+
+专题
+招聘
+ITeye
+GitChat
+图文课
+Python工程师
+写博客 消息 登录注册
+ 
+关闭
+xml 将解析的文件里的值赋给对象,将对象存入集合 06-06 阅读数 1288
+使用DMO遍历xml文件(将xml文件中要获取的内容存到ArrayList集... 08-10 阅读数 298
+
+Jakarta-Common-JXPath使用笔记 01-24 阅读数 1016
+Apache Common JXPath 02-16 阅读数 1141
+Java通过http访问网页及xml及文件并保存到local 04-24 阅读数 7764
+JXPath 01-26 阅读数 434
+通过xpath查询xml中的节点并修改节点元素值 04-03 阅读数 9344
+java 用dom4j把一个List T对象生成xml案例 08-19 阅读数 661
+JXPathContext支持迷糊匹配 03-12 阅读数 32
+JXPath使用实例 03-14 阅读数 11
+在Java中使用迭代器访问集合元素 08-23 阅读数 541
+Mybatis的Mapper.xml文件中如何遍历一个对象的集合属性 04-23 阅读数 9558
+java中使用sax解析xml，以实体类集合的方式接受xml解析的值 07-18 阅读数 2333
+从url下载xml文件并解析(在流的状态直接解析) 07-04 阅读数 1119
+jxpath jar包 08-17立即下载
+解析XML文件的几种方式 03-21 阅读数 2664
+JXPath使用介绍 03-11 阅读数 25
+Java 对象集合 08-13 阅读数 695
+xml转化成list集合 07-26 阅读数 2727
+Java（迭代器访问集合类） 08-31 阅读数 873
+使用Dom4j将实体类导出成xml文件 08-03 阅读数 826
+第21讲 struts2值栈OGNL访问JavaBean，List集合 Map对象 11-10 阅读数 145
+
+XML解析之sax解析案例（二）使用sax解析把 xml文档封装成对象... 05-31 阅读数 1513
+java使用相对路径读取xml文件 01-19 阅读数 13
+读取XML文件 并转成Map 10-31 阅读数 2167
+利用dom4j解析.xml之将xml文本信息封装成对象 12-16 阅读数 2275
+jaxb 解析多列数据的xml 映射成list 08-23 阅读数 4474
+通过json字符串传对象集合，在js中访问对象的属性 10-28 阅读数 481
+[经典]自动将任何javabean封装成xml,返回Element对象 03-31立即下载
+XML解析之SAX解析：如何将XML信息存储到集合中 12-04 阅读数 741
+转
+使用JXPath访问java对象、集合和XML文件
+2015年04月21日 17:23:04 yczz 阅读数 3220
+一、JXPath简介
+
+JXPath是apache公司提供的XPath的java实现，属于jakarta的一部分，最新的版本是1.1，JXPath的主要功能在于一组java类库来使用XPath的方式访问符合JavaBeans规范的java类、java集合(Collections)、其他具有动态属性的对象（如Map、ServletContext等），同时提供了一套扩展机制使我们可以增加对这些对象之外的其他对象模型的支持。
+
+[注]
+
+1、关于XPath的更多内容请大家访问XPath的主页
+
+asp">http://www.w3schools.com/xpath/default.asp
+
+2、关于JXPath的更多内容请大家访问JXPath的主页
+
+http://jakarta.apache.org/commons/jxpath/index.html
+
+二、环境准备
+
+1、下载JXPath
+
+JXPath最新版本的二进制代码下载地址为
+
+http://apache.linuxforum.net/dist/jakarta/commons/jxpath/binaries/commons-jxpath-1.1.zip
+
+2、下载eclipse
+
+作者使用了eclipse作为开发工具，请大家到http://www.eclipse.org/下载eclipse的最新版本。
+
+3、下载Tomcat
+
+作者使用了Tomcat作为Web容器来演示如何使用JXPath访问ServletContext中的对象，请大家到jakarta.apache.org下载Tomcat的最新版本。
+
+下面的几个章节将详细的演示如何使用JXPath来访问各种各样的对象，同时将演示如何通过JXPath来创建对象、修改对象的属性等功能。
+
+三、使用JXPath访问对象内容3.1 访问JavaBean的属性
+
+1、准备一个符合要求的Java类
+
+作者制作了一个Company类，它包括3个属性：ID、Name和Address，代码如下：
+package org.vivianj.jxpath.examples.pub;
+import java.util.Comparator;
+import org.apache.log4j.Logger;
+public class Company implements Comparator{
+public static Logger logger = Logger.getLogger(Company.class);
+private String name = "";
+private int id = 0;
+private String address = "";
+public　void setName(String p_name){
+this.name = p_name;
+}
+public void setId(int p_id){
+this.id = p_id;
+}
+public void setAddress(String p_address){
+this.address = p_address;
+}
+public String getName(){
+return this.name;
+}
+public int getId(){
+return this.id;
+}
+public String getAddress(){
+return this.address;
+}
+public int compare(Object o1, Object o2){
+return 0;
+}
+public boolean equals(Object obj) {
+boolean result = false;
+if (obj instanceof Company){
+Company company = (Company) obj;
+if (company.getId()==this.id
+&& company.getName().equals(this.getName())
+&& company.getAddress().equals(this.getAddress()))
+result = true;
+}
+return result;
+}
+}
+
+2、使用JXPath来访问该java类的属性
+
+现在我们使用JXPath来访问这个类的属性，测试代码如下：
+//实例化一个Company对象
+Company company = new Company();
+//设置该对象的各个属性
+company.setId(1);
+company.setName("vivianj组织");
+company.setAddress("www.vivianj.org");
+//初始化JXPath的上下文环境
+JXPathContext context = JXPathContext.newContext(company);
+//使用XPath语法来访问该对象的属性
+//getValue方法的参数"name"、"id"、"address"使用了XPath的语法，
+//他们分别代表要访问company对象的属性name、id、address
+String name = (String)context.getValue("name");
+Integer id = (Integer) context.getValue("id");
+String address = (String)context.getValue("address");
+
+3.1.1 Lenient 访问模式
+
+在上面的访问方式中有可能会出现这样的情况：如果你要访问的属性不是这个Java类的属性，那么执行过程中系统会报出一个违例-- org.apache.commons.jxpath.JXPathException: No value for xpath: xxx(xxx是你要访问的属性的名称)。
+
+这种情况对于程序的稳定性、健壮性是有害的，这时候我们应该使用JXPath提供的Lenient 访问模式来避免出现这样的情况，在Lenient 访问模式下，如果你访问了不存在的属性，系统会返回一个null，而不是抛出一个违例。
+
+要使用Lenient 访问模式非常简单，只需要在代码中增加context.setLenient(true)调用就可以了，具体操作如下：
+
+//实例化一个Company对象
+Company company = new Company();
+//设置该对象的各个属性
+company.setId(1);
+company.setName("vivianj组织");
+company.setAddress("www.vivianj.org");
+//初始化JXPath的上下文环境
+JXPathContext context = JXPathContext.newContext(company);
+//通知系统使用Lenient 访问模式
+context.setLenient(true)
+//使用XPath语法来访问该对象的属性
+String name = (String)context.getValue("name1");
+
+[注] name1 不是Company类的属性，但是由于使用了Lenient 访问模式，所以系统返回null。
+
+3.2 访问嵌套属性
+
+3.1中的例子演示了如何访问类的简单类型属性，如果类的属性本身就是一个类类型，情况会怎么样呢，下面的例子将演示这种访问方式：
+
+1、准备Association类
+
+Association类有一个属性company,他本身是Company类类型
+package org.vivianj.jxpath.examples.pub;
+import java.util.ArrayList;
+import java.util.Collection;
+public class Association {
+private Company company;
+public Company getCompany(){
+return this.company;
+}
+public void setCompany(Company p_company){
+this.company = p_company;
+}
+}
+
+2、用JXPath访问嵌套属性
+//实例化Association类
+Association association = new Association();
+//实例化Company类
+Company company = new Company();
+company.setId(1);
+company.setName("vivianj组织");
+company.setAddress("www.vivianj.org");
+//设置Association对象的company属性
+association.setCompany(company);
+//初始化JXPath上下文
+JXPathContext context = JXPathContext.newContext(association);
+//使用Lenient访问模式访问嵌套属性
+context.setLenient(true);
+//通过JXPath方法获得指定属性的值
+//其中getValue方法的参数"company/name"的
+//第一部分company代表Association的属性company,
+//第二部分("/"符号后面的部分)name代表是company对象的属性
+String name = (String) context.getValue("company/name");
+
+3.3 访问Java集合
+
+JXPath可以访问Java集合的内容，这些集合包括java数组、Collection类及其子类，他们的访问方式基本类似，详细的情况请参照下面的程序代码：
+
+1、扩展Association类，增加一个提供Company对象的数组的方法
+
+给Association类增加一个方法getCompanysInArray方法，方法的签名和内容如下：
+public Company[] getCompanysInArray(){
+for (int i = 0 ; i < 5 ; i++){
+//实例化新的Company对象
+Company comp = new Company();
+comp.setId(i);
+comp.setName("Name" + i );
+comp.setAddress("address" + i);
+//将实例化的对象赋值给到数组的对应元素
+companysInArray[i] = comp;
+}
+return companysInArray;
+}
+
+2、扩展Association类，增加一个提供Company对象的Collection的方法
+
+给Association类增加一个方法getCompanysInCollection方法，方法的签名和内容如下：
+public Collection getCompanysInCollection(){
+for (int i = 0 ; i < 5 ; i++){
+//实例化新的Company对象
+Company comp = new Company();
+comp.setId(i);
+comp.setName("Name" + i );
+comp.setAddress("address" + i);
+//将实例化的对象增加到Collection中
+companysInCollection.add(comp);
+}
+return companysInCollection;
+}
+
+3.3.1 访问方法
+
+通过JXPath访问数组的详细代码如下：
+
+//实例化Association类
+Association association = new Association();
+//初始化JXPath上下文
+JXPathContext context = JXPathContext.newContext(association);
+//使用Lenient访问模式访问嵌套属性
+context.setLenient(true);
+//通过JXPath语法访问数组下标为4的记录的name属性
+//getValue方法的参数"companysInArray[5]/name"中的
+//部分companysInArray是Association的属性，
+//5代表访问数组中第5个元素，name表示第五个元素的属性名
+String name = (String) context.getValue("companysInArray[5]/name");
+//通过XPath语法访问集合中第4条记录的name属性
+//getValue方法的参数" companysInColletion[5]/name"中的
+//部分companysInColletion是Association的属性名，
+//5代表访问集合中第5个元素，name表示第五个元素的属性名
+String name = (String) context.getValue("companysInColletion[5]/name");
+
+[注] XPath访问数组或者集合时，数组或者集合的下标是从1开始，这点和java语言中规定的从0开始有点不同
+
+3.3.2 获取多条记录
+
+既然是访问集合数据，那么经常会出现这样的需求：需要获得符合条件的多条记录。这种情况使用JXPath也非常方便，使用context对象的iterator方法加上相应的XPath信息就可以了，操作后返回的内容保存在Iterator对象中，非常方便就可以访问。具体的代码如下：
+
+1、按记录所在的位置获取
+//实例化Association类
+Association association = new Association();
+//实例化JXPath上下文
+JXPathContext context = JXPathContext.newContext(association);
+//获得数组中下标大于3的所有记录
+//iterator方法的参数companysInArray [position() > 3]使用了XPath的语法
+//其中的companysInArray是Association对象的属性，他是一个数组
+// position()是XPath中的内置函数,获得记录在数组中的下标
+Itarator companysInArray =
+context.iterate("companysInArray [position() > 3]");
+//获得集合中所处位置大于3的所有记录
+//iterator方法的参数companysInCollection [position() > 3]使用了XPath的语法
+//其中的companysInCollection是Association对象的属性
+//他是一个Collection类型或者是其子类型的一个实例
+//position()是XPath中的内置函数,获得记录在集合中的位置
+Itarator companysInCollection =
+context.iterate("companysInCollection [position() > 3]");
+
+2、按指定的规则获取
+//实例化Association类
+Association association = new Association();
+//实例化JXPath上下文
+JXPathContext context = JXPathContext.newContext(association);
+//获得数组中对象的name属性为'name3'的所有对象
+//iterator方法的参数companysInArray [name='name3']使用了XPath的语法
+//其中的companysInArray是Association对象的属性，他是一个数组
+//name='name3'是条件表达式，表示返回对象的name属性值必须是name3
+Itarator companysInArray =
+context.iterate("companysInArray [name='name3']");
+//获得集合中对象的name属性为'name2'的所有对象
+//iterator方法的参数companysInCollection [name='name3']使用了XPath的语法
+//其中的companysInCollection是Association对象的属性
+//他是一个Collection类型或者是其子类型的一个实例
+//name='name3'是条件表达式，表示返回对象的name属性值必须是name3
+Itarator companysInCollection =
+context.iterate("companysInCollection [name='name3']");
+
+3.4 访问Map对象的内容
+
+1、准备符合条件的java类
+package org.vivianj.jxpath.examples.pub;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.jxpath.JXPathContext;
+public class MyMapSource {
+private Map map = new HashMap();
+public MyMapSource(){
+map.put("id",new Integer(5));
+map.put("name","name");
+}
+public Map getMapSource(){
+return this.map;
+}
+}
+
+2、使用JXPath访问Map的内容
+//实例化MyMapSource对象
+MyMapSource myMapSource = new MyMapSource();
+//实例化JXPath上下文
+JXPathContext context = JXPathContext.newContext(myMapSource);
+//通过JXPath访问Map对象的内容
+// getValue方法的参数使用了XPath语法
+// mapSource/id中的mapSource表示MyMapSource对象的属性，
+//他是一个Map类型的对象,id表示获取该Map对象的id字段
+Integer id = (Integer) context.getValue("mapSource/id");
+
+3.5 访问XML文件
+
+1、编写自己的XML文件
+
+
+
+sun
+
+
+18 #,WenShan Road
+
+
+
+ibm
+
+18 #,WenEr Road
+
+
+2、编写一个类，返回符合条件的company内容
+package org.vivianj.jxpath.examples.pub;
+import java.net.URL;
+import org.apache.commons.jxpath.Container;
+import org.apache.commons.jxpath.xml.DocumentContainer;
+public class Companys {
+private Container companys = null;
+public Container getCompanys(){
+if (companys == null){
+//获取XML文件的内容
+URL url = getClass().getResource("companys.xml");
+//将XML的内容绑定到companys对象
+companys = new DocumentContainer(url);
+}
+return companys;
+}
+}
+
+3、使用JXPath访问XML文件的内容
+//实例化Companys对象
+Companys companys = new Companys();
+//初始化JXPath上下文
+JXPathContext context = JXPathContext.newContext(companys);
+//获得指定记录的子元素的内容
+/*getValue方法的参数
+"companys/companys/company[@id = '101']/address/street"
+使用了XPath语法
+其中的第一个companys表示访问Companys对象的companys属性
+第二个companys表示访问XML数据中的companys元素
+company、address、street都是xml中的元素的名字
+@id = '101'是一个条件表达式，表示符合条件的company元素的id属性必须是101
+*/
+String street = (String)context.getValue(
+"companys/companys/company[@id = '101']/address/street");
+//通过JXPath获取xml元素的属性的值
+logger.debug("id=" +
+context.getValue("companys/companys/company[@id = '101']/@id"));
+//通过JXPath获取xml元素的子元素的值
+logger.debug("p_id=" +
+context.getValue("companys/companys/company[name = 'sun']/name"));
+
+[注] 通过JXPath访问xml内容时，如果访问属性，必须增加一个@符号，以示区别
+
+四、总结
+
+JXPath是apache组织提供的一个XPath的java实现，目前最新的版本是1.1，通过JXPath提供的丰富的类库，使用者可以很简单的使用XPath语法来访问java对象、集合、xml内容、web应用环境下的各种对象等。
+
+本文中作者一开始简单的介绍了JXPath的相关信息，接下来的章节中，作者结合实例，详细的演示了如何通过JXPath提供的丰富的类库访问java对象、集合和XML文件的详细过程，同时给出了简单的注释，希望能够帮助大家进入JXPath的精彩世界。JXPath的强大功能远不止此，请大家关注作者的后续文章。
+
+
+
+JXPath Interprets XPath Syntax on Java Object Graphs
+JXPath uses an intuitive interpretation of the xpath syntax in the context of Java object graphs. Here are some examples:
+Example 1: JavaBean Property Access
+JXPath can be used to access properties of a JavaBean.
+public class Employee { public String getFirstName(){ ... } } Employee emp = new Employee(); ... JXPathContext context = JXPathContext.newContext(emp); String fName = (String)context.getValue("firstName");
+In this example, we are using JXPath to access a property of the 
+emp
+ bean. In this simple case the invocation of JXPath is equivalent to invocation of getFirstName() on the bean.
+Example 2: Nested Bean Property Access
+JXPath can traverse object graphs:
+public class Employee { public Address getHomeAddress(){ ... } } public class Address { public String getStreetNumber(){ ... } } Employee emp = new Employee(); ... JXPathContext context = JXPathContext.newContext(emp); String sNumber = (String)context.getValue("homeAddress/streetNumber");
+In this case XPath is used to access a property of a nested bean.
+A property identified by the xpath does not have to be a "leaf" property. For instance, we can extract the whole Address object in above example:
+
+Address addr = (Address)context.getValue("homeAddress");
+Example 3: Collection Subscripts
+JXPath can extract elements from arrays and collections.
+public class Integers { public int[] getNumbers(){ ... } } Integers ints = new Integers(); ... JXPathContext context = JXPathContext.newContext(ints); Integer thirdInt = (Integer)context.getValue("numbers[3]");
+A collection can be an arbitrary array or an instance of java.util. Collection.
+Note: in XPath the first element of a collection has index 1, not 0.
+
+Example 4: Map Element Access
+JXPath supports maps. To get a value use its key.
+public class Employee { public Map getAddresses(){ return addressMap; } public void addAddress(String key, Address address){ addressMap.put(key, address); } ... } Employee emp = new Employee(); emp.addAddress("home", new Address(...)); emp.addAddress("office", new Address(...)); ... JXPathContext context = JXPathContext.newContext(emp); String homeZipCode = (String)context.getValue("addresses/home/zipCode");
+Often you will need to use the alternative syntax for accessing Map elements:
+String homeZipCode = (String) context.getValue("addresses[@name='home']/zipCode");
+In this case, the key can be an expression, e.g. a variable.
+Note: At this point JXPath only supports Maps that use strings for keys.
+Note: JXPath supports the extended notion of Map: any object with dynamic properties can be handled by JXPath provided that its class is registered with the 
+JXPathIntrospector
+.
+Example 5: Retrieving Multiple Results
+JXPath can retrieve multiple objects from a graph. Note that the method called in this case is not 
+getValue
+, but 
+iterate
+.
+public class Author { public Book[] getBooks(){ ... } } Author auth = new Author(); ... JXPathContext context = JXPathContext.newContext(auth); Iterator threeBooks = context.iterate("books[position() < 4]");
+This returns a list of at most three books from the array of all books written by the author.
+Example 6: Setting Properties
+JXPath can be used to modify property values.
+public class Employee { public Address getAddress() { ... } public void setAddress(Address address) { ... } } Employee emp = new Employee(); Address addr = new Address(); ... JXPathContext context = JXPathContext.newContext(emp); context.setValue("address", addr); context.setValue("address/zipCode", "90190");
+Example 7: Creating objects
+JXPath can be used to create new objects. First, create a subclass of 
+AbstractFactory
+ and install it on the JXPathContext. Then call 
+createPathAndSetValue()
+ instead of "setValue". JXPathContext will invoke your AbstractFactory when it discovers that an intermediate node of the path is null. It will not override existing nodes.
+public class AddressFactory extends AbstractFactory { public boolean createObject(JXPathContext context, Pointer pointer, Object parent, String name, int index){ if ((parent instanceof Employee) && name.equals("address"){ ((Employee)parent).setAddress(new Address()); return true; } return false; } } JXPathContext context = JXPathContext.newContext(emp); context.setFactory(new AddressFactory()); context.createPathAndSetValue("address/zipCode", "90190");
+Example 8: Using Variables
+JXPath supports the notion of variables. The XPath syntax for accessing variables is "$varName".
+public class Author { public Book[] getBooks(){ ... } } Author auth = new Author(); ... JXPathContext context = JXPathContext.newContext(auth); context.getVariables().declareVariable("index", new Integer(2)); Book secondBook = (Book)context.getValue("books[$index]");
+You can also set variables using JXPath:
+context.setValue("$index", new Integer(3));
+Note: you can only change the value of an existing variable this way, you cannot define a new variable.
+When a variable contains a JavaBean or a collection, you can traverse the bean or collection as well:
+
+... context.getVariables().declareVariable("book", myBook); String title = (String)context.getValue("$book/title); Book array[] = new Book[]{...}; context.getVariables().declareVariable("books", array); String title = (String)context.getValue("$books[2]/title);
+Example 9: Using Nested Contexts
+If you need to use the same set of variable while interpreting XPaths with different beans, it makes sense to put the variables in a separate context and specify that context as a parent context every time you allocate a new JXPathContext for a JavaBean.
+JXPathContext varContext = JXPathContext.newContext(null); varContext.getVariables().declareVariable("title", "Java"); JXPathContext context = JXPathContext.newContext(varContext, auth); Iterator javaBooks = context.iterate("books[title = $title]");
+Using Custom Variable Pools
+By default, JXPathContext creates a HashMap of variables. However, you can substitute a custom implementation of the Variables interface to make JXPath work with an alternative source of variables. For example, you can define implementations of Variables that cover a servlet context, HTTP request or any similar structure.
+Example 10: Using Standard Extension Functions
+Using the standard extension functions, you can call methods on objects, static methods on classes and create objects using any constructor. The class names should be fully qualified.
+Here's how you can create new objects:
+
+Book book = (Book) context.getValue( "org.apache.commons.jxpath.example.Book.new ('John Updike')");
+Here's how you can call static methods:
+Book book = (Book) context.getValue( "org. apache.commons.jxpath.example.Book.getBestBook('John Updike')");
+Here's how you can call regular methods:
+String firstName = (String)context.getValue("getAuthorsFirstName($book)");
+As you can see, the target of the method is specified as the first parameter of the function.
+Example 11: Using Custom Extension Functions
+Collections of custom extension functions can be implemented as 
+Functions
+ objects or as Java classes, whose methods become extenstion functions.
+Let's say the following class implements various formatting operations:
+
+public class Formats { public static String date(Date d, String pattern){ return new SimpleDateFormat(pattern).format(d); } ... }
+We can register this class with a JXPathContext:
+context.setFunctions(new ClassFunctions(Formats.class, "format")); ... context.getVariables().declareVariable("today", new Date()); String today = (String)context.getValue("format:date($today, 'MM/dd/yyyy')");
+You can also register whole packages of Java classes using PackageFunctions.
+Also, see 
+FunctionLibrary
+, which is a class that allows you to register multiple sets of extension functions with the same JXPathContext.
+
+
+
+
+
+ 
+想对作者说点什么
+JXpath学习笔记
+阅读数 464
+
+http://www.javaworld.com/article/2077700/data-storage/java-object-queries-using-jxpath.html  1     简...
+博文
+来自：	八白龙的专栏
+jxpath
+阅读数 2066
+
+中国 | 热线电话：800-810-3786如何购买 | MySun | 各地网站                 首页>>网友原创文章使用JXPath访问java对象、集合和XML文件作者：肖菁作者...
+博文
+来自：	兼融并蓄,共存共荣.
+实用技巧分析——JXPATH实用讲解
+阅读数 100
+
+使用JXPATH　　　　APACHE的东西有个好处，就是简单，符合KISS原则。毕竟是给数万程序员用的，太晦涩了这些大忙人们可没功夫去慢慢琢磨。　　　　JXPathContextctx=JXPathC...
+博文
+来自：	dolphin_ygj
+XPath方式访问JavaBean对象
+阅读数 873
+
+教程地址：http://commons.apache.org/jxpath/users-guide.htmlXPath教程：http://www.w3school.com.cn/xpath/index...
+博文
+来自：	孟飞阳的专栏
+ 
+JAVA使用JXPATH操作XML
+阅读数 451
+
+使用JXPATH　　　　APACHE的东西有个好处，就是简单，符合KISS原则。毕竟是给数万程序员用的，太晦涩了这些大忙人们可没功夫去慢慢琢磨。　　　　JXPathContextctx=JXPathC...
+博文
+来自：	jiangbo86的专栏
+Java对象查询方法:Jxpath(转译)
+阅读数 931
+
+在JAVA对象中,如何进行有效的查询呢,这一直是个很值得探讨的问题.大家知道，在XML中,要找元素如何找呢?没错，通过XPATH是个不错的办法,同样道理,新近发现原来在JAVA中,也居然有象XPATH...
+博文
+来自：	jackyrongvip的专栏
+JXPath(1.3)的简单示例
+阅读数 576
+
+JXPath提供了使用Xpath语法操纵符合Java类命名规范的JavaBeans的工具。也支持maps，DOM和其他对象模型。....
+博文
+来自：	huey2672的专栏
+一切都可以XML？－－JXPATH实用讲解
+阅读数 966
+
+使用APACHE的东西有个好处，就是简单，符合KISS原则。毕竟是给数万程序员用的，太晦涩了这些大忙人们可没功夫去慢慢琢磨。JXPathContextctx=JXPathContext.newCont...
+博文
+来自：	Eta的专栏
+转发 使用JXPath访问java对象、集合和XML文件
+阅读数 17
+
+摘要JXPath是Apache组织提供的一个XPath实现，通过JXPath，你可以使用XPath的语法、函数访问不同的数据内容，包括java对象、集合、xml内容、web应用环境下的各种对象等，本文...
+博文
+来自：	buye1213的博客
+apache commons JXPath 说明,使用JXPath访问java对象、..._CSDN博客
+3-18
+
+apache commons JXPath 说明,使用JXPath访问java对象、集合和XML文件2014...博文 来自: 飞鸟Blog jxpath 06-26 阅读数 1995 中国 | 热线电话:...
+
+使用JXPath访问java对象、集合和XML文件【转】 - iteye..._CSDN博客
+7-7
+
+xml内容、web应用环境下的各种对象等,本文中作者简单的介绍了JXPath,并且演示了如何通过JXPath提供的类库访问java对象、集合和XML文件的详细过程,同时给出了简单的...
+
+陈小春哭诉：上海土豪怒砸2亿请他代言这款0充值正版传奇！真经典！
+贪玩游戏 · 顶新
+使用JXPath访问java对象、集合和XML文件【转】
+阅读数 29
+
+摘要 JXPath是Apache组织提供的一个XPath实现，通过JXPath，你可以使用XPath的语法、函数访问不同的数据内容，包括java对象、集合、xml内容、web应用环境下的各种对象等，本...
+博文
+来自：	iteye_10194的博客
+JXPath使用实例 - 茂盛博客 - CSDN博客
+4-4
+
+博文 来自: 飞鸟Blog JXPATH指南 11-24 阅读数 58 使用JXPath查询Java对象...apache commons JXPath 说明,使用JXPath访问java对象、集合和XML文件 12-24 阅...
+
+JXpath学习笔记 - 八白龙的专栏 - CSDN博客
+7-2
+
+xml 将解析的文件里的值赋给对象,将对象存入集合
+阅读数 1288
+
+在dom解析的基础上加了很多if语句,不是最优解法.publicclassDom4jaddList{@TestpublicvoidDompareXml()throwsException{Filefil...
+博文
+来自：	杨恒的博客
+ 杨道龙关注
+杨道龙
+451篇文章
+
+排名:2000+
+
+双斜杠少年关注
+双斜杠少年
+367篇文章
+
+排名:1000+
+
+xiepan110关注
+xiepan110
+67篇文章
+
+排名:千里之外
+
+buye1213关注
+buye1213
+7篇文章
+
+排名:千里之外
+
+jxpath - 兼融并蓄,共存共荣. - CSDN博客
+10-31
+
+了JXPath,并且演示了如何通过JXPath提供的类库访问java对象、集合和XML文件的详细...来自: 飞鸟Blog JAVA使用JXPATH操作XML 05-05 416 使用JXPATH APACHE的东西...
+
+编写更少量的代码:使用apache commons工具类库 - weixi..._CSDN博客
+6-28
+
+properties文件--PropertiesConfiguration类; xml文件—...说明:那么JXpath就是基于Java对象的Xpath,也就是用...与Jav... 博文 来自: 飞鸟Blog Java常用类库—...
+
+使用DMO遍历xml文件(将xml文件中要获取的内容存到ArrayList集合中再取出来)(DMO解析)
+阅读数 298
+
+以下是我要将xml文件中要获取的内容存到ArrayList集合中再取出来的代码，大家也可以不用弄到集合去，我弄到集合也是为了好玩而已，哈哈。。。importjava.io.IOException;im...
+博文
+来自：	小询的博客
+Jakarta-Common-JXPath使用笔记
+阅读数 1016
+
+JXPath是apache公司提供的XPath的java实现，属于jakarta的一部分，最新的版本是1.1，JXPath的主要功能在于一组java类库来使用XPath的方式访问符合JavaBeans...
+博文
+来自：	【昆山人在上海】
+JAXB注解使用 - 飞鸟Blog - 博客频道 - CSDN.NET
+11-4
+
+飞鸟Blog目录视图 摘要视图 订阅移动信息安全的漏洞和逆向原理 【观点】世界上最...上一篇PHP资源大全 下一篇使用JXPath访问java对象、集合和XML文件 ...
+
+Apache Common JXPath
+阅读数 1141
+
+JXPath是apache公司提供的XPath的java实现，属于jakarta的一部分，最新的版本是1.1，JXPath的主要功能在于一组java类库来使用XPath的方式访问符合JavaBeans...
+博文
+来自：	ChinFeng的专栏
+【内幕】蜗牛学院-高端IT人才孵化基地
+蜗牛学院 · 顶新
+Java通过http访问网页及xml及文件并保存到local
+阅读数 7764
+
+下面的是简易版,详细地可以根据此进行修改.比如文件后缀......下面的代码进行过测试：import java.io.File;import java.io.FileOutputStream;impo...
+博文
+来自：	Anonymous的博客－－I'm lovin' IT 追求心随意动
+JXPath
+阅读数 434
+
+JXPathCamelsupportsJXPathtoallowXPathexpressionstobeusedonbeansinanExpressionorPredicatetobeusedinth...
+博文
+来自：	xgbjmxn的专栏
+通过xpath查询xml中的节点并修改节点元素值
+阅读数 9344
+
+1.转换字符串到Document&根据Xpath语法查找到指定节点并修改值12345678//把xml格式的字符串转成DocumentDocumentdoc=DocumentHelper.parseT...
+博文
+来自：	shen332401890的专栏
+java 用dom4j把一个List T对象生成xml案例
+阅读数 661
+
+dom4j准备jar：dom4j-1.6.1.jar，该jar主要是生成和解析xml用    fastjson-1.2.49.jar，该jar是alibaba的，主要是用来把List&amp;lt;T...
+博文
+来自：	p812438109的专栏
+JXPathContext支持迷糊匹配
+阅读数 32
+
+看完例子就会了[code=&quot;java&quot;]publicclassPerson{	privateStringname;	privateintage;	/**	*	*/	publicPe...
+博文
+来自：	五谷丰登
+ 
+JXPath使用实例
+阅读数 11
+
+0094/8827/13165d0e-0663-3bd8-9854-56bcca4d3728.jpg[/img]执行简单的JXPath查询：　　最简单的查询就是从对象树中查找一个对象，例如，要查找公司...
+博文
+来自：	茂盛博客
+在Java中使用迭代器访问集合元素
+阅读数 541
+
+1.使用迭代器可以访问List、Map、Set集合中的元素。2.学习网址http://www.java2s.com/Tutorial/Java/0140__Collections/Iteratethr...
+博文
+来自：	凯耐的博客
+Mybatis的Mapper.xml文件中如何遍历一个对象的集合属性
+阅读数 9558
+
+如下所示：Java实体对象中有如下一个属性/***系统员工ID集合（批量修改登录时间用）*/privatelong[]sysEmpIds;则对应配置文件为（配置中&lt;foreach&gt;标签）：...
+博文
+来自：	sunnyzyq的博客
+java中使用sax解析xml，以实体类集合的方式接受xml解析的值
+阅读数 2333
+
+1.先编写要解析的xml文件：Allen男20namy女18lufy男192.编写要转换的实体类：PersonBeanpackagecom.xml.util;publicclassPersonBean...
+博文
+来自：	w2393040183的专栏
+从url下载xml文件并解析(在流的状态直接解析)
+阅读数 1119
+
+importjava.io.InputStream;importjava.io.UnsupportedEncodingException;importjava.net.HttpURLConnectio...
+博文
+来自：	蜗牛程序员
+ 
+jxpath jar包 08-17 jxpath jar包 JXPATH是通过简单的表达式,可以在JAVA的类对象层次中进行查询 下载
+解析XML文件的几种方式
+阅读数 2664
+
+前言虽然更喜欢用json,但是xml更灵活，在配置文件的时候更方便要用SAXRead需要的jar包dom4j-1.6.1.jar,jaxen-1.1-beta-10.jarXML文件格式如下...
+博文
+来自：	翟开顺
+JXPath使用介绍
+阅读数 25
+
+博文
+来自：	茂盛博客
+Java 对象集合
+阅读数 695
+
+java对象集合1.JDK中对象集合和相关接口JDk中主要集合类型主要分为以下四种;set:无序不可重复集合list:有序可重复集合map:具有映射关系集合queue：具有队列性质集合集合相关接口和类...
+博文
+来自：	Silvester123的博客
+xml转化成list集合
+阅读数 2727
+
+publicstaticList&amp;lt;Map&amp;lt;String,String&amp;gt;&amp;gt;xml2list(Stringxml,Stringnode){	xml...
+博文
+来自：	IT_Joy2017的博客
+ 
+Java（迭代器访问集合类）
+阅读数 873
+
+通常希望依次访问集合中的元素。处理这个问题的最简单的方法是使用迭代器，迭代器是一个实现Iterator或者实现ListIterator接口的对象。Iterator可以遍历集合中的元素，从而获得或删除元...
+博文
+来自：	JACK_JYH的博客
+使用Dom4j将实体类导出成xml文件
+阅读数 826
+
+maven依赖&amp;lt;dependency&amp;gt;&amp;lt;groupId&amp;gt;org.apache.poi&amp;lt;/groupId&amp;gt;&amp;l...
+博文
+来自：	weixin_42870077的博客
+第21讲 struts2值栈OGNL访问JavaBean，List集合 Map对象
+阅读数 145
+
+一，OGNL访问JavaBean1在项目HeadFirstStruts2chapter04，新建com.cruise.model包，Student类，nameage属性，全参构造和无参构造，packa...
+博文
+来自：	Cruise的博客
+XML解析之sax解析案例（二）使用sax解析把 xml文档封装成对象
+阅读数 1513
+
+Demo1类：importjava.io.File;importjava.util.List;importjavax.xml.parsers.SAXParser;importjavax.xml.par...
+博文
+来自：	态度决定高度A=X+Y+Z
+java使用相对路径读取xml文件
+阅读数 13
+
+一、xml文件一般的存放位置有三个：1.放在WEB-INF下；2.xml文件放在/WEB-INF/classes目录下或classpath的jar包中；3.放在与解析它的java类同一个包中，不一定是...
+博文
+来自：	冲浪口
+ 
+读取XML文件 并转成Map
+阅读数 2167
+
+需要引用jar包dom4j-1.6.jarjaxen-1.1-beta-6.jar代码片段XML文件1测试www.test
+博文
+来自：	x_zcl的博客
+利用dom4j解析.xml之将xml文本信息封装成对象
+阅读数 2275
+
+packagecn.zdh.dom4j_read;//使用dom4j将xml文件信息封装成对象。importjava.io.File;importjava.util.ArrayList;importj...
+博文
+来自：	guyan1111的博客
+jaxb 解析多列数据的xml 映射成list
+阅读数 4474
+
+packagecom.*.getMap;importjavax.xml.bind.annotation.*;importjava.util.ArrayList;importjava.util.List...
+博文
+来自：	我是小星星 挂在天上放光明
+通过json字符串传对象集合，在js中访问对象的属性
+阅读数 481
+
+在控制层中@ResponseBody@RequestMapping(value="/zphList")publicMessagecheckJSONzhpList(HttpServletRequestr...
+博文
+来自：	qq_35122784的博客
+[经典]自动将任何javabean封装成xml,返回Element对象 03-31 将javabean中的数据封装成xml,只需要将对象传入自定义工具类方法中,即可自动封装成Element对象. 下载
+这变态传奇你卸载算我输！爆率9.8，不花一分钱，刀刀爆橙装！
+贪玩游戏 · 猎媒
+XML解析之SAX解析：如何将XML信息存储到集合中
+阅读数 741
+
+xml源文件张三男2217728394033
+博文
+来自：	三十四号的博客
+xml转换成list，，对象转xml
+阅读数 2412
+
+xml转换成list方法及所需要的包dom4j-1.6.1.jar对象转xml方法，，，所需的包stream-1.3.1.jar...
+博文
+来自：	逝者如风
+dom4j、XStream的jar包 09-20 dom4j用于解析xml 文档，而XStream则是将Java对象转成xml文件。使用这两个工具就很好的解决了xml文件的解析与Java对象转成xml的麻烦了！ 下载
+将对象保存为XML格式
+阅读数 755
+
+1.首先创建一个Customer对象；（Customer.java）2.其次用Customer对象生成XML文件(Object2XmlDemo.java)3.生成出来的文件格式；packageper....
+博文
+来自：	qq_30718137的博客
+通过xStream读取xml文件生成Java对象和Java对象生成xml文件
+阅读数 662
+
+通过xStream读取xml文件生成Java对象和Java对象生成xml文件
+博文
+来自：	猿来缘去的博客
+ 
+使用Set集合对复杂对象去重
+阅读数 1449
+
+步骤1.使用Set集合2.重写equal和hashCode方法注意的是：我们想根据一些属性为依据去判断是否为同一个对象从而去重，那么我们这里就需要以这些属性为因子去重写equal和hashCode方法...
+博文
+来自：	a1102325298的博客
+java读取xml文件并转换成对象，并进行修改
+阅读数 5195
+
+java读取xml文件并转换成对象，并进行修改
+博文
+来自：	weikzhao0521的博客
+使用dom4j 把xml格式解析为对象或者对象集合
+阅读数 9335
+
+android开发里经常会遇到后台传来xml格式的数据，需要我们把它们解析后变成对象或者集合，dom4j是一个Java的XMLAPI，类似于jdom，用来读写XML文件的。dom4j是一个非常非常优秀...
+博文
+来自：	lixunjing的专栏
+java list和xml互转例子 11-03 文件里包含jar包 dom4j-1.6.1.jar，list中放多个map，map里随意放键值对，最后可转换为xml文档，xml文档也可以解析存入list文件中 下载
+JAXB的使用（java对象和xml文本的相互转换）
+阅读数 2327
+
+JAXB（JavaArchitectureforXMLBinding)是一个业界的标准，是一项可以根据XMLSchema产生Java类的技术。该过程中，JAXB也提供了将XML实例文档反向生成Java...
+博文
+来自：	吴渣渣的博客
+陈小春坦言：这游戏不充钱都能当全服大哥，找到充值入口算我输！
+贪玩游戏 · 猎媒
+集合中利用迭代器删除对象
+阅读数 303
+
+packagecom.test;importjava.util.ArrayList;importjava.util.Iterator;publicclassArray_list{publicstati...
+博文
+来自：	dreamzuora的博客
+机器学习教程 Objective-C培训 交互设计视频教程 颜色模型 设计制作学习
+没有更多推荐了，返回首页
+
+
+yczz
+
+关注
+原创
+234
+粉丝
+599
+喜欢
+249
+评论
+209
+等级： 访问： 198万+ 积分： 1万+ 排名： 887
+
+ 
+最新文章
+Activiti——数据表结构
+【干货】Chrome插件(扩展)开发全攻略
+starUML破解方法（Windows10 &amp; MAC）
+jsPlumb插件做一个模仿viso的可拖拉流程图
+jsPlumb.js(连线器)API阅读笔记
+个人分类
+AJAX34篇
+Delphi7篇
+EXT13篇
+FLEX7篇
+JAVA120篇
+JSP10篇
+linux3篇
+PHP5篇
+python3篇
+RIA141篇
+Ruby3篇
+Struts10篇
+VB1篇
+VC15篇
+数据库34篇
+服务器13篇
+架构57篇
+非技术类32篇
+JBPM1篇
+移动34篇
+C++1篇
+基础平台2篇
+展开
+
+归档
+2018年11月 1篇
+2018年8月 1篇
+2018年7月 1篇
+2017年5月 2篇
+2016年11月 1篇
+2016年9月 5篇
+2016年8月 4篇
+2016年7月 5篇
+2016年6月 12篇
+2016年5月 8篇
+2016年3月 6篇
+2016年2月 5篇
+2016年1月 4篇
+2015年12月 2篇
+2015年11月 14篇
+2015年10月 7篇
+2015年9月 9篇
+2015年8月 9篇
+2015年7月 6篇
+2015年5月 5篇
+2015年4月 4篇
+2015年1月 1篇
+2014年12月 4篇
+2014年11月 4篇
+2014年9月 5篇
+2014年8月 10篇
+2014年6月 8篇
+2014年5月 5篇
+2014年4月 6篇
+2014年3月 5篇
+2014年2月 7篇
+2014年1月 2篇
+2013年11月 24篇
+2013年10月 5篇
+2013年9月 2篇
+2013年5月 1篇
+2013年4月 5篇
+2013年3月 5篇
+2013年1月 7篇
+2012年12月 1篇
+2012年9月 1篇
+2012年8月 1篇
+2012年7月 5篇
+2012年6月 5篇
+2012年5月 2篇
+2011年11月 17篇
+2011年8月 1篇
+2011年5月 14篇
+2011年4月 4篇
+2011年3月 4篇
+2011年2月 1篇
+2011年1月 1篇
+2010年11月 10篇
+2010年10月 9篇
+2010年9月 7篇
+2010年8月 7篇
+2010年7月 5篇
+2010年6月 1篇
+2010年5月 5篇
+2010年4月 1篇
+2010年3月 7篇
+2010年2月 1篇
+2010年1月 3篇
+2009年12月 3篇
+2009年11月 4篇
+2009年10月 6篇
+2009年9月 3篇
+2009年8月 3篇
+2009年7月 1篇
+2009年6月 8篇
+2009年5月 6篇
+2009年4月 3篇
+2009年3月 53篇
+2009年1月 12篇
+2008年12月 2篇
+2008年11月 1篇
+2008年10月 3篇
+2008年9月 1篇
+2008年8月 1篇
+2008年6月 5篇
+2008年5月 1篇
+2008年4月 1篇
+2008年3月 1篇
+2008年2月 4篇
+2008年1月 15篇
+2007年12月 93篇
+展开
+
+热门文章
+Java IO最详解
+阅读数 255343
+
+通过Gradle来下载依赖的jar包
+阅读数 66338
+
+Java 8的新特性—终极版
+阅读数 60564
+
+Windows 下安装NPM
+阅读数 54696
+
+H5、React Native、Native应用对比分析
+阅读数 51387
+
+最新评论
+Javascript的DOM操作 ...
+weixin_44548307：学了，学了
+
+Socket.io 的发送对象范围
+qq_40103142：你好，请问有在房间广播（不包含当前客户端）的实例吗？想学习一下。
+
+Flash Media Serve...
+bose_job：怎么播放avi格式的视频呢
+
+Java 8的新特性—终极版
+S_body：[reply]yang1982_0907[/reply] 确实不错
+
+starUML破解方法（Windo...
+hqu__aweng：最后打包命令之后找不到文件是什么情况呢?
+
+
+ 
+程序人生
+程序人生
+
+CSDN资讯
+CSDN资讯
+
+kefu@csdn.net QQ客服
+
+客服论坛400-660-0108
+
+工作时间 8:30-22:00
+
+关于我们招聘广告服务 网站地图
+
+百度提供站内搜索 京ICP备19004658号
+
+©1999-2019 北京创新乐知网络技术有限公司
+
+经营性网站备案信息 网络110报警服务
+
+北京互联网违法和不良信息举报中心
+
+中国互联网举报中心家长监护版权申诉
+
+ 1
+ VIP
+免广告
+手机看
+客服
+举报
+返回
+顶部
