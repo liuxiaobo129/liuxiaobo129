@@ -1,0 +1,67 @@
+
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class quartzTest {
+    public static void main(String[] args)throws SchedulerException, InterruptedException {
+        //jobDetail
+        JobDetail jobDetail = JobBuilder.newJob(HelloJob.class).withIdentity("cronJob").build();
+        //cronTrigger
+        //每日的9点40触发任务
+        CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity("cronTrigger").withSchedule(CronScheduleBuilder.cronSchedule("*/5 * * * * ?")).build();
+        CronTrigger cronTrigger1 = TriggerBuilder.newTrigger().withIdentity("cronTrigger1").withSchedule(CronScheduleBuilder.cronSchedule("*/1 * * * * ?")).build();
+        //1.每日10点15分触发      0 15 10 ？* *
+        //2.每天下午的2点到2点59分（正点开始，隔5分触发）       0 0/5 14 * * ?
+        //3.从周一到周五每天的上午10点15触发      0 15 10 ? MON-FRI
+        //4.每月的第三周的星期五上午10点15触发     0 15 10 ? * 6#3
+        //5.2016到2017年每月最后一周的星期五的10点15分触发   0 15 10 ? * 6L 2016-2017
+        //Scheduler实例
+        StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory();
+        Scheduler scheduler = stdSchedulerFactory.getScheduler();
+        scheduler.start();
+        //scheduler.scheduleJob(jobDetail,cronTrigger);
+        List list = new ArrayList();
+        list.add(cronTrigger);
+        list.add(cronTrigger1);
+
+        Map map = new HashMap();
+        map.put(jobDetail,list);
+        scheduler.scheduleJobs(map,true);
+        System.out.println("over");
+//        Thread.sleep(20000);
+//        scheduler.pauseTrigger(cronTrigger.getKey());
+//
+//        //scheduler.pauseJob(jobDetail.getKey());
+//        System.out.println("pause");
+//        Thread.sleep(10L * 1000L);
+//        scheduler.resumeTrigger(cronTrigger.getKey());
+        //scheduler.resumeJob(cronTrigger.getJobKey());
+        // shut down the scheduler
+       // scheduler.shutdown(true);
+    }
+}
+
+
+
+//class CronScheduler {
+//    public static void main(String[] args) throws SchedulerException, InterruptedException {
+//        //jobDetail
+//        JobDetail jobDetail = JobBuilder.newJob(HelloJob.class).withIdentity("cronJob").build();
+//        //cronTrigger
+//        //每日的9点40触发任务
+//        CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity("cronTrigger").withSchedule(CronScheduleBuilder.cronSchedule("0 40 9 * * ? ")).build();
+//        //1.每日10点15分触发      0 15 10 ？* *
+//        //2.每天下午的2点到2点59分（正点开始，隔5分触发）       0 0/5 14 * * ?
+//        //3.从周一到周五每天的上午10点15触发      0 15 10 ? MON-FRI
+//        //4.每月的第三周的星期五上午10点15触发     0 15 10 ? * 6#3
+//        //5.2016到2017年每月最后一周的星期五的10点15分触发   0 15 10 ? * 6L 2016-2017
+//        //Scheduler实例
+//        StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory();
+//        Scheduler scheduler = stdSchedulerFactory.getScheduler();
+//        scheduler.start();
+//        scheduler.scheduleJob(jobDetail,cronTrigger);
+//    }
+//}
