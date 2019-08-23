@@ -1,0 +1,361 @@
+Nav logo
+首页
+下载App
+搜索
+×
+广告
+logback通过配置自动发送kafka消息并存入es
+96  一抹斜阳丶 
+2017.12.27 16:32* 字数 276 阅读 1511评论 0喜欢 0
+步骤
+logback的AppenderBase和UnsynchronizedAppenderBase
+先来段logback配置
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d [%-5level][%t][%c][%X{tenant}][%X{requestId}] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/xxx-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>[%d{HH:mm:ss:SSS}][%5p][%c:%L] %m%n</pattern>
+        </layout>
+    </appender>
+    
+<!--    <appender name="kafka" class="com.xxx.util.logback.UnblockedKafkaAppender"> -->
+<!--        <needFilter>true</needFilter> -->
+<!--        <includingPackage>com.xxx.mirc.redis.dubbo</includingPackage> -->
+<!--    </appender> -->
+    <root level="info">
+<!--         <appender-ref ref="kafka"/> -->
+        <appender-ref ref="logfile"/>
+<!--         <appender-ref ref="STDOUT"/> -->
+    </root>
+</configuration>
+
+上述的appender标签就是配置的logback处理类。有使用logback提供的ConsoleAppender，RollingFileAppender。同时也可以自定义扩展appender。
+logback提供的抽象处理类。AppenderBase，UnsynchronizedAppenderBase，用来提供扩展支持。分析下源码。
+
+abstract public class UnsynchronizedAppenderBase<E> extends ContextAwareBase implements
+    Appender<E> {
+  private ThreadLocal<Boolean> guard = new ThreadLocal<Boolean>();
+  public void doAppend(E eventObject) {
+ }
+
+  abstract protected void append(E eventObject);
+}
+abstract public class AppenderBase<E> extends ContextAwareBase implements
+    Appender<E> {
+   private boolean guard = false;
+  public void doAppend(E eventObject) {
+ }
+
+  public synchronized void doAppend(E eventObject);
+}
+其实这两个类，大多代码都一样。
+
+实现的功能都是记录Status状态，然后检查Appender上的Filter是否满足条件，最后再调用子类的doAppend方法。用到设计模式：模板方法。
+
+但是区别在于Appender的doAppend方法是synchronized的，UnsynchronizedAppenderBase则是用ThreadLocal的方式存储guard状态值。
+自定义一个扩展类，实现发送kafka消息：
+
+public class UnblockedKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent>{
+    BaseKafkaProducer<LogBackKafkaVo> producer;
+    private static Set<String> includeSet = new HashSet<String>();
+    private String includingPackage;
+    private String kafkaBrokerPath;
+
+    private boolean needFilter=true;
+
+    public boolean isNeedFilter() {
+        return needFilter;
+    }
+
+    @Override
+    protected void append(ILoggingEvent eventObject) {
+        if (needFilter) {
+            boolean flag=false;
+            if(CollectionUtils.isNotEmpty(includeSet)){
+                for(String regex:includeSet){
+                    if(eventObject.getLoggerName().matches(regex)){
+                        flag=true;
+                        break;
+                    }
+                }
+            }
+            if(!flag)
+                return;
+        }
+        LogBackKafkaVo vo = new LogBackKafkaVo().build(eventObject);
+        if (producer != null)
+            try {
+                producer.sendMsg(vo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    }
+    
+
+    @Override
+    public void start() {
+        super.start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initProducer();
+            }
+        }).start();
+    }
+    
+    private void initProducer(){
+        while (!FileReaderUtils.existsFile("kafka.properties")) {
+            try {
+                Thread.sleep(50L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+        }
+        if (needFilter) {
+            if (StringUtils.isBlank(includingPackage))
+                return;
+            for (String s : includingPackage.split(",")) {
+                includeSet.add(s+".*");
+            }
+        }
+        producer = new LogBackLoggerProducer();
+        try {
+            producer.kafkaProducerConfig=producer.initConfig(kafkaBrokerPath);
+            producer.setProducer_type(KafkaConstant.ASYNC);
+            producer.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+kafka操作/ 生产者为例
+定义底层kafka操作类
+public class ProducerProxy<T1, T2> {
+    public ProducerProxy(ProducerConfig producerConfig,int size) {
+        for(int i=0;i<size;i++){
+            Producer<T1, T2> producer=new Producer<T1, T2>(producerConfig);
+            prodMap.put(i, producer);
+            queue.offer(producer);
+        }
+    }
+
+    private Map<Integer,Producer<T1, T2>> prodMap=new HashMap<Integer,Producer<T1, T2>>();
+    private ConcurrentLinkedQueue<Producer<T1, T2>> queue=new ConcurrentLinkedQueue<Producer<T1, T2>>();
+    public void send(List<KeyedMessage<T1, T2>> messages) {
+        if (prodMap.isEmpty())
+            throw new IllegalStateException("prodMap can not be null");
+            int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(
+                    prodMap.size());
+            prodMap.get(i).send(messages);
+    }
+    public void close() {
+        for(Producer<T1, T2> prod:prodMap.values())
+            prod.close();
+    }
+    
+    public void send(KeyedMessage<T1, T2> msg) {
+        if (prodMap.isEmpty())
+            throw new IllegalStateException("prodMap can not be null");
+            int i = java.util.concurrent.ThreadLocalRandom.current().nextInt(
+                    prodMap.size());
+            prodMap.get(i).send(msg);
+    }
+    public Producer<T1, T2> pollProducer() {
+        return queue.poll();
+    }
+}
+ProducerProxy意义在于：创建多个producer，调用时，随机分配；
+
+public class AbstractKafkaProducer {
+    protected static ProducerProxy<String, String> producer;
+    protected static ProducerProxy<byte[], byte[]> byteProducer;
+    protected static Map<String,AsyncKafkaMessageProducer> kafkaMessageCacheMap = new HashMap<String,AsyncKafkaMessageProducer>(2);
+    static Map<String,AbstractKafkaProducer> mapProducer=new HashMap<String,AbstractKafkaProducer>(2);
+    private static AbstractKafkaProducer abstractKafkaProducer=new AbstractKafkaProducer();
+    public static AbstractKafkaProducer getInstance(){
+        return abstractKafkaProducer;
+    }
+    protected AbstractKafkaProducer(){
+        if(!mapProducer.isEmpty())
+            return;
+        mapProducer.put(KafkaConstant.STRING, StringKafkaProducer.getInstance());
+    }
+    public void setProducer(ProducerProxy<String, String> producer) {
+        AbstractKafkaProducer.producer = producer;
+    }
+    public void setByteProducer(ProducerProxy<byte[], byte[]> byteProducer) {
+        AbstractKafkaProducer.byteProducer = byteProducer;
+    }
+    public void sendMsg(String prodtype,String serializerType,Object msg,String topic,String... key) throws IOException{
+        mapProducer.get(serializerType).sendMsg(prodtype,msg,topic,key);
+    }
+    
+    protected void sendMsg(String prodtype,Object msg,String topic,String... key) throws IOException{
+    }
+}
+提供基础kafka操作类。
+
+提供基础kafka操作类
+public abstract class BaseKafkaProducer<T> implements KafkaProducer<T> {
+    public static ProducerProxy<String, String> getProducer() {
+        return producer;
+    }
+
+    public static ProducerProxy<byte[], byte[]> getByteProducer() {
+        return byteProducer;
+    }
+
+    protected Properties initProducer(KafkaProducerConfig kafkaProducerConfig,
+            String... home) {
+        final Properties props = new Properties();
+        
+        props.put(KafkaConstant.Producer.metadata_broker_list, kafkaProducerConfig.getMetadata_broker_list());
+        ...
+        return props;
+    }
+
+    /**
+     * 发送管理事件
+     * 
+     * @throws Exception
+     */
+    @Override
+    public boolean sendMsg(final T t,String... key) throws Exception {
+        if (t == null) {
+            return false;
+        }
+        try {
+            resetTopic();
+            String type = producer_type;
+            Object o = generateMsg(t);
+            AbstractKafkaProducer
+                    .getInstance()
+                    .sendMsg(
+                            type,
+                            KafkaConstant.BYTEENCODER
+                                    .equals(produce_serilize_class) ? KafkaConstant.BYTE
+                                    : KafkaConstant.STRING, o, topic,key);
+            return true;
+        } catch (final Exception e) {
+            logger.error("send msg to jump mq exception:", e);
+            throw e;
+        } catch (final Error e) {
+            logger.error("send msg to jump mq error:", e);
+            throw e;
+        }
+    }
+
+    public void init(){}
+
+    protected abstract void resetTopic();
+
+    protected Object generateMsg(T t) {
+        return t;
+    }
+}
+暴露使用方式
+@Configuration
+public class DubboKafkaProducerConfiguration  {
+    @Bean(name = "dubboLoggerProducer")
+    public DubboLoggerProducer dubboLoggerProducer() throws IOException {
+        BaseKafkaProducer<DubboInvokeDetail> dubboProducer=new DubboLoggerProducer();
+        try {
+            dubboProducer.setProducer_type(KafkaConstant.ASYNC);
+            dubboProducer.init();
+            KafkaDubboUtil.setLogSender((KafkaProducer<DubboInvokeDetail>) dubboProducer);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(),e);
+            return null;
+        }
+        return (DubboLoggerProducer) dubboProducer;
+    }
+
+}
+es操作
+写个kafka消费程序，写入es即可。
+
+结果说明
+{
+    "_index":"logback-2017",
+    "_type":"com.xxx.util.logback.LogBackKafkaVo",
+    "_id":"hacyp0pdrvtt",
+    "_version":1,
+    "_score":1,
+    "_source":{
+        "argumentArray":"[]/r/n",
+        "callerDataArray":"",
+        "formattedMessage":"不存在memberno[]",
+        "level":"INFO",
+        "loggerContextVO":"LoggerContextVO{name='default', propertyMap={HOSTNAME=wx-test}, birthTime=1495017602946}",
+        "loggerName":"com.xxx.Object",
+        "shardId":25,
+        "status":0,
+        "threadName":"ConsumeMessageThread_10",
+        "timeStamp":"2017-05-17 18:52:26"
+    }
+}
+小礼物走一走，来简书关注我
+
+ Java © 著作权归作者所有 举报文章
+96 一抹斜阳丶 
+写了 5491 字，被 25 人关注，获得了 46 个喜欢
+
+blog: chenlisong.github.io
+   更多分享
+Web note ad 1
+ 后发表评论
+评论
+智慧如你，不想发表一点想法咩~
+被以下专题收入，发现更多相似内容
+Apache ...
+ 240
+Spring Cloud
+Spring Cloud为开发人员提供了快速构建分布式系统中一些常见模式的工具（例如配置管理，服务发现，断路器，智能路由，微代理，控制总线）。分布式系统的协调导致了样板模式, 使用Spring Cloud开发人员可以快速地支持实现这些模式的服务和应用程序。他们将在任何分布式...
+
+ 48  卡卡罗2017
+Log4j学习和总结
+在应用程序中添加日志记录总的来说基于三个目的：监视代码中变量的变化情况，周期性的记录到文件中供其他应用进行统计分析工作；跟踪代码运行时轨迹，作为日后审计的依据；担当集成开发环境中的调试器的作用，向文件或控制台打印代码的调试信息。 最普通的做法就是在代码中嵌入许多的打印语句，...
+
+ 48  时待吾
+Log4j总结&学习
+在应用程序中添加日志记录总的来说基于三个目的：监视代码中变量的变化情况，周期性的记录到文件中供其他应用进行统计分析工作；跟踪代码运行时轨迹，作为日后审计的依据；担当集成开发环境中的调试器的作用，向文件或控制台打印代码的调试信息。 最普通的做法就是在代码中嵌入许多的打印语句，...
+
+ 48  时待吾
+ 240
+logback 配置详解
+概览 简单地说，Logback 是一个 Java 领域的日志框架。它被认为是 Log4J 的继承人。Logback 主要由三个模块组成： logback-core logback-classic logback-access logback-core 是其它模块的基础设施，...
+
+ 48  beanlam
+ 240
+引导的力量：聊聊孩子家庭教育的一点小心得
+这次分享的内容是最近在孩子学校家长会上的一次发言。 在接到这个光荣的“政治任务”时，正好在埋头苦写部门工作总结及思路，同时还在酒店组织一次厅经理的能力提升培训。 最终，待手头事情告一段落后，在家长会的前一天晚上八点多钟才开始动笔，火急火燎、熬夜整完。虽然辛苦，但，痛并快乐着...
+
+ 48  亮歌行
+我用没过好的前半生，换了几个道理
+人生即将过半，回想前半生，除了学业不断精进与家庭幸福以外，其他很多生命的维度都是非常欠缺的。最近，对自己过往的人生进行了深刻地反思，明白了几个道理。分享出来，与大家共享。 如果说在某些方面，取得了些许进步的话，我认为可以归因为：1对自己够狠；2常怀感恩之心；3乐于学习，勤于...
+
+ 48  Sunny之生命管理
+2017-10-1
+很气很气，却又很无奈。哎！
+
+ 48  明天我会成为梦想中的我
+无题
+PS.昨天没有坚持500字！晚上写真的很累！ 因为今天下午要出差，早上没有去办公室。早上先上了会口语课，我第一次选了欧美外教，一个有岁数的lady，很会鼓励人。我们谈到了工作，她跟我说了她最近的经历，六个月前，她在墨西哥的一所学校教授英语，持续一段时间后，她觉得非常不自由，...
+
+ 48  魔红红
+ 240
+木马先生，你不喜欢糖果
+他们说骑上马背就可以开始流浪,我仰起天真的脸,旋转过一天的木马停在原地,于是我就以为周游了地球,其实世界像个华丽的玻璃瓶,装满了自欺欺人的幸福,这些幸福,我们习惯把它们叫做糖果,木马先生你肯定见过很多孩子的梦想和幸福吧,每天早晨游乐场的大门打开,每天黄昏游乐场的人群散去,...
+
+ 48  梦小北
