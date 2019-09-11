@@ -1,0 +1,554 @@
+
+首页
+博客
+学院
+下载
+论坛
+APP
+问答
+商城
+活动
+VIP会员
+
+专题
+招聘
+ITeye
+GitChat
+图文课
+疯狂Python精讲
+写博客消息登录注册
+原
+getClassLoader()和getContextClassLoader()的区别
+2018年10月16日 18:01:24 aaa821 阅读数 636更多
+分类专栏： JAVA基础
+版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+本文链接：https://blog.csdn.net/AAA821/article/details/77939039
+ 
+
+   区别一: 
+
+          getClassLoader()是当前类加载器,而getContextClassLoader是当前线程的类加载器
+
+ 
+
+   区别二:
+
+         getClassLoader是使用双亲委派模型来加载类的,而getContextClassLoader就是为了避开双亲委派模型的加载方式的,也就是说它不是用这种方式来加载类
+
+当前类加载器加载和定义当前方法所属的那个类。这个类加载器在你使用带单个参数的Class.forName()方法，Class.getResource()方法和相似方法时会在运行时类的链接过程中被隐式调用(也就是说当你用Class.forname(package.className)的时候已经调用当前类加载器来加载这个类了)
+
+转载个例子
+
+     Thread context class loader存在的目的主要是为了解决parent delegation机制下无法干净的解决的问题。假如有下述委派链： 
+    ClassLoader A -> System class loader -> Extension class loader -> Bootstrap class loader 
+
+那么委派链左边的ClassLoader就可以很自然的使用右边的ClassLoader所加载的类。 
+
+但如果情况要反过来，是右边的ClassLoader所加载的代码需要反过来去找委派链靠左边的ClassLoader去加载东西怎么办呢？没辙，parent delegation是单向的，没办法反过来从右边找左边。 
+
+这种情况下就可以把某个位于委派链左边的ClassLoader设置为线程的context class loader，这样就给机会让代码不受parent delegation的委派方向的限制而加载到类了
+
+ 
+
+ 
+
+有时这种加载顺序不能正常工作，通常发生在有些JVM核心代码必须动态加载由应用程序开发人员提供的资源时(比如说在核心类A中,它要动态加载一个应用程序开发人员提供的类B时,假如说类Ａ是由扩展类加载器（Extension ClassLoader）加载的,根据双亲委派模型的要求,它会先把B交给它的父加载器也就是启动类加载器（Bootstrap ClassLoader）,这时候启动类加载器（Bootstrap ClassLoader）加载不了，那扩展类加载器就会尝试自己加载,这时候它也加载不了,这就尴尬了,就会报ClassNotFoundException了)
+
+ 
+
+以JNDI举例：它的核心内容在rt.jar中的引导类中实现了，但是这些JNDI核心类可能加载由独立厂商实现和部署在应用程序的classpath中的JNDI提供者。这个场景要求一个父类加载器（这个例子中的原始类加载器，即加载rt.jar的加载器）去加载一个在它的子类加载器（系统类加载器）中可见的类。此时通常的J2SE委托机制不能工作，解决办法是让JNDI核心类使用线程上下文加载器，从而有效建立一条与类加载器层次结构相反方向的“通道”达到正确的委托。
+
+ 假如说加载rt.jar的是启动类加载器（Bootstrap ClassLoader),它要加载一个开发人员提供的类,开发人员提供的类是由系统类加载器来加载的,这时候尴尬了,应该双亲委派模型没有双向的,只有单向的委托父加载器帮我加载,没有说双向的可以委托子加载器来帮我加载.这时候就可以用线程上下文加载器给jndi指定它的加载器是系统类加载器.
+
+ 
+
+ 
+
+老中医说：饭后一件事，成易瘦体质，想瘦多少就瘦多少！
+梦跃生物 · 顶新
+
+想对作者说点什么
+qq_36544586
+qq_36544586： 说的很清晰了(1个月前#1楼)
+Classloader与Thread.currentThread().getContextClassLoader()区别
+阅读数 4143
+
+匆匆九月，回到目前的创业公司工作已满二个多月了。回来后每天都有干不完的任务，对于每天的工作每天也很少有时间来进行总结与思考。仿佛让我想到了两年前刚来这家公司时的样子，虽然一直很忙有事干，但有一种瞎忙的...
+博文
+来自： 静下心来 静下心来
+Thread.getContextClassLoader与Thread.getClassLoader()区别
+阅读数 708
+
+在阅读springboot启动时候的源码中，发现获取classLoader使用的是getContextClassLoader于是乎产生了疑问，这种获取ClassLoader的方式与我们最常见的通过Cl...
+博文
+来自： wp500的专栏
+关于getClass()，Object.class，getClassLoader的理解
+阅读数 2974
+
+1、对Class类的理解：Class类包含了类的信息，如构造方法、方法、属性，可用于反射。以下是所有方法2、获取Class类对象的几种方法：Testtest=newTest();(1).test.ge...
+博文
+来自： MrwanZH的博客
+Thread.currentThread().getContextClassLoader() 和 Class.getClassLoader()的区别
+阅读数 3160
+
+一、同一工程中：String path = Thread.currentThread().getContextClassLoader().getResource(".").getPath();    ...
+博文
+来自： Fred Lee的程序人生
+
+getClassLoader 和 ClassLoader.getSystemClassLoader()区别
+阅读数 5398
+
+1. getClassLoader是在apk内部加载的2.ClassLoader.getSystemClassLoader()是系统级别。liz
+博文
+来自： vurtne_ye的专栏
+getClass().getClassLoader()
+阅读数 808
+
+最后结果：我的大小写。 1.Class.getResourceAsStream(Stringpath)：path不以'/'开头时默认是从此类所在的包下取资源，以'/'开头则是从ClassPath(Sr...
+博文
+来自： seaReal1的博客
+彻底搞懂Class.getResource和ClassLoader.getResource的区别和底层原理
+阅读数 1万+
+
+一案例驱动 二源码分析 三类加载器ClassLoader 四总结 五参考 一案例驱动最近加载文件的时候遇到了一个问题，很有意思！具体看下面案例代码publicclassTestClassLoader{...
+博文
+来自： zhangshk_的博客
+Java class.getClassLoader().getResource("")获取资源路径
+阅读数 7729
+
+在开发中经常需要获取资源文件路径，例如读写配置文件等。Java也提供很多方法来获取这些路径，下面就几种常用到的作一下讨论区分：其中xxx是当前的类1、xxx.class.getClassLoader(...
+博文
+来自： xm的博客
+一看你就懂，超详细java中的ClassLoader详解
+阅读数 17万+
+
+本篇文章已授权微信公众号guolin_blog（郭霖）独家发布ClassLoader翻译过来就是类加载器，普通的java开发者其实用到的不多，但对于某些框架开发者来说却非常常见。理解ClassLoad...
+博文
+来自： frank 的专栏
+....currentThread().getContextClassLoader()区别 - ..._CSDN博客
+9-3
+
+Thread.getContextClassLoader与Thread.getClassLoader..._CSDN博客
+8-10
+
+老公爆料：一天做一次，狂瘦30斤，惊呆
+舜飞
+this.class.getClassLoader()怎么理解？
+阅读数 4万+
+
+this.class.getClassLoader()怎么理解？java是面向对象语言，面向对象的语言的宗旨就是万事万物皆对象，那么类也是一个对象，类里面的属性和方法也是对象。java里面的所有的类都...
+博文
+来自： tony的专栏
+Thread.currentThread().getContextClassLoader() 和 C..._CSDN博客
+6-24
+
+Thread.currentThread().getContextClassLoader() 和 C..._CSDN博客
+10-27
+
+线程上下文类加载器（Context ClassLoader）
+阅读数 3112
+
+1.线程上下文类加载器是从jdk1.2开始引入的，类Thread中的getContextClassLoader()与setContextClassLoader(ClassLoaderc1)，分别用来获...
+博文
+来自： mweibiao的博客
+静下心来静下心来关注
+静下心来静下心来
+108篇文章
+
+排名:千里之外
+
+wp500关注
+wp500
+65篇文章
+
+排名:千里之外
+
+MrWanZH关注
+MrWanZH
+32篇文章
+
+排名:千里之外
+
+FredLzy关注
+FredLzy
+259篇文章
+
+排名:6000+
+
+Thread.currentThread().getContextClassLoader() 和 C..._CSDN博客
+10-24
+
+Thread.currentThread().getContextClassLoader() 和 C..._CSDN博客
+10-20
+
+一文理解class.getClassLoader().getResourceAsStream(file)和class.getResourceAsStream(file)区别
+阅读数 9531
+
+基础理解都是实现获取在classpath路径下的资源文件的输入流。为什么是classpath而不是src，因为当web项目运行时,IDE编译器会把src下的一些资源文件移至WEB-INF/classe...
+博文
+来自： FeelTouch
+Java 类加载体系与ContextClassLoader
+阅读数 1万+
+
+va是非常简单精巧的语言，背后的基本原来也很简单，总的说来有两点：1.JVM的内存管理，理解了这个，有关对象的问题都能解决。比如线程安全问题，内存泄露问题等。2.JVM的类加载体系，理解了这个，有关j...
+博文
+来自： v1v1wang的专栏
+Thread.currentThread().getContextClassLoader()和Cla..._CSDN博客
+8-27
+
+getClass()和getClassLoader()区别 以及ClassLoader详..._CSDN博客
+4-30
+
+getClassLoader().loadClass与Class.forName的区别 实例
+阅读数 531
+
+packagecom;publicclassUser{ privateStringusername; static{ System.out.println(&quot;thisisstaticblo...
+博文
+来自： 坚持，让梦想闪耀！
+
+一文理解class.getClassLoader().getResourceAsStream(..._CSDN博客
+8-30
+
+使用getClassLoader().getResource()需注意的问题
+阅读数 1万+
+
+在JavaWEB项目编程时，往往通过classLoader获取Jar包的物理路径，但是可能会存在2个问题：URL地址解析错误，不能正确获取Jar文件路径。1、URL地址解析错误见下例，通过getCla...
+博文
+来自： hongweigg的专栏
+this.class.getClassLoader()
+阅读数 368
+
+this.class.getClassLoader()怎么理解？    java是面向对象语言，面向对象的语言的宗旨就是万事万物皆对象，那么类也是一个对象，类里面的属性和方法也是对象。java里面的所...
+博文
+来自： 在路上---品味生活
+Thread的getContextClassLoader()
+09-09
+忘记以前有没有问过这个问题,总之我现在有看到几个地方有这个: Thread.currentThread().getContextClassLoader() 我总是想不出在什么情况下会用这种方式获得一个论坛
+class.getClassLoader().getResource()方法是不是不能获取上级目录？
+12-12
+Tomcat 8.0 普通java文件中： 类名.class.getClassLoader().getResource("/"); //可获得站点下的classes文件夹的绝对路径 类名.class.论坛
+Thread.getContextClassLoader()解析
+阅读数 47
+
+类加载器分为三种：1、系统类加载器或叫作应用类加载器(systemclassloaderorapplicationclassloader)2、当前类加载器3、当前线程类加载器系统类加载器(system...
+博文
+来自： weixin_41770606的博客
+
+获取资源文件地址getClassLoader
+阅读数 1244
+
+this.class.getClassLoader().getResourceAsStream与this.class.getResourceAsStream本文转自:http://xixinfei.i...
+博文
+来自： 小提提la的博客
+Thread.currentThread().getContextClassLoader() 和 Class.getClassLoader()区别
+阅读数 3208
+
+查了一些资料也不是太明白两个的区别，但是前者是最安全的用法 打个简单的比方，你一个WEB程序，发布到Tomcat里面运行。首先是执行Tomcat org.apache.catalina.startup...
+博文
+来自： Flyer的后花园
+关于getClass().getClassLoader()
+阅读数 356
+
+InputStream   is   =   getClass().getClassLoader().getResourceAsStream("helloworld.properties");中get...
+博文
+来自： sinatAPGW的博客
+Thread.currentThread().getContextClassLoader().loadClass有什么用？
+06-28
+我们公司的jee框架有一句，Thread.currentThread().getContextClassLoader("org.springframework.context.ApplicationC论坛
+Thread.currentThread().getContextClassLoader().getResource 获得路径资源
+阅读数 3011
+
+转载：https://blog.csdn.net/z69183787/article/details/22774537
+博文
+来自： 枫之木落的博客
+蚕丝被被曝光了!长期盖蚕丝被发生了惊人变化……没看的赶紧看看吧
+达民 · 猎媒
+Thread.currentThread().getContextClassLoader().loadClass的问题
+01-05
+现在有这么一个问题 在上面的图片中， 我想要用 Class<OpJobExecuteEngine> engineClass = (Class<OpJobExecuteEngine>) Thread .论坛
+Thread.currentThread().getContextClassLoader().getResourceAsStream
+阅读数 3万+
+
+Java路径　　Java中使用的路径，分为两种：绝对路径和相对路径。具体而言，又分为四种：　　一、URI形式的绝对资源路径　　如：file:/D:/java/eclipse32/workspace/j...
+博文
+来自： z69183787的专栏
+Java类加载,getClassLoader()
+阅读数 233
+
+转自【java类加载的深入研究1】loadClass()的研究,IBM深入探讨Java类加载器类加载器基本概念顾名思义，类加载器（classloader）用来加载Java类到Java虚拟机中。一般来说...
+博文
+来自： Site_Dave的博客
+getClassLoader
+阅读数 1439
+
+1. 下面这个方法可以取得一个输入流    InputStreamis=getClass().getClassLoader().getResourceAsStream("helloworld.prop...
+博文
+来自： yinbodotcc的专栏
+this.getClass().getClassLoader().getResource("") 异常
+阅读数 157
+
+参考：http://www.qchcloud.cn/tn/article/35this.getClass().getClassLoader().getResource("")异常1、this.getC...
+博文
+来自： TN 铁牛
+如果不想穷一辈子:读懂三不卖七不买是关键,可惜无人知晓
+顶点财经 · 顶新
+Thread.currentThread().getContextClassLoader()
+阅读数 385
+
+Thread线程API中，getContextClassLoader()方法的描述为：*ReturnsthecontextClassLoaderforthisThread.Thecontext*Cla...
+博文
+来自： SJZYLC的专栏
+ContextClassLoader浅析
+阅读数 9259
+
+CurrentClassLoader当前类所属的ClassLoader，在虚拟机中类之间引用，默认就是使用这个ClassLoader。另外，当你使用Class.forName(),Class.getR...
+博文
+来自： Java Dynamic的专栏
+问题：何时使用Thread.getContextClassLoader()?
+阅读数 3501
+
+这是一个很常见的问题，但答案却很难回答。这个问题通常在需要动态加载类和资源的系统编程时会遇到。总的说来动态加载资源时，往往需要从三种类加载器里选择：系统或说程序的类加载器、当前类加载器、以及当前线程的...
+博文
+来自： huxin1的专栏
+Javaweb使用getContextClassLoader().getResource("")加载路径问题
+阅读数 1176
+
+今天在写项目的时候需要使用Thread.currentThread().getContextClassLoader().getResource("")来获取项目的根目录读取一下配置文件，但是实际运行之...
+博文
+来自： hebeixmg的博客
+用 类名.class.getClassLoader().getResourceAsStream来获得bin目录下的配置文件
+阅读数 2814
+
+packagedemo1;importjava.io.InputStream;importjava.util.Properties;importjava.util.Set;publicclasspro...
+博文
+来自： alexzt的博客
+蚕丝被可不敢再盖了, 附近长期盖蚕丝被夫妻俩发生了这种改变！
+达民 · 猎媒
+classload的详解
+阅读数 1087
+
+ClassLoader翻译过来就是类加载器，普通的Java开发者其实用到的不多，但对于某些框架开发者来说却非常常见。理解ClassLoader的加载机制，也有利于我们编写出更高效的代码。ClassLo...
+博文
+来自： ziji3810111的博客
+关于.class.getClassLoader().getResourceAsStream
+阅读数 5946
+
+从配置文件读取获得连接mysql数据库的代码中，有这么一段InputStreamin=JDBCUtilsConfig.class.getClassLoader().getResourceAsStrea...
+博文
+来自： 成神之路
+请教基本语法this.class.getClassLoader()怎么理解？
+08-09
+this.class.getClassLoader()怎么理解？ this.class 是什么意思呀？论坛
+getClass().getClassLoader() 返回 null
+10-06
+如上,我总是得到空值,哪位高手帮我讲一下? 我要得到本地的地址, 如hello/myPicture.jpg,那么hello/myPicture.jpg应该放到什么地方???论坛
+关于ClassLoader.getSystemClassLoader（）和Thread.currentThread().getContextClassLoader()
+阅读数 2422
+
+今天碰到一个问题，我做了一个动态编译的程序，但在javaSE环境直接运行（即javaApplication状态）可以运行，但在tomcat服务器上通过请求来处理就不行，提示找不到我动态生成的类：关键语...
+博文
+来自： xcxy2015的博客
+震惊:千万不要在乱买蚕丝被了！我是认真的，再忙也要看！
+浩恒网络 · 猎媒
+Class.getResource()、ClassLoader.getResource()和this.class.getClassLoader()解析
+阅读数 1万+
+
+一、this.class.getClassLoader()；二、Class.getResource()；三、ClassLoader.getResource()；
+博文
+来自： lmb55的专栏
+ContextClassLoader深度讲解
+阅读数 329
+
+Thread.currentThread().getContextClassLoader();-从方法名字来看,应该是获取当前上下文的类加载器搞清楚这个问题,当你在出现资源加载不到的时候就很容器解决那...
+博文
+来自： chinesszz的博客
+this.getClass().getClassLoader().getResource(File.separator).getPath()获取资源路劲
+阅读数 2304
+
+查看资料项目中获取资源文件路径1、xxx.class.getClassLoader().getResource(“”).getPath(); 获取src资源文件编译后的路径（即classes路径）2、...
+博文
+来自： 麦子的博客
+Class类的getClassLoader()方法
+阅读数 957
+
+packageminglu;importjava.lang.reflect.InvocationTargetException;importjava.lang.reflect.Method;publi...
+博文
+来自： Manketon的专栏
+ClassLoader获取的方式
+阅读数 4138
+
+其一java1.2以及之后：Method method=Thread.class.getMethod("getContextClassLoader",null);ClassLoadercl=(Clas...
+博文
+来自： c253898303的博客
+
+Java类加载机制ClassLoader之ContextClassLoader
+阅读数 1350
+
+1.java的classLoader加载机制大家都比较清楚，就是委托机制，如下这种机制就是，加载一个类的时候，会一直向上委托，如果BootStrapClassLoader加载不到，然后再依次往下加载，...
+博文
+来自： 擀面皮
+Web基础之Class与ClassLoader的getResource区别
+阅读数 2699
+
+在Web开发中经常要加载项目下的各种资源，有一种方法是用ClassLoader或者Class类提供的getResource来加载。本文将从代码上来分析两者的区别...
+博文
+来自： 追本溯源的专栏
+getClass().getClassLoader()为null
+阅读数 4534
+
+想获取resources下的文件，之前用过this.getClass().getClassLoader().getResourceAsStream(path);可以获取到，但最近的一个工程中需要在一个...
+博文
+来自： 码农的幸福生活
+深入理解Java类加载器(2)：线程上下文类加载器
+阅读数 3万+
+
+线程上下文类加载器线程上下文类加载器（contextclassloader）是从JDK1.2开始引入的。类java.lang.Thread中的方法getContextClassLoader()和set...
+博文
+来自： Jack Zhou的专栏
+深入浅出ClassLoader
+阅读数 244
+
+http://ifeve.com/classloader/你真的了解ClassLoader吗？这篇文章翻译自zeroturnaround.com的 DoYouReallyGetClassloaders...
+博文
+来自： lomo1122的专栏
+陈小春哭诉：上海土豪怒砸2亿请他代言这款0充值传奇！真经典！
+贪玩游戏 · 顶新
+c# linq原理 c# 装箱有什么用 c#集合 复制 c# 一个字符串分组 c++和c#哪个就业率高 c# 批量动态创建控件 c# 模块和程序集的区别 c# gmap 截图 c# 验证码图片生成类 c# 再次尝试 连接失败
+
+aaa821
+
+TA的个人主页 >
+私信
+关注
+原创
+34
+粉丝
+6
+喜欢
+15
+评论
+8
+等级： 访问： 7万+积分： 1265排名： 6万+
+勋章：
+
+
+
+最新文章
+(转)List.subList带来的ConcurrentModificationException异常
+Linux命令
+Redis用Eval报command keys must be in same slot解决
+Sql语句中IN和exists的区别及应用`
+常用Linux命令
+分类专栏
+JAVA基础49篇
+多线程理解6篇
+Java内存
+Mysql13篇
+Oracle
+第三方API调用
+队列1篇
+遇到的问题2篇
+TCP5篇
+SpringBoot5篇
+springCloud6篇
+分布式11篇
+消息中间件7篇
+ElasticSearch3篇
+spring3篇
+redis7篇
+Docker
+nio2篇
+git1篇
+linux1篇
+展开
+
+归档
+2019年8月1篇
+2019年4月1篇
+2019年1月10篇
+2018年12月1篇
+2018年11月4篇
+2018年10月46篇
+2018年9月29篇
+2018年7月2篇
+2018年6月2篇
+2018年5月3篇
+2018年4月7篇
+2018年3月3篇
+2018年1月2篇
+2017年10月4篇
+2017年9月6篇
+2017年8月3篇
+2017年7月2篇
+2017年6月8篇
+2017年5月2篇
+2017年4月4篇
+展开
+
+热门文章
+Git的smart Checkout跟force checkout的区别
+阅读数 10772
+
+利用百度地图API实现百度地图坐标拾取
+阅读数 6864
+
+Mysql中的GAP锁(间隙锁)
+阅读数 5215
+
+读扩散和写扩散的理解
+阅读数 4359
+
+Java中的字符串连接符(+)
+阅读数 3974
+
+最新评论
+getClassLoader()和...
+qq_36544586：说的很清晰了
+
+利用百度地图API实现百度地图坐标...
+qq_45187612：我也是用studio做了个app就单纯的显示基本地图的 app 现在定位模块的位置信息发送到了onenet平台 那么app如何获取这个位置信息并且在地图上显示呢？
+
+RabbitMQ实现分布式事务(最...
+HEJI1103：没有写完差评
+
+MySql-Undo及Redo详解
+zhang_int_int：灰常好的资料，需要仔细品读
+
+调用微信小程序二维码接口生成二维码
+qq_40065816：楼主qrCode还有BaseConfig的jar包找不到啊
+
+
+程序人生
+程序人生
+
+CSDN资讯
+CSDN资讯
+
+kefu@csdn.netQQ客服
+
+客服论坛400-660-0108
+
+工作时间 8:30-22:00
+
+关于我们招聘广告服务 网站地图
+
+百度提供站内搜索 京ICP备19004658号
+
+©1999-2019 北京创新乐知网络技术有限公司
+
+经营性网站备案信息网络110报警服务
+
+北京互联网违法和不良信息举报中心
+
+中国互联网举报中心家长监护版权申诉
+
+
+1
+
+1
+
+VIP
+免广告
+手机看
+客服
+举报
