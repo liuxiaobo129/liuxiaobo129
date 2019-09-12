@@ -1,0 +1,1261 @@
+
+首页
+博客
+学院
+下载
+论坛
+APP
+问答
+商城
+活动
+VIP会员
+
+专题
+招聘
+ITeye
+GitChat
+图文课
+疯狂Python精讲
+写博客消息登录注册签到赢大礼>>
+原
+tomcat源码系列---HTTP请求处理过程
+2018年09月03日 22:10:15 lhrimperial 阅读数 1541更多
+分类专栏： tomcat源码系列
+版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+本文链接：https://blog.csdn.net/u013857458/article/details/82355879
+tomcat源码系列—HTTP请求处理过程
+分析tomcat对HTTP请求的处理过程得从Connector的架构说起，前面说过Connector是用于接收请求，并将请求封装成Request和Response，然后交给Container处理，处理完之后再由Connector将处理结果返回给客户端。
+Connector的结构图
+这里写图片描述
+Connector使用ProtocolHandler来处理请求的，ProtocolHandler包含三个部件：Endpoint、Processor、Adapter
+- Endpoint用来处理底层的Socket网络连接的，Processor用于将连接接收到的Socket封装成Request，Adapter用于将Request交给Container具体处理
+- Endpoint由于是处理底层Socket网络连接的，所以Endpoint是用来实现TCP/IP协议的，而Processor是用来实现HTTP协议的，Adapter是用来将请求适配到Servlet容器进行处理的。
+- Endpoint的抽象类AbstractEndpoint里面定义了Acceptor和AsynTimeout两个内部类和一个Handler接口。Acceptor用于监听请求，AsyncTimeout用于检查异步Request超时的，Handler用于处理接收到的Socket，在内部调用Processor进行处理。
+
+以上分析了Connector的架构，分析了几个重要类之间是如何处理请求的，下面具体分析每一个类中如何处理流转一次HTTP请求的
+
+Connector
+从Connector的架构图中可以看出Connector类中有两个比较重要的属性，ProtocolHandler（协议）和adapter（适配器）。既然是连接器，需要具备处理客户端请求的连接，然后将客户端的Socket请求的数据，解析和包装成HTTP数据格式，然后将HTTP数据包交给容器去处理。协议完成接收连接与数据包装，而adapter完成把封装的数据适配到容器进行处理。
+
+Connector构造函数
+public Connector(String protocol) {
+    setProtocol(protocol);
+    // Instantiate protocol handler
+    ProtocolHandler p = null;
+    try {
+        Class<?> clazz = Class.forName(protocolHandlerClassName);
+        p = (ProtocolHandler) clazz.getConstructor().newInstance();
+    } catch (Exception e) {
+        log.error(sm.getString(
+                "coyoteConnector.protocolHandlerInstantiationFailed"), e);
+    } finally {
+        this.protocolHandler = p;
+    }
+
+    if (Globals.STRICT_SERVLET_COMPLIANCE) {
+        uriCharset = StandardCharsets.ISO_8859_1;
+    } else {
+        uriCharset = StandardCharsets.UTF_8;
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+在Connector的构造方法中通过反射实例化协议protocolH，协议的设置在conf/server.xml中配置，通过setProtocol来赋值。
+
+tomcat8中默认实现Http11NioProtocol，Http11NioProtocol构造方法中实例化 NioEndpoint
+
+Connector的初始化
+在Connector的初始化方法initInternal中，主要完成两个操作
+实例化适配器CoyoteAdapter
+初始化ProtocolHandler的init方法
+@Override
+protected void initInternal() throws LifecycleException {
+    ……
+    adapter = new CoyoteAdapter(this);
+    protocolHandler.setAdapter(adapter);
+    ……
+    try {
+        protocolHandler.init();
+    } catch (Exception e) {
+       ……
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+ProtocolHandler的init方法会调用父类AbstractProtocol的init方法
+
+public void init() throws Exception {
+   ……
+    String endpointName = getName();
+    endpoint.setName(endpointName.substring(1, endpointName.length()-1));
+    endpoint.setDomain(domain);
+
+    endpoint.init();
+}
+1
+2
+3
+4
+5
+6
+7
+8
+其父类的init方法会调用endpoint的init方法，init方法中调用bind方法完成底层网络Socket端口绑定与监听
+
+public void bind() throws Exception {
+
+   serverSock = ServerSocketChannel.open();
+   socketProperties.setProperties(serverSock.socket());
+   InetSocketAddress addr = (getAddress()!=null?new InetSocketAddress(getAddress(),getPort()):new InetSocketAddress(getPort()));
+   serverSock.socket().bind(addr,getAcceptCount());
+   serverSock.configureBlocking(true); //mimic APR behavior
+
+   // Initialize thread count defaults for acceptor, poller
+   if (acceptorThreadCount == 0) {
+       // FIXME: Doesn't seem to work that well with multiple accept threads
+       acceptorThreadCount = 1;
+   }
+   if (pollerThreadCount <= 0) {
+       //minimum one poller thread
+       pollerThreadCount = 1;
+   }
+   setStopLatch(new CountDownLatch(pollerThreadCount));
+
+   // Initialize SSL if needed
+   initialiseSsl();
+
+   selectorPool.open();
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+Connector的启动
+protected void startInternal() throws LifecycleException {
+   try {
+        protocolHandler.start();
+    } catch (Exception e) {
+
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+Connector启动方法中调用ProtocolHandler的start方法，ProtocolHandler的start方法中启动Endpoint。
+
+Endpoint及内部类分析
+Endpoint主要用来提供基础的网络I/O服务，封装了网络通讯相关的细节。
+1. AbstractEndpoint的线程池
+AbstractEndpoint有一个Executor的属性，是它所使用的线程池，这个线程池可以是外界指定的，也可以是由AbstractEndpoint自己创建的，通过属性internalExecutor来标识使用的是外部的线程池，还是Endpoint自己创建的线程池。这个线程池具体是用来处理网络连接的读写的。
+
+在当调用者没有显示指定所用的线程池时，会创建一个自己所用的线程池
+
+public void createExecutor() {
+    internalExecutor = true;
+    TaskQueue taskqueue = new TaskQueue();
+    TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
+    executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);
+    taskqueue.setParent( (ThreadPoolExecutor) executor);
+}
+1
+2
+3
+4
+5
+6
+7
+AbstractEndpoint的Acceptor
+在AbstractEndpoint中定义了Acceptor类（实现了Runnable接口），同时定义了acceptors属性，主要用于接收网络请求。
+启动acceptors时，并没有使用前面提到过的线程池，而是生成了新的守护线程来运行，具体生成Acceptor由子类重写抽象方法createAcceptor来完成
+protected final void startAcceptorThreads() {
+    int count = getAcceptorThreadCount();
+    acceptors = new Acceptor[count];
+
+    for (int i = 0; i < count; i++) {
+        acceptors[i] = createAcceptor();
+        String threadName = getName() + "-Acceptor-" + i;
+        acceptors[i].setThreadName(threadName);
+        Thread t = new Thread(acceptors[i], threadName);
+        t.setPriority(getAcceptorThreadPriority());
+        t.setDaemon(getDaemon());
+        t.start();
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+AbstractEndpoint框架主要定义了一些基本的属性，同时规定了生命周期的调用顺序，Endpoint的初始化和启动，主要执行了具体子类的所实现的startInternal来完成。
+
+public final void init() throws Exception {
+    if (bindOnInit ) {
+        bind();
+        bindState = BindState.BOUND_ON_INIT;
+    }
+}
+
+public final void start() throws Exception {
+    if (bindState == BindState.UNBOUND) {
+        bind();
+        bindState = BindState.BOUND_ON_START;
+    }
+    startInternal();
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+NioEndpoint
+NioEndpoint的bind操作上面已经分析过，主要做一些配置参数的计算，以及端口绑定与监听，
+下面看startInternal方法
+@Override
+public void startInternal() throws Exception {
+
+    if (!running) {
+        running = true;
+        paused = false;
+
+        processorCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
+                socketProperties.getProcessorCache());
+        keyCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
+                        socketProperties.getKeyCache());
+        eventCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
+                        socketProperties.getEventCache());
+        nioChannels = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
+                socketProperties.getBufferPool());
+
+        // Create worker collection
+        if ( getExecutor() == null ) {
+            createExecutor();
+        }
+
+        initializeConnectionLatch();
+
+        // Start poller threads
+        pollers = new Poller[getPollerThreadCount()];
+        for (int i=0; i<pollers.length; i++) {
+            pollers[i] = new Poller();
+            Thread pollerThread = new Thread(pollers[i], getName() + "-ClientPoller-" +i);
+            pollerThread.setPriority(threadPriority);
+            pollerThread.setDaemon( true);
+            pollerThread.start();
+        }
+
+        startAcceptorThreads();
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+在startInternal中，初始化线程池，创建和启动网络数据接收线程组，创建和启动poller线程组。Poller和网络接收有关，后面分析。
+
+线程池的调用时机
+Acceptor和Poller与线程池的调用时机有关，Acceptor是主要监听网络连接并且进行任务分发的后台线程。Acceptor负责接收网络请求，建立连接，连接建立之后，将这个socket连接交给Poller。由Poller来负责执行数据的读取和业务执行。
+在Acceptor的run方法中接收到网络连接socket，通过setSocketOptions方法交给Poller，setSocketOptions方法是专门处理socket连接的方法，将一个SocketChannel对象包装能一个NioChannel之后，注册到Poller中。
+
+protected boolean setSocketOptions(SocketChannel socket) {
+    // Process the connection
+    try {
+        //disable blocking, APR style, we are gonna be polling it
+        socket.configureBlocking( false);
+        Socket sock = socket.socket();
+        socketProperties.setProperties(sock);
+        NioChannel channel = nioChannels.pop();
+        // 这里省略了设置channel属性的一些语句
+        getPoller0().register(channel);
+    } catch (Throwable t) {
+        // 省略异常处理的相关代码
+        return false ;
+    }
+    return true ;
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+getPoller0是在startInternal方法中初始化的pollers数组中取一个poller，通过Poller对象的register方法把这个channel注册到Poller对象上，Pollers数组的大小是根据当前的运行环境计算出来的，无法通过配置修改。
+
+private int pollerThreadCount = Math.min(2,Runtime.getRuntime().availableProcessors());
+1
+Poller
+Poller是实现了Runnable接口的，在启动NioEndpoint的时候，会启动pollers。每个Poller都有一个自己的Selector对象，在Poller的构造方法中通过Selector.open方法生成。在run方法中处理已有的事件
+public void run() {
+    while (true) {
+        try {
+            if (!close) {
+                hasEvents = events();
+                if (wakeupCounter.getAndSet(-1) > 0) {                   
+                    keyCount = selector.selectNow();
+                } else {
+                    keyCount = selector.select(selectorTimeout);
+                }
+                wakeupCounter.set(0);
+            }
+            if (close) {
+                events();
+                timeout(0, false);
+                try {
+                    selector.close();
+                } catch (IOException ioe) {
+                    log.error(sm.getString("endpoint.nio.selectorCloseFail"), ioe);
+                }
+                break;
+            }
+        } catch (Throwable x) {
+            ExceptionUtils.handleThrowable(x);
+            log.error("",x);
+            continue;
+        }
+        //either we timed out or we woke up, process events first
+        if ( keyCount == 0 ) hasEvents = (hasEvents | events());
+
+        Iterator<SelectionKey> iterator =
+            keyCount > 0 ? selector.selectedKeys().iterator() : null;
+        // Walk through the collection of ready keys and dispatch
+        // any active event.
+        while (iterator != null && iterator.hasNext()) {
+            SelectionKey sk = iterator.next();
+            NioSocketWrapper attachment = (NioSocketWrapper)sk.attachment();
+            // Attachment may be null if another thread has called
+            // cancelledKey()
+            if (attachment == null) {
+                iterator.remove();
+            } else {
+                iterator.remove();
+                processKey(sk, attachment);
+            }
+        }//while
+
+        //process timeouts
+        timeout(keyCount,hasEvents);
+    }//while
+
+    getStopLatch().countDown();
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+processKey主要的工作就是调用NioEndpoint的processSocket来实现socket的读写。在processSocket中使用前面分析过的线程池来处理封装成了SocketProcessor对象的任务。
+
+public boolean processSocket(SocketWrapperBase<S> socketWrapper,
+            SocketEvent event, boolean dispatch) {
+    ……
+    SocketProcessorBase<S> sc = processorCache.pop();
+    if (sc == null) {
+        sc = createSocketProcessor(socketWrapper, event);
+    } else {
+        sc.reset(socketWrapper, event);
+    }
+    Executor executor = getExecutor();
+    if (dispatch && executor != null) {
+        executor.execute(sc);
+    } else {
+        sc.run();
+    }
+   ……
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+Poller中Selector的注册
+前面提过过Acceptor的主要工作是把建立好的socket注册到Poller上，通过register方法实现，Poller的register把建立好的连接socket封装成一个PollerEvent对象，然后放入Poller维护的事件队列中，Poller内部维护的事件队列如下：
+
+private final SynchronizedQueue<PollerEvent> events = new SynchronizedQueue<>();
+1
+events是一个PollerEvent类型的队列，events方法中循环取出PollerEvent对象，然后执行它。PollerEvent实现了Runnable接口，在run方法中完成了channel对selector的注册。
+
+SocketProcessor
+实现了Runnable接口，在processSocket中提交给上面分析过的线程池执行，doRun方法中获取ConnectionHandler来将接收的Socket交给processor处理
+SocketState state = SocketState.OPEN;
+// Process the request from this socket
+if (event == null) {
+    state = getHandler().process(socketWrapper, SocketEvent.OPEN_READ);
+} else {
+    state = getHandler().process(socketWrapper, event);
+}
+1
+2
+3
+4
+5
+6
+7
+Handler是处理协议的地方，process方法在AbstractProcessorLight中的实现。AbstractProcessorLight是一个轻量级的抽象processor实现。
+
+public SocketState process(SocketWrapperBase<?> socketWrapper, SocketEvent status)
+            throws IOException {
+
+   SocketState state = SocketState.CLOSED;
+   Iterator<DispatchType> dispatches = null;
+   do {
+       if (dispatches != null) {
+           DispatchType nextDispatch = dispatches.next();
+           state = dispatch(nextDispatch.getSocketStatus());
+       } else if (status == SocketEvent.DISCONNECT) {
+           // Do nothing here, just wait for it to get recycled
+       } else if (isAsync() || isUpgrade() || state == SocketState.ASYNC_END) {
+           state = dispatch(status);
+           if (state == SocketState.OPEN) {
+             state = service(socketWrapper);
+           }
+       } else if (status == SocketEvent.OPEN_WRITE) {
+           // Extra write event likely after async, ignore
+           state = SocketState.LONG;
+       } else if (status == SocketEvent.OPEN_READ){
+           state = service(socketWrapper);
+       } else {
+           state = SocketState.CLOSED;
+       }
+
+       if (state != SocketState.CLOSED && isAsync()) {
+           state = asyncPostProcess();
+       }
+       if (dispatches == null || !dispatches.hasNext()) {
+           // Only returns non-null iterator if there are
+           // dispatches to process.
+           dispatches = getIteratorAndClearDispatches();
+       }
+   } while (state == SocketState.ASYNC_END ||
+           dispatches != null && state != SocketState.CLOSED);
+
+   return state;
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+默认实现Http11Processor的service，这里就是现实HTTP协议的地方，最终交给adapter来适配到Container容器镜像处理
+
+public SocketState service(SocketWrapperBase<?> socketWrapper){
+ try {
+        rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
+        getAdapter().service(request, response);
+     }catch(){
+     }
+}
+1
+2
+3
+4
+5
+6
+7
+在CoyoteAdapter中将Request和Response装换成Servlet容器中处理的Request和Response，然后从service中获取容器，再调用管道Pipeline的阀门Valve的invoke方法
+
+public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
+            throws Exception {
+    try {
+            // Parse and set Catalina and configuration specific
+            // request parameters
+            postParseSuccess = postParseRequest(req, request, res, response);
+            if (postParseSuccess) {
+                //check valves if we support async
+                request.setAsyncSupported(
+                        connector.getService().getContainer().getPipeline().isAsyncSupported());
+                // Calling the container
+                connector.getService().getContainer().getPipeline().getFirst().invoke(
+                        request, response);
+            }
+         } catch (IOException e) {
+            // Ignore
+        } finally {
+        }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+整个容器中执行的链路如图：这里写图片描述
+
+Servlet.service调用
+在StandardWrapper的invoke中，如果Servlet还未初始化则初始化Servlet
+
+ public final void invoke(Request request, Response response)
+    throws IOException, ServletException {
+    boolean unavailable = false;
+    Throwable throwable = null;
+    // This should be a Request attribute...
+    long t1=System.currentTimeMillis();
+    requestCount.incrementAndGet();
+    StandardWrapper wrapper = (StandardWrapper) getContainer();
+    Servlet servlet = null;
+    Context context = (Context) wrapper.getParent();
+    try {
+        if (!unavailable) {
+            //初始化Servlet
+            servlet = wrapper.allocate();
+        }
+    } catch (UnavailableException e) {
+    }
+
+    MessageBytes requestPathMB = request.getRequestPathMB();
+    DispatcherType dispatcherType = DispatcherType.REQUEST;
+    if (request.getDispatcherType()==DispatcherType.ASYNC) dispatcherType = DispatcherType.ASYNC;
+    request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,dispatcherType);
+    request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
+            requestPathMB);
+    // 生成过滤器调用链，包含匹配的Filter和Servlet
+    ApplicationFilterChain filterChain =
+            ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
+
+    try {
+        if ((servlet != null) && (filterChain != null)) {
+            // Swallow output if needed
+            if (context.getSwallowOutput()) {
+                try {
+                    SystemLogHandler.startCapture();
+                    if (request.isAsyncDispatching()) {
+                        request.getAsyncContextInternal().doInternalDispatch();
+                    } else {
+                        //filter责任链调用
+                        filterChain.doFilter(request.getRequest(),
+                                response.getResponse());
+                    }
+                } finally {
+                    String log = SystemLogHandler.stopCapture();
+                    if (log != null && log.length() > 0) {
+                        context.getLogger().info(log);
+                    }
+                }
+            } else {
+                if (request.isAsyncDispatching()) {
+                    request.getAsyncContextInternal().doInternalDispatch();
+                } else {
+                    filterChain.doFilter
+                        (request.getRequest(), response.getResponse());
+                }
+            }
+
+        }
+    } catch (ClientAbortException e) {
+    }
+
+    if (filterChain != null) {
+        filterChain.release();
+    }
+
+    try {
+        if (servlet != null) {
+            wrapper.deallocate(servlet);
+        }
+    } catch (Throwable e) {
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+
+
+想对作者说点什么
+Tomcat源码分析 -- Tomcat整体架构
+阅读数 2万+
+
+本章结构如下：前言Tomcat顶层结构ServerServiceConnectorContainerTomncat启动流程一、前言一般而言，对于一个复杂的系统，直接扎进去看源码会是很难受的，会浪费大量...
+博文
+来自： w1992wishes的博客
+Tomcat源码分析---启动过程
+阅读数 844
+
+  Tomcat启动是由Bootstrap开始的，大家都知道Tomcat最顶层的容器是Server，而Server又是是由Catalina调用的，理论上可以不用Bootstrap，只用Catalina...
+博文
+来自： hixiaoxiaoniao的专栏
+Tomcat源码分析（一）------ 架构
+阅读数 40
+
+废话少说，拉代码，导入eclipse开干，具体步骤可以参考http://hi.baidu.com/hateeyes/blog/item/7f44942a20ad8f9d023bf66d.html下面谈...
+博文
+来自： 编程开发资料库
+tomcat处理一个请求的过程
+阅读数 4858
+
+首先，tomcat是一个基于组件的服务器，它的构成组件都是可配置的，可以在tomcat目录下conf/server.xml中进行配置。其配置文件结构如下：顶层类元素：一个配置文件中只能有一个元素，可包...
+博文
+来自： joenqc的博客
+
+tomcat源码系列---环境搭建
+阅读数 910
+
+使用Idea+Maven搭建Tomcat源码的开发环境。使用的Tomcat是8.5.23版本，Tomcat是用Ant构建的，基于本人或大部分开发习惯于Maven，所以采用Maven来构建Tomcat源...
+博文
+来自： lhrimperial的专栏
+tomcat源码05-08apache-tomcat-7.0.78-src.zip 本资源为tomcat apache源码下载
+Tomcat源码浅析（一）
+阅读数 369
+
+Tomcat源码目录： Tomcat源码浅析（一）：下载源码，导入eclipse并且运行Tomcat源码浅析（二）：Tomcat原理Tomcat源码浅析（三）：自己动手写一个TomcatTomcat源...
+博文
+来自： Democreen
+一本关于tomcat源码分析的书---How Tomcat Works,提供下载地址
+09-05
+Tomcat的设计和实现处处体现着设计模式的思想，它的基本流程是首先通过解析xml格式的配置文件，获得系统的配置和应用信息，然后加载定制的组件模块提供各种系统服务。系统的各部分功能都是通过可以配置的组论坛
+这辈子Tomcat源码是一定要看的
+阅读数 3866
+
+这辈子Tomcat源码是一定要看的—咕泡学院Jack老师视频讲解https://pan.baidu.com/s/1MA5syoSUM45hVTliToRsJA  密码 wl66咕泡学院JAVA直播学习...
+博文
+来自： peng5007的博客
+tomcat源码系列---HTTP请求处理过程 - lhrimperial的专..._CSDN博客
+4-4
+
+tomcat源码系列---环境搭建 - lhrimperial的专栏 - CSDN博客
+11-8
+
+减肥比抽脂还快，一个月轻松瘦到90斤！
+舜飞
+tomcat源码打包
+阅读数 54
+
+1.使用idea导入源码后加入如下的pom.xml文件&amp;lt;?xmlversion=&quot;1.0&quot;encoding=&quot;UTF-8&quot;?&amp;gt;&am...
+博文
+来自： benson123的博客
+tomcat源码系列---启动分析之webapp - lhrimperial的专..._CSDN博客
+10-30
+
+tomcat源码系列---启动分析之Catalina启动 - lhrimperi..._CSDN博客
+11-14
+
+Tomcat源码分析----一个http请求的经历
+阅读数 494
+
+Tomcat源码分析----一个http请求的经历楚岩 2016-04-0609:53:46 浏览2675 评论1http 学生 tomcat源码 tomcat处理http摘要： 本章节对http请求...
+博文
+来自： evilcry2012的专栏
+w1992wishes关注
+w1992wishes
+131篇文章
+
+排名:千里之外
+
+hixiaoxiaoniao关注
+hixiaoxiaoniao
+199篇文章
+
+排名:千里之外
+
+iteye_20954关注
+iteye_20954
+0篇文章
+
+排名:千里之外
+
+joenqc关注
+joenqc
+127篇文章
+
+排名:千里之外
+
+tomcat源码系列---启动分析之Lifecycle - lhrimperial的专栏 - ...
+11-2
+
+Tomcat源码解读系列(三)——Tomcat对HTTP请求处理的整..._CSDN博客
+6-21
+
+Tomcat处理HTTP请求过程分析
+阅读数 288
+
+Tomcat处理HTTP请求过程分析一、Tomcat是什么？Tomcat是一个web应用服务器，是一个Servlet/Jsp容器，主要负责将客户端请求传递给对应的Servlet，并且将Servlet的...
+博文
+来自： 雷小涛的专栏
+tomcat8源码导入
+阅读数 828
+
+https://blog.csdn.net/zhoufenqin/article/details/50301011  在做web工程时一直不是很明白servlet，tomcat作为一个servlet容...
+博文
+来自： zhong12270107的博客
+Tomcat框架设计 - lhrimperial的专栏 - CSDN博客
+4-5
+
+tomcat源码系列---启动分析之Catalina初始化 - lhrimpe..._CSDN博客
+11-11
+
+Tomcat之请求处理响应过程
+阅读数 85
+
+经过上篇Tomcat架构简述，我们了解到Tomcat的结构和模块化，模块之间的关系。因此，到这里，就像我们已经盖好一座大楼，并将其装饰成了酒店。分配了前台（Connector），其他工作服务人员（Co...
+博文
+来自： Allen202的专栏
+
+Tomcat源码分析---一个http请求的经历 - weixin_343816..._CSDN博客
+6-26
+
+Tomcat处理一个http请求的过程 - shark1357 - CSDN博客
+4-6
+
+Tomcat处理一个HTTP请求的过程
+阅读数 1912
+
+一、Tomcat的组成（1）Server服务器元素代表整个catalinaservlet容器。是单例模式。 （2）ServiceService是这样一个集合：它由一个或者多个Connector组成，以...
+博文
+来自： 茅坤宝骏氹的博客
+Tomcat源码下载地址
+阅读数 3471
+
+Tomcat官网：http://tomcat.apache.org/Tomcat各版本源码：http://archive.apache.org/dist/tomcat/比如，Tomcat-5.0.28...
+博文
+来自： 马欢欢asiaasia666
+Tomcat源码分析---停止过程
+阅读数 282
+
+当Tomcat执行完后，会注册一个钩子线程，之后主线程main会启动一个ServerSocket，监听8005的数据。这两个方式都是用来做关闭处理的，钩子线程会调用Catalina#stop()，由C...
+博文
+来自： hixiaoxiaoniao的专栏
+tomcat 最全源码分析02-27对 NIO 模式，请求的流程描述的很详细。值得去仔细的研究。下载
+tomcat架构的源码分析10-28介绍了tomcat的架构，从源码分析tomcat组成!下载
+犹太人的两种神思维：死记七不买三不卖，你将赚到怀疑人生！
+股管家 · 顶新
+tomcat源码系列---启动分析之Catalina启动
+阅读数 377
+
+tomcat源码系列—启动分析之Catalina启动tomcat的初始化过程，是由Bootstrap反射调用Catalina的load方法完成tomcat的初始化，包括server.xml的解析、实例...
+博文
+来自： lhrimperial的专栏
+1.Tomcat原理以及处理http请求过程
+阅读数 279
+
+一.Tomcat是什么？Tomcat是一个Web应用服务器，同时也是一个Servlet/JSP容器。Tomcat作为Servlet容器，负责处理客户端请求，把请求传送给Servlet，并将Servle...
+博文
+来自： 郑学炜的技术博客
+Tomcat源码解析系列
+阅读数 3044
+
+学web也有一段时间了，为了从底层了解web应用在Tomcat中的运行，决定看一下Tomcat的源码参见《HowTomcatworks》  和大牛博客，对大体架构有了一定的了解，但是具体细节还是不大清...
+博文
+来自： jiaomingliang的专栏
+tomcat9源码
+阅读数 129
+
+一、tomcat入口入口一般都是main方法，看源码得知，入口是Bootstrap类的main方法，如图：最重要的三个步骤就是init、load和start方法，这三个方法都是通过反射调用catali...
+博文
+来自： 大龙的博客
+tomcat源码系列---启动分析之webapp
+阅读数 51
+
+tomcat源码系列—启动分析（四）webapp前言上一篇文章中我们分析了Service、Engine、Host、Pipeline、Valve组件的启动逻辑，在HostConfig中会实例化Stand...
+博文
+来自： lhrimperial的专栏
+犹太人的两种神思维：死记七不买三不卖，你将赚到怀疑人生！
+股管家 · 顶新
+tomcat源码阅读--BootStrap tomcat 入口类
+阅读数 216
+
+本博客是原创：主要目的是为了自己总结学习的，不喜勿喷，当然里面有错误欢迎指出。寒暄部分：BootStrap类是tomcat的入口自然有一个main方法不要问我为什么我也不知道是咋回事，百度搜到的或者说...
+博文
+来自： cxdn_czj的博客
+Tomcat各个版本的下载地址包括源码
+阅读数 3641
+
+Tomcat各个版本的下载地址包括源码：http://archive.apache.org/dist/tomcat/tomcat-7/
+博文
+来自： wangchun__的博客
+tomcat7源码分析
+阅读数 4547
+
+tomcat7源码分析本篇分为六个部分：tomcat基本框架tomcat启动流程简介tomcat启动流程源码分析tomcat处理一个请求过程分析.jsp生成.java和.class流程分析apache...
+博文
+来自： 没有伞的孩子只能快跑，如若不跑，只有一个结果：超过你的人回头鄙视你
+如何查看Tomcat的源码?图文介绍!
+阅读数 740
+
+1.首先需要tomcat的源码包先代开apache的官网,并找到你tomcat的版本,截图红色方框https://tomcat.apache.org/ 2.选择好版本之后下载相应的源码包,看清楚是源码...
+博文
+来自： 学习,真香
+TOMCAT源码一（构建Eclipse工程）
+阅读数 17
+
+ 1、下载tomcat7源码，进入官方网站http://tomcat.apache.org/download-70.cgi，在底部“SourceCodeDistributions”处选择源码下载，并解...
+博文
+来自： 骑着蚂蚁赶灰机
+如果不想穷一辈子:读懂三不卖七不买是关键,可惜无人知晓
+巨景证券 · 顶新
+tomcat源码解析第6课-一次http请求过程
+阅读数 257
+
+一、启动8080端口监听http请求二、启动http监听代码解析NioEndpoint的方法startInternal启动socket的监听，监听http请求@Overridepublicvoidst...
+博文
+来自： csdnjquery163com的博客
+Tomcat Server处理一个http请求的过程
+阅读数 290
+
+TomcatServer处理一个http请求的过程假设来自客户的请求为：http://localhost:8080/wsota/wsota_index.jsp请求被发送到本机端口8080，被在那里侦听...
+博文
+来自： lxlong的博客
+从源码分析Tomcat如何处理Http请求
+阅读数 808
+
+先看一下我的web.xmldispatcherorg.springframework.web.servlet.DispatcherServletcontextConfigLocation/WEB-IN...
+博文
+来自： 天下无双
+Tomcat8源码分析系列-tomcat框架设计
+阅读数 3325
+
+总体架构tomcat的总体架构如下图所示（摘自http://blog.csdn.net/jiaomingliang/article/details/47393141）如上图所示，tomcat由Serv...
+博文
+来自： 黄小厮的博客
+读Tomcat源码可以从中学习到什么？
+阅读数 1192
+
+https://www.zhihu.com/question/21054519作者：hongjiang链接：https://www.zhihu.com/question/21054519/answer...
+博文
+来自： lppl010_的专栏
+
+tomcat源码解读——启动过程分析
+阅读数 389
+
+参考文章：tomcat源码解读——启动过程分析在上一篇文章中介绍了idea中tomcat源码调试环境的搭建，调试环境搭建完成之后首先配置tomcat的启动信息，配置信息如下（具体配置步骤参考源码中的R...
+博文
+来自： m47838704的专栏
+Tomcat入门之源代码导入运行
+阅读数 793
+
+   Tomcat是apache基金会的开源项目，在其官网上提供了源代码的下载和代码库的地址，所有人可以在官网上下载代码，或者通过svn、git来直接同步代码库中的代码。第一步：   下载代码：在官网...
+博文
+来自： qiu7qiu7的博客
+tomcat源码：tomcat中详解URL请求过程
+阅读数 613
+
+这里分析一个实际的请求是如何在Tomcat中被处理的，以及最后是怎么样找到要处理的Servlet的？当我们在浏览器中输入http://hostname:port/contextPath/servlet...
+博文
+来自： 思考、总结、专注
+tomcat7源码
+阅读数 149
+
+ IDEA工程https://github.com/tryandcatch/Tomcat7.0.67.git   tomcat优化https://www.cnblogs.com/xuwc/p/8523...
+博文
+来自： u012557298的专栏
+如何阅读Tomcat源代码？
+阅读数 3777
+
+书籍《HowTomcatWorks》对应的中文版《深入剖析Tomcat》《Tomcat6Developer’sGuide》片段分析Tomcat其实就是分析一个Servlet容器，我们从servlet容...
+博文
+来自： 晚晴小筑
+陈小春哭诉：上海土豪怒砸2亿请他代言这款0充值传奇！真经典！
+贪玩游戏 · 顶新
+Tomcat源码解析-整体流程介绍
+阅读数 2358
+
+一、架构下面谈谈我对Tomcat架构的理解总体架构：1、面向组件架构2、基于JMX3、事件侦听1）面向组件架构tomcat代码看似很庞大，但从结构上看却很清晰和简单，它主要由一堆组件组成，如Serve...
+博文
+来自： 一次次成长的过程
+c# linq原理 c# 装箱有什么用 c#集合 复制 c# 一个字符串分组 c++和c#哪个就业率高 c# 批量动态创建控件 c# 模块和程序集的区别 c# gmap 截图 c# 验证码图片生成类 c# 再次尝试 连接失败
+
+lhrimperial
+
+TA的个人主页 >
+私信
+关注
+原创
+43
+粉丝
+30
+喜欢
+20
+评论
+3
+等级： 访问： 2万+积分： 648排名： 11万+
+勋章：
+
+
+最新文章
+运行Mysql 镜像
+Docker常用命令
+Java 线程的基本API
+Netty事件注册过程
+JDK动态代理的原理与底层实现
+分类专栏
+
+tomcat源码系列
+7篇
+
+MySQL系列
+4篇
+
+Java网络编程系列
+7篇
+
+Netty源码系列
+4篇
+
+Spring源码系列
+1篇
+
+Java 基础系列
+5篇
+
+Java 多线程系列
+1篇
+
+docker系列
+2篇
+展开
+
+归档
+2019年4月2篇
+2018年9月23篇
+2018年8月2篇
+2018年5月3篇
+2015年12月6篇
+2015年10月1篇
+2015年8月4篇
+2014年10月1篇
+2014年9月1篇
+展开
+
+热门文章
+Netty整体架构
+阅读数 3477
+
+Java NIO原理与简单实现
+阅读数 1673
+
+Spring 组件概述
+阅读数 1621
+
+tomcat源码系列---HTTP请求处理过程
+阅读数 1538
+
+IO原理理解与IO模型
+阅读数 1523
+
+最新评论
+Netty整体架构
+seacloudsky：真不错
+
+Netty整体架构
+lopin44455：写的非常好，看《netty实战》不明白的，在这里都搞明白了
+
+Netty整体架构
+liuziteng0228：博主这篇博客写的真是厉害了。
+
+
+程序人生
+程序人生
+
+CSDN资讯
+CSDN资讯
+
+kefu@csdn.netQQ客服
+
+客服论坛400-660-0108
+
+工作时间 8:30-22:00
+
+关于我们招聘广告服务 网站地图
+
+百度提供站内搜索 京ICP备19004658号
+
+©1999-2019 北京创新乐知网络技术有限公司
+
+经营性网站备案信息网络110报警服务
+
+北京互联网违法和不良信息举报中心
+
+中国互联网举报中心家长监护版权申诉
+
+
+1
+
+VIP
+免广告
+手机看
+客服
+举报
+返回
+顶部
