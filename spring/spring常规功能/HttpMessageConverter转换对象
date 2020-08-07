@@ -1,0 +1,223 @@
+首页 资讯 精华 论坛 问答 博客 专栏 群组 下载您还未登录! 登录
+`
+jackyrong的博客
+jackyrong
+浏览: 7209283 次
+性别: Icon_minigender_1
+来自: 广州
+
+最近访客 更多访客>>
+go2run的博客go2runsteed_ns的博客steed_ns66das的博客66daszhoujunsheng168的博客zhoujunsheng168
+博主相关
+博客
+微博
+相册
+收藏
+留言
+关于我
+文章分类
+全部博客 (2425)
+软件工程 (75)
+JAVA相关 (662)
+ajax/web相关 (351)
+数据库相关/oracle (218)
+PHP (147)
+UNIX/LINUX/FREEBSD/solaris (118)
+音乐探讨 (1)
+闲话 (11)
+网络安全等 (21)
+.NET (153)
+ROR和GOG (10)
+[网站分类]4.其他技术区 (181)
+算法等 (7)
+[随笔分类]SOA (8)
+收藏区 (71)
+金融证券 (4)
+[网站分类]5.企业信息化 (3)
+c&c++学习 (1)
+读书区 (11)
+其它 (10)
+收藏夹 (1)
+设计模式 (1)
+FLEX (14)
+Android (98)
+软件工程心理学系列 (4)
+HTML5 (6)
+C/C++ (0)
+数据结构 (0)
+书评 (3)
+python (17)
+NOSQL (10)
+MYSQL (85)
+java之各类测试 (18)
+nodejs (1)
+JAVA (1)
+neo4j (3)
+VUE (4)
+docker相关 (1)
+社区版块
+我的资讯 ( 1)
+我的论坛 ( 33)
+我的问答 ( 3)
+存档分类
+2019-04 ( 1)
+2019-02 ( 1)
+2019-01 ( 2)
+更多存档...
+最新评论
+xiaobadi： jacky~~~~~~~~~ 
+推荐两个不错的mybatis GUI生成工具
+masuweng：         
+(转）JAVA获得机器码的实现
+albert0707： 有些扩展名为null
+java 7中可以判断文件的contenttype了
+albert0707： 非常感谢!!!!!!!!!
+java 7中可以判断文件的contenttype了
+zhangle： https://zhuban.me竹板共享 - 高效便捷的文档 ...
+一个不错的网络白板工具
+spring mvc 中自定义HttpMessageConverter
+博客分类： JAVA相关
+ 
+  在spring mvc中，大家对@responsebody,@requestbody用的比较多了，它们是可以自定义的
+
+HttpMessageConverter接口提供了5个方法：
+
+canRead：判断该转换器是否能将请求内容转换成Java对象
+canWrite：判断该转换器是否可以将Java对象转换成返回内容
+getSupportedMediaTypes：获得该转换器支持的MediaType类型
+read：读取请求内容并转换成Java对象
+write：将Java对象转换后写入返回内容
+其中read和write方法的参数分别有有HttpInputMessage和HttpOutputMessage对象，这两个对象分别代表着一次Http通讯中的请求和响应部分，可以通过getBody方法获得对应的输入流和输出流。
+
+
+其中read和write方法的参数分别有有HttpInputMessage和HttpOutputMessage对象，这两个对象分别代表着一次Http通讯中的请求和响应部分，可以通过getBody方法获得对应的输入流和输出流。
+
+使用的时候，可以extends AbstractHttpMessageConverter就可以了，比如下面的例子：
+
+演示使用js向spring mvc发送自定义格式的字符串(属性用-隔开),通过自定义的HttpMessageConverter自动转换成对象,然后通过HttpMessageConverter输出指定格式到浏览器
+
+Java代码  收藏代码
+public class Person {  
+  
+    private String firstName;  
+    private String lastName;  
+。。。。  
+
+
+
+Java代码  收藏代码
+public class WiselyMessageConverter extends AbstractHttpMessageConverter<Person> {  
+  
+     //自定义媒体类型  
+    public WiselyMessageConverter(){  
+        super(new MediaType("application", "x-wisely", Charset.forName("UTF-8")));  
+    }  
+    //从request里获得构造Person实例的数据  
+    @Override  
+    protected Person readInternal(Class<? extends Person> clazz,  
+     HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {  
+        String temp = StreamUtils.copyToString(inputMessage.getBody(),   
+  
+Charset.forName("UTF-8"));  
+        String[] tempArr = temp.split("-");  
+        return new Person(tempArr[0],tempArr[1]);  
+    }  
+  
+    //只支持Person类  
+    @Override  
+    protected boolean supports(Class<?> clazz) {  
+        return Person.class.isAssignableFrom(clazz);  
+    }  
+  
+    //将person实例转换成你想要的字符串格式  
+    @Override  
+    protected void writeInternal(Person person, HttpOutputMessage outputMessage)   
+                                 throws IOException, HttpMessageNotWritableException {  
+        String out = "hello:" +person.getFirstName() + "-" + person.getLastName();  
+        outputMessage.getBody().write(out.getBytes());  
+    }  
+  
+}  
+  
+配置WiselyMessageConverter  
+  @Override  
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {  
+        WiselyMessageConverter converter = new WiselyMessageConverter();  
+        converters.add(converter);  
+    }  
+
+
+
+Java代码  收藏代码
+@RequestMapping(value = "/convert", produces = { "application/x-wisely" })  
+    public @ResponseBody Person convert(@RequestBody Person person) {  
+        return person;  
+    }  
+
+
+jsp页面
+Java代码  收藏代码
+function req(){  
+       $.ajax({  
+           url: "convert",  
+           data: "wang-yunfei",//注意此处的格式  
+           type:"POST",  
+           contentType:"application/x-wisely",  
+           success: function(data){  
+               $("#resp").html(data);  
+           }  
+       });  
+   }  
+
+
+另外不错的参考文参考：
+http://www.scienjus.com/custom-http-message-converter/
+分享到：  
+spring 4 mvc,java 8中针对日期的一个处理 ... | spring retry开源项目例子
+2015-10-08 17:01浏览 9538评论(0)分类:编程语言查看更多
+评论
+发表评论
+ 您还没有登录,请您登录后再发表评论
+
+
+复习：强迫线程顺序执行方式 2019-01-03 23:42  985
+方法1：  三个线程,t1,t2,t3,如果一定要按顺序执行， ...
+(转）不错的前后端处理异常的方法 2019-01-02 23:16  1598
+前言 在 Web 开发中, 我们经常会需要处理各种异常, 这是 ...
+info q的极客时间大咖说等资料下载 2018-08-15 08:40  3016
+info q的极客时间大咖说等资料下载，还有不少思维导图 链接 ...
+CXF 客户端超时时间设置（非Spring配置方式） 2018-07-03 22:38  1293
+import org.apache.cxf.endpoint. ...
+(转)synchronized关键字画像：正确打开方式 2018-06-14 09:25  173
+https://mp.weixin.qq.com/s/b3Sx ...
+CountDownLatch的例子 2018-06-13 14:10  301
+public class StatsDemo { ...
+两道面试题，带你解析Java类加载机制 2018-06-12 16:29  264
+https://mp.weixin.qq.com/s/YTa0 ...
+Spring中获取request的几种方法，及其线程安全性分析 2018-06-11 09:03  195
+https://mp.weixin.qq.com/s/KeFJ ...
+内部类小结 2018-06-06 10:25  127
+https://mp.weixin.qq.com/s/hErv ...
+JVM虚拟机小结1 2018-06-04 20:43  183
+1 jps -l //列出详细的类名和进程ID 2）jps - ...
+windows下自带命令行工具查看CPU资源情况等 2018-06-04 12:53  2397
+微软提供了不少命令行� ...
+(收藏）深入分析Java的序列化与反序列化 2018-05-30 15:21  243
+https://mp.weixin.qq.com/s/T2Bn ...
+apache common包中的序列化工具 2018-05-30 09:10  1323
+什么是序列化 我们的对 ...
+JAVA8 JVM的变化： 元空间（Metaspace） 2018-05-24 22:30  606
+本文将会分享至今为至我收集的关于永久代（Permanent G ...
+(转）服务器性能指标（一）——负载（Load）分析及问题排查 2018-05-21 21:03  627
+原创： Hollis Hollis 负载( ...
+（转）对象复用 2018-05-20 15:27  506
+public class Student {     priv ...
+mapreduce中入门中要注意的几点 2018-05-06 08:59  319
+在 mapreduce中，比如有如下的词： I love be ...
+HDFS的基本操作 2018-05-02 21:47  339
+-mkdir            在HDFS创建目录    ...
+一个不错的开源工具类，专门用来解析日志头部的，好用 2018-05-02 20:00  328
+一个不错的开源工具类，专门用来解析日志头部的，好用。 http ...
+介绍个不错的RESTFUL MOCK的工具wiremock 2018-04-27 21:02  1501
+介绍个不错的RESTFUL MOCK的工具wiremock,地 ...
+ Global site tag (gtag.js) - Google Analytics
