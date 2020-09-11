@@ -1,175 +1,37 @@
+ function operateFormatter(value, row) {
+    return '<button class="btn btn-primary btn-sm" onclick="del(\'' + row.idRule + '\')">删除</button>';
+    // return [
+    //     '<a href="model/rule/detail/page?idRule=' + row.idRule + '" title="编辑或运行规则" target="_blank"><span class="glyphicon glyphicon-pencil" style="color:black"></span></a>',
+    // ].join('');
+}
 
-SegmentFault
-首页
-问答
-专栏
-资讯
-课程
-活动
-发现
-搜索关键字
+function del(id) {
+    var index = $('#id_table_rule').bootstrapTable('getData').length;
+    $('#id_table_rule').bootstrapTable('remove', {
+        field: "idRule",   //此处的 “id”对应的是字段名
+        values: [parseInt(id)]
+    });
+    var dataList = $('#id_table_rule').bootstrapTable("getData", true);
+}
 
-Jiadong
- 423
-【SpringMVC】浅谈Convert/Format机制与HttpMessageConverter的关系
-convertspringformatterhttpspring-mvc
-发布于 2017-07-27
-简介
-Spring3引入了较Spring2的PropertyEditor更加强大、通用的Convert/Format SPI，Convert SPI可以实现任意类型的转换；Format SPI支持国际化，并在前者的基础上实现了String与任意类型的转换。这两类SPI属于spring-core，被整个spring-framework共享，是一种通用的类型转换器。
 
-HttpMessageConverter虽然功能上也表现为HttpMessage与任意类型的转换，但其接口和Convert SPI并没有继承关系。HttpMessageConverter属于spring-web。HttpMessage是SpringMVC对Servlet规范中HttpServletRequest和HttpServletResponse的包装，因此接受请求时需要把HttpMessage转换成用户需要的数据，在生成响应时需要把用户生成的数据转换成HttpMessage。如果用户在XML的<mvc:message-converters>中没有指定register-defaults=false，SpringMVC默认至少会注册一些自带的HttpMessageConvertor（从先后顺序排列分别为ByteArrayHttpMessageConverter、StringHttpMessageConverter、ResourceHttpMessageConverter、SourceHttpMessageConverter、AllEncompassingFormHttpMessageConverter）。
 
-如果后端服务使用Restful API的形式，一般使用JSON作为前后端通信的格式规范，由于SpringMVC自带MappingJackson2HttpMessageConverter，在依赖中引入jackson后，容器会把该转换器自动注册到converter链的末尾。
+系统账号
 
-两者的分工
-Http请求中有几个常用的部分可以用来传递业务信息，以常见的Get和Post方法为例。
+新增账号
 
-是否可用  URL Parameter Header  Body
-Get 是 是 是 否
-Post  是 否 是 是
-那么上述的4个部分都是用HttpMessageConverter来进行类型转换的吗？显然不是，HttpMessageConverter和Convert SPI各有分工， HttpMessageConverte只负责解析Http包的Body体部分1，其余部分都交由相关的Convert SPI处理2。
 
-是否支持  URL Parameter Header  Body
-HttpMessageConverter  否 否 否 是
-Convert SPI 是 是 是 否
-除上表所示之外，SpringMVC还有一些需要Convert SPI的场景，如读取Cookie值的@CookieValue（本质是Header），解析矩阵URL的@MatrixVariable（本质是URL），读取本地会话的@SessionAttribute，解析SpEL的@Value。
+提醒
 
-Convert SPI类型转换实例
-在SpringMVC中，单次请求的整个处理流程中有哪些地方需要类型转换？以Delete /ajax/shop/12345/blacklist?id=1请求为例，后端对应的处理方法如下。
 
-@DeleteMapping("/ajax/{shopId}/blacklist") @ResponseBody
-public boolean deleteBlackItem(@RequestParam Integer id, @PathVariable Integer shopId) {
-    //省略
-    return true;
-} 
-由于请求的URL为String类型，而接受的参数id和shopId都是Integer类型，因此Spring会自动查找合适的Converter（具体实现为StringToNumberConverterFactory的工厂产品）把字符串“12345”和“1”转化为数字12345和1，分别赋值给shopId和id。处理完业务逻辑后，方法返回true，但需要将其格式化成String类型的“true”才能输出到响应的Body中，这时Spring就会使用StringToBooleanConverter来完成转换。如下图所示，除了上述常见的数据绑定和格式化显示功能，数据验证功能（JSR-303）基于数据绑定也间接利用了这两套SPI。
+保存后，列表账号将具备查看该主体下全部案件的权限，请问是否提交？
 
-SpringMVC数据绑定、验证与Convert SPI的关系
 
-结语
-在SpringMVC处理请求时，HttpMessageConverter和Convert SPI分别用来反序列化请求的Body和非Body部分，即HttpMessageConverter是一套小型、独立、额外为用户提供的专门的Body体的类型转换器；而Convert SPI则与PropertyEditor类似，可以处理更为通用的类型转换。
+insertCompanyAccount();
 
-Reference
-SpringMVC数据类型转换——第七章 注解式控制器的数据验证、类型转换及格式化——跟着开涛学SpringMVC
-具体见HandlerMethodInvoker.readWithMessageConverters方法 ↩
-具体见不同的HandlerMethodArgumentResolver实现 ↩
 
- 
-阅读 5k 更新于 2017-09-04
-本作品系 原创， 采用《署名-非商业性使用-禁止演绎 4.0 国际》许可协议
-
-Jiadong
- 423 
-3 条评论
-得票时间
-
-撰写评论 ...
-
-moranshouwang ： good
-  回复  2019-01-02
-
-ytfrdfiw ： 写得很好，感谢分享。特别是两者的分工这个总结。
-  回复  2019-01-15
-
-毛豆 ： 请问下这个deleteBlackItem方法返回的事boolean，最终使用@ResponseBody放到response body中的吧，那么应该用的HttpMessgeConverter转化的吧？而不是convert spi吧？
-  回复  2019-08-23
-推荐阅读
-Java Web 面试中关于Spring MVC必问题,不看血亏！
-Spring MVC是Spring构建在Servlet API上的Web框架。目前大部分的Java Web 开发已经使用Spring MVC 来做。它提供了模型 - 视图 - 控制器架构，可用于开发灵活的Web应用程序。在本教程中，我们将重点关注与之相关的...
-
-码农小胖哥  阅读 1.9k  20 赞
-
-如何妙用Spring 数据绑定机制？
-在剖析完 「Spring Boot 统一数据格式是怎么实现的？ 」文章之后，一直觉得有必要说明一下 Spring's Data Binding Mechanism 「Spring 数据绑定机制」。
-
-日拱一兵  阅读 1k  10 赞  5 评论
-
-彻底解决Spring mvc中时间的转换和序列化等问题
-在使用Spring mvc 进行开发时我们经常遇到前端传来的某种格式的时间字符串无法用java8的新特性java.time包下的具体类型参数来直接接收。 我们使用含有java.time封装类型的参数接收也会报反序列化问题，在返回前端...
-
-码农小胖哥  阅读 1.4k  8 赞
-
-spring-mvc的Conveter和Formatter
-Spring的Converter可以将一种类型转换成另一种类型。在使用时，必须编写一个实现org.springframework.core.convert.converter.Converter接口的java类。这个接口的声明如下
-
-jecyhw  阅读 9.1k  3 赞
-
-【SpringBoot2.x】-SpringBoot Web开发中Thymeleaf、Web、Tomcat以及Favicon
-Web开发是开发中至关重要的一部分， Web开发的核心内容主要包括内嵌Servlet容器和Spring MVC。更重要的是，Spring Boot`为web开发提供了快捷便利的方式进行开发，使用依赖jar：spring-boot-starter-web,提供了嵌...
-
-Ccww  阅读 772  3 赞
-
-Spring COC TypeConverter
-Spring的核心思想是IOC(Inversion of Control),DI其实就是IOC的另外一种说法。所谓IoC，对于spring框架来说，就是由spring来负责控制对象的生命周期和对象间的关系。当一个对象需要使用其它对象时，通过Spring容...
-
-carl_zhao  阅读 901  2 赞
-
-spring-boot项目整合Retrofit最佳实践，最优雅的HTTP客户端工具！
-大家都知道okhttp是一款由square公司开源的java版本http客户端工具。实际上，square公司还开源了基于okhttp进一步封装的retrofit工具，用来支持通过接口的方式发起http请求。如果你的项目中还在直接使用RestTempl...
-
-六点半起床  阅读 53  1 赞
-
-spring boot 随笔 -- 配置全局的String转Date参数转换器
-你在写接口的时候难免会遇到接收String类型的日期参数(例如：2018-04-21 11:57:36)转换成Date类型情况。百度了一番，发现大多数答案都是这样子的：
-
-one2three  阅读 6.5k  1 赞  2 评论
-
-MO的后端奇妙之旅
-用户专栏
-Nothing gone but code
-
-15 人关注
-18 篇文章
-
- 
-Planets
-广告位促销，月曝光三千万，10 元/天
-2020 年新版 Springboot 2.3 教程
-Spring5 / Mybatis / Vue / Cubeui 全套
-PHP 进阶之路
-BAT资深研发工程师带你从技术架构出发
-▶ 目录
-后端知识库
-产品
-热门问答
-热门专栏
-热门课程
-最新活动
-技术圈
-酷工作
-移动客户端
-课程
-Java 开发课程
-PHP 开发课程
-Python 开发课程
-前端开发课程
-移动开发课程
-资源
-每周精选
-用户排行榜
-徽章
-帮助中心
-声望与权限
-社区服务中心
-合作
-关于我们
-广告投放
-职位发布
-讲师招募
-联系我们
-合作伙伴
-关注
-产品技术日志
-社区运营日志
-市场运营日志
-团队日志
-社区访谈
-条款
-服务条款
-隐私政策
-下载 App
-Copyright © 2011-2020 SegmentFault.
-
-浙ICP备 15005796号-2 浙公网安备 33010602002000号 杭州堆栈科技有限公司版权所有
-
-   
+<%--    <script src="<%=basePath%>resources/libs/jquery/jquery-1.9.1.min.js"></script>--%>
+<%--    <script src="<%=basePath%>resources/libs/bootstrap/bootstrap.min.js"></script>--%>
+<%--    <script src="<%=basePath%>resources/libs/bootstrap-table/bootstrap-table.js"></script>--%>
+<%--    <script src="<%=basePath%>resources/libs/bootstrap-table/extensions/editable/bootstrap-editable.js"></script>--%>
+<%--    <script src="<%=basePath%>resources/libs/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js"></script>--%>
