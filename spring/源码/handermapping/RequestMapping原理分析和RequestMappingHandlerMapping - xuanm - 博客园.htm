@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)https://www.cnblogs.com/grasp/p/11100124.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta property="og:description" content="转载https://juejin.im/post/5cbeadb96fb9a031ff0d18b5 源码版本spring-webmvc-4.3.7.RELEASE 使用Spring MVC的同学一般都">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/bundle-cogitation.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/bundle-cogitation-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/grasp/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/grasp/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/grasp/wlwmanifest.xml">
+    <script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/osd.js"></script><script async="" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/analytics.js"></script><script type="text/javascript" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/encoder.js"></script><script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/hm.js"></script><script>
+        var currentBlogId = 221102;
+        var currentBlogApp = 'grasp';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Cogitation';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2019-06-27 10:48';
+        </script>
+    <script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/blog-common.min.js"></script>
+    
+    
+    
+<script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/pubads_impl_2020091702.js" async=""></script><link rel="preload" href="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/f.txt"></script><link rel="prefetch" href="https://0a318c989fe1ea5dc924568839d0c461.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body>
+    <a name="top"></a>
+    
+    <div id="top">
+	
+<div>
+	<table>
+		<tbody><tr>
+			<td class="HeaderTitles">
+				<h1 class="HeaderTitle"><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/grasp/">众妙之门</a>
+</h1>
+				<p id="tagline">
+业精于勤,荒于嬉;行成于思,毁于随
+</p>
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+<div class="HeaderBar">
+	<table id="HeaderBar" class="HeaderBar" cellpadding="0" cellspacing="0">
+		<tbody><tr>
+			<td class="HeaderBarTab" nowrap="">
+&nbsp;
+<a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+ ::
+
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/grasp/">
+首页</a>
+ ::
+<a href="http://q.cnblogs.com/" class="menu">博问</a> ::
+<a href="http://home.cnblogs.com/ing/" class="menu">闪存</a> ::
+
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+ ::
+
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/xuanm">
+联系</a> ::
+
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/grasp/rss/">
+订阅</a>
+
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/grasp/rss/">
+    <img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/xml.gif" alt="订阅">
+</a> ::
+
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+ ::
+
+
+</td>
+			<td><img id="Header1_BlueTab" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/BlueTabRight.gif" align="absmiddle" alt=""></td>
+			<td class="HeaderBarTabBack" nowrap="" width="100%">
+				<div class="BlogStatsBar">
+	<table class="BlogStatsBar">
+		<tbody><tr>
+			<td width="100%">
+			</td>
+			<td class="BlogStatsBar" nowrap="">
+				&nbsp;
+				
+118 
+				随笔&nbsp;::
+				
+0 文章
+				::
+				
+21 评论
+				::
+				
+0 引用
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+
+
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+
+
+</div>
+<div id="leftmenu">	
+
+	    <div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/08/27&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年9月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/10/27&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        5
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            6
+                        </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                <a href="https://www.cnblogs.com/grasp/archive/2020/09/11.html"><u>11</u></a>
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            12
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            19
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            26
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalTodayDay" align="center">
+                            27
+                        </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            4
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            10
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+		
+<div id="sidebar_news" class="newsItem"><h3>公告</h3>
+<div class="News">
+	
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/grasp/">
+            xuanm
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/grasp/" title="入园时间：2015-04-01">
+            5年5个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/grasp/followers/">
+            21
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/grasp/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;7f58ef95-33d8-e411-b908-9dcfd8948a71&#39;)">+加关注</a></div>
+        <script>getFollowStatus('7f58ef95-33d8-e411-b908-9dcfd8948a71');</script>
+    </div>
+</div>
+</div>
+
+</div>
+
+<div id="sidebar_ad"></div>
+		<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/grasp/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/grasp/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/grasp/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/grasp/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/grasp/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+		<h3>
+随笔分类
+
+
+</h3>
+				<ul>
+			
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1834932.html" rel="" target="">
+    activiti(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1419695.html" rel="" target="">
+    hadoop(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1262278.html" rel="" target="">
+    html,js,css(5)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1373237.html" rel="" target="">
+    java基础(19)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1571011.html" rel="" target="">
+    linux(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1262918.html" rel="" target="">
+    mybatis(11)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1364958.html" rel="" target="">
+    mysql(8)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1654000.html" rel="" target="">
+    nginx(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1349324.html" rel="" target="">
+    NIO(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1830961.html" rel="" target="">
+    oracle(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1566159.html" rel="" target="">
+    python(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1350027.html" rel="" target="">
+    servlet(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1349338.html" rel="" target="">
+    socket(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1246624.html" rel="" target="">
+    springcloud(8)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1214713.html" rel="" target="">
+    springmvc(18)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1483309.html" rel="" target="">
+    spring源码(13)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1490577.html" rel="" target="">
+    struts2(6)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1350822.html" rel="" target="">
+    tomcat(10)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1579426.html" rel="" target="">
+    ZAP(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/category/1342283.html" rel="" target="">
+    线程(5)
+</a>
+ 
+</li>
+			
+				</ul>
+		<h3>
+随笔档案
+
+
+</h3>
+				<ul>
+			
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/09.html" rel="" target="">
+    2020年9月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/08.html" rel="" target="">
+    2020年8月(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/07.html" rel="" target="">
+    2020年7月(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/06.html" rel="" target="">
+    2020年6月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/05.html" rel="" target="">
+    2020年5月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/04.html" rel="" target="">
+    2020年4月(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/03.html" rel="" target="">
+    2020年3月(3)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/02.html" rel="" target="">
+    2020年2月(4)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2020/01.html" rel="" target="">
+    2020年1月(3)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/12.html" rel="" target="">
+    2019年12月(5)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/11.html" rel="" target="">
+    2019年11月(7)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/10.html" rel="" target="">
+    2019年10月(5)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/09.html" rel="" target="">
+    2019年9月(4)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/08.html" rel="" target="">
+    2019年8月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/07.html" rel="" target="">
+    2019年7月(6)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/06.html" rel="" target="">
+    2019年6月(12)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/05.html" rel="" target="">
+    2019年5月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/04.html" rel="" target="">
+    2019年4月(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/03.html" rel="" target="">
+    2019年3月(7)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/02.html" rel="" target="">
+    2019年2月(1)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2019/01.html" rel="" target="">
+    2019年1月(8)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/12.html" rel="" target="">
+    2018年12月(13)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/11.html" rel="" target="">
+    2018年11月(9)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/09.html" rel="" target="">
+    2018年9月(2)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/08.html" rel="" target="">
+    2018年8月(3)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/07.html" rel="" target="">
+    2018年7月(5)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/05.html" rel="" target="">
+    2018年5月(4)
+</a>
+ 
+</li>
+				<li>
+<a href="https://www.cnblogs.com/grasp/archive/2018/04.html" rel="" target="">
+    2018年4月(4)
+</a>
+ 
+</li>
+			
+				</ul>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div id="recent_comments_wrap" class="RecentComment">
+    <h3 class="catListTitle">最新评论</h3>
+    <div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/grasp/p/9296530.html">1. Re:SpringCloud之实现客户端的负载均衡Ribbon（二）</a></li>
+                    <li class="recent_comment_body"><p>厉害厉害</p>
+</li>
+                    <li class="recent_comment_author">--阿楚姑娘w</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/grasp/p/10588996.html">2. Re:MapperScan和ComponentScan同时使用问题</a></li>
+                    <li class="recent_comment_body">@北北LikeCode 我也是实际中遇到的问题...</li>
+                    <li class="recent_comment_author">--xuanm</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/grasp/p/10588996.html">3. Re:MapperScan和ComponentScan同时使用问题</a></li>
+                    <li class="recent_comment_body"><p>终于找到答案了，我解决了一上午的这个问题，把我的一个domain当mapper扫描了</p>
+</li>
+                    <li class="recent_comment_author">--北北LikeCode</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/grasp/p/9323490.html">4. Re:SpringCloud之网关 Zuul（四）</a></li>
+                    <li class="recent_comment_body">@ tss0615谢谢哈，有时间可以写下...</li>
+                    <li class="recent_comment_author">--xuanm</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/grasp/p/9296530.html">5. Re:SpringCloud之实现客户端的负载均衡Ribbon（二）</a></li>
+                    <li class="recent_comment_body">@ tss0615不客气...</li>
+                    <li class="recent_comment_author">--xuanm</li>
+        </ul>
+    </div>
+</div>
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    
+<div id="topview_posts_wrap">
+    <h3 class="catListTitle">阅读排行榜</h3>
+    <div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/11268049.html">
+                            1. mybatis 中 if-test 判断大坑(41153)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9491862.html">
+                            2. 在IDEA中将SpringBoot项目打包成jar包的方法(22145)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9258811.html">
+                            3. SpringCloud之服务注册与发现Eureka（一）(17861)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9448660.html">
+                            4. SpringBoot集成RabbitMQ(11500)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/10241956.html">
+                            5. CentOS7版本区别和下载(11063)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    
+<div id="topfeedback_posts_wrap">
+    <h3 class="catListTitle">评论排行榜</h3>
+    <div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9296530.html">
+                            1. SpringCloud之实现客户端的负载均衡Ribbon（二）(9)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/11042580.html">
+                            2. spring与springmvc父子容器(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/10588996.html">
+                            3. MapperScan和ComponentScan同时使用问题(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9491862.html">
+                            4. 在IDEA中将SpringBoot项目打包成jar包的方法(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/grasp/p/9323490.html">
+                            5. SpringCloud之网关 Zuul（四）(2)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/grasp/p/10061577.html">
+                                1. IDEA运行tomcat8.5.35源代码(6)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/grasp/p/11268049.html">
+                                2. mybatis 中 if-test 判断大坑(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/grasp/p/11042580.html">
+                                3. spring与springmvc父子容器(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/grasp/p/9305218.html">
+                                4. SpringCloud之声明式服务调用 Feign（三）(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/grasp/p/9258811.html">
+                                5. SpringCloud之服务注册与发现Eureka（一）(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+	
+</div>
+<div id="main">
+	<div id="post_detail">
+<div class="post">
+	<div class="postTitle">
+		
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/grasp/p/11100124.html">
+    <span>RequestMapping原理分析和RequestMappingHandlerMapping</span>
+    
+
+
+</a>
+
+	</div>
+	
+	<div class="postText">
+		
+<div id="cnblogs_post_body" class="blogpost-body">
+    <p>转载<a href="https://juejin.im/post/5cbeadb96fb9a031ff0d18b5">https://juejin.im/post/5cbeadb96fb9a031ff0d18b5</a></p>
+<p>源码版本spring-webmvc-4.3.7.RELEASE</p>
+<p>使用Spring MVC的同学一般都会以下方式定义请求地址:</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">@Controller
+@RequestMapping(</span>"/test"<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> TestController {
+
+    @RequestMapping(value </span>= {"/show"<span style="color: rgba(0, 0, 0, 1)">})
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> String testTest() {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> "/jsp/index"<span style="color: rgba(0, 0, 0, 1)">;
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div>
+<p>@Controller注解用来把一个类定义为Controller。</p>
+<p>@RequestMapping注解用来把web请求映射到相应的处理函数。</p>
+<p>@Controller和@RequestMapping结合起来完成了Spring MVC请求的派发流程。</p>
+<p>为什么两个简单的注解就能完成这么复杂的功能呢？又和&lt;context:component-scan base-package="xx.xx.xx"/&gt;的位置有什么关系呢？</p>
+</div>
+<h2 class="heading" data-id="heading-1">@RequestMapping流程分析</h2>
+<div>
+<div>
+<p>@RequestMapping流程可以分为下面6步：</p>
+<ul>
+<li>1.注册RequestMappingHandlerMapping bean 。</li>
+<li>2.实例化RequestMappingHandlerMapping bean。</li>
+<li>3.获取RequestMappingHandlerMapping bean实例。</li>
+<li>4.接收requst请求。</li>
+<li>5.在RequestMappingHandlerMapping实例中查找对应的handler。</li>
+<li>6.handler处理请求。</li>
+</ul>
+<p>为什么是这6步，我们展开分析。</p>
+</div>
+<h3 class="heading" data-id="heading-2">1 注册RequestMappingHandlerMapping bean</h3>
+<div>
+<div>
+<p>第一步还是先找程序入口。</p>
+<p>使用Spring MVC的同学都知道，要想使@RequestMapping注解生效，必须得在xml配置文件中配置&lt; mvc:annotation-driven/&gt;。因此我们以此为突破口开始分析。</p>
+<p>在b<a href="https://www.cnblogs.com/grasp/p/11074770.html" target="_blank">ean 解析、注册、实例化流程源码剖析&nbsp;</a>文中我们知道xml配置文件解析完的下一步就是解析bean。在这里我们继续对那个方法展开分析。如下：</p>
+</div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果该元素属于默认命名空间走此逻辑。Spring的默认namespace为：</span><span style="color: rgba(0, 128, 0, 1); text-decoration: underline">http://www.springframework.org/schema/beans</span><span style="color: rgba(0, 128, 0, 1)">“</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (delegate.isDefaultNamespace(root)) {
+            NodeList nl </span>=<span style="color: rgba(0, 0, 0, 1)"> root.getChildNodes();
+            </span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">int</span> i = 0; i &lt; nl.getLength(); i++<span style="color: rgba(0, 0, 0, 1)">) {
+                Node node </span>=<span style="color: rgba(0, 0, 0, 1)"> nl.item(i);
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span> (node <span style="color: rgba(0, 0, 255, 1)">instanceof</span><span style="color: rgba(0, 0, 0, 1)"> Element) {
+                    Element ele </span>=<span style="color: rgba(0, 0, 0, 1)"> (Element) node;
+                     </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">对document中的每个元素都判断其所属命名空间，然后走相应的解析逻辑</span>
+                    <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (delegate.isDefaultNamespace(ele)) {
+                        parseDefaultElement(ele, delegate);
+                    }
+                    </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                        delegate.parseCustomElement(ele);
+                    }
+                }
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果该元素属于自定义namespace走此逻辑 ，比如AOP，MVC等。</span>
+<span style="color: rgba(0, 0, 0, 1)">            delegate.parseCustomElement(root);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<p>方法中根据元素的命名空间来进行不同的逻辑处理，如bean、beans等属于默认命名空间执行parseDefaultElement()方法，其它命名空间执行parseCustomElement()方法。</p>
+<p>&lt; mvc:annotation-driven/&gt;元素属于mvc命名空间，因此进入到 parseCustomElement()方法。</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinition parseCustomElement(Element ele) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> parseCustomElement(ele, <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+    }</span></pre>
+</div>
+<p>进入parseCustomElement(ele, null)方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取该元素namespace url</span>
+        String namespaceUri =<span style="color: rgba(0, 0, 0, 1)"> getNamespaceURI(ele);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">得到NamespaceHandlerSupport实现类解析元素</span>
+        NamespaceHandler handler = <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (handler == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            error(</span>"Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]"<span style="color: rgba(0, 0, 0, 1)">, ele);
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> handler.parse(ele, <span style="color: rgba(0, 0, 255, 1)">new</span> ParserContext(<span style="color: rgba(0, 0, 255, 1)">this</span>.readerContext, <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">, containingBd));
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>进入NamespaceHandlerSupport类的parse()方法。</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinition parse(Element element, ParserContext parserContext) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">此处得到AnnotationDrivenBeanDefinitionParser类来解析该元素</span>
+        <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> findParserForElement(element, parserContext).parse(element, parserContext);
+    }</span></pre>
+</div>
+<p>上面方法分为两步，（1）获取元素的解析类。（2）解析元素。</p>
+<p>（1）获取解析类。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">private</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
+        String localName </span>=<span style="color: rgba(0, 0, 0, 1)"> parserContext.getDelegate().getLocalName(element);
+        BeanDefinitionParser parser </span>= <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.parsers.get(localName);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (parser == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            parserContext.getReaderContext().fatal(
+                    </span>"Cannot locate BeanDefinitionParser for element [" + localName + "]"<span style="color: rgba(0, 0, 0, 1)">, element);
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> parser;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>Spring MVC中含有多种命名空间，此方法会根据元素所属命名空间得到相应解析类，参考<a id="cb_post_title_url" href="https://www.cnblogs.com/grasp/p/11079748.html">spring xml 配置文件中标签的解析</a>，其中&lt; mvc:annotation-driven/&gt;对应的是AnnotationDrivenBeanDefinitionParser解析类。</p>
+<p>（2）解析&lt; mvc:annotation-driven/&gt;元素</p>
+<p>进入AnnotationDrivenBeanDefinitionParser类的parse()方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinition parse(Element element, ParserContext parserContext) {
+        Object source </span>=<span style="color: rgba(0, 0, 0, 1)"> parserContext.extractSource(element);
+        XmlReaderContext readerContext </span>=<span style="color: rgba(0, 0, 0, 1)"> parserContext.getReaderContext();
+
+        CompositeComponentDefinition compDefinition </span>= <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> CompositeComponentDefinition(element.getTagName(), source);
+        parserContext.pushContainingComponent(compDefinition);
+
+        RuntimeBeanReference contentNegotiationManager </span>=<span style="color: rgba(0, 0, 0, 1)"> getContentNegotiationManager(element, source, parserContext);
+
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">生成RequestMappingHandlerMapping bean信息</span>
+        RootBeanDefinition handlerMappingDef = <span style="color: rgba(0, 0, 255, 1)">new</span> RootBeanDefinition(RequestMappingHandlerMapping.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+        handlerMappingDef.setSource(source);
+        handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        handlerMappingDef.getPropertyValues().add(</span>"order", 0<span style="color: rgba(0, 0, 0, 1)">);
+        handlerMappingDef.getPropertyValues().add(</span>"contentNegotiationManager"<span style="color: rgba(0, 0, 0, 1)">, contentNegotiationManager);
+
+        ......
+        
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">此处HANDLER_MAPPING_BEAN_NAME值为:RequestMappingHandlerMapping类名
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">容器中注册name为RequestMappingHandlerMapping类名</span>
+        parserContext.registerComponent(<span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> BeanComponentDefinition(handlerMappingDef, HANDLER_MAPPING_BEAN_NAME));
+        
+        ......
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>可以看到上面方法在Spring MVC容器中注册了一个名为“HANDLER_MAPPING_BEAN_NAME”,类型为RequestMappingHandlerMapping的bean(看此函数的其它代码，得到同时也注册了RequestMappingHandlerAdapter等)。</p>
+<p>至于这个bean能干吗，继续往下分析。</p>
+</div>
+</div>
+</div>
+<h3 class="heading" data-id="heading-3">2. RequestMappingHandlerMapping bean实例化</h3>
+<p>bean注册完后的下一步就是实例化。</p>
+<p>在开始分析实例化流程之前，我们先介绍一下RequestMappingHandlerMapping是个什么样类。</p>
+<h4 class="heading" data-id="heading-4">2.1 RequestMappingHandlerMapping继承图</h4>
+<img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/738818-20190627214336170-1548778266.png" alt="">
+<div>
+<div>
+<p>上图信息比较多，我们查找关键信息。可以看到这个类间接实现了HandlerMapping接口，是HandlerMapping类型的实例。</p>
+<p>除此之外还实现了ApplicationContextAware和IntitalzingBean 这两个接口。</p>
+<h4 class="heading" data-id="heading-5">2.2 ApplicationContextAware接口</h4>
+<p>下面是<a href="https://link.juejin.im/?target=https%3A%2F%2Fdocs.spring.io%2Fspring-framework%2Fdocs%2Fcurrent%2Fjavadoc-api%2Forg%2Fspringframework%2Fcontext%2FApplicationContextAware.html" rel="nofollow noopener noreferrer" target="_blank">官方介绍</a>：</p>
+<p>在这里简要介绍一下这两个接口：</p>
+</div>
+<pre>public interface <span class="typeNameLabel">ApplicationContextAware
+extends <a title="interface in org.springframework.beans.factory" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/Aware.html">Aware</a></span></pre>
+<div class="block">Interface to be implemented by any object that wishes to be notified of the&nbsp;<a title="interface in org.springframework.context" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"><code>ApplicationContext</code></a>&nbsp;that it runs in.</div>
+<div class="block">&nbsp;</div>
+<div class="block">该接口只包含以下方法：</div>
+<div class="block">
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">void</span> setApplicationContext(ApplicationContext applicationContext) <span style="color: rgba(0, 0, 255, 1)">throws</span> BeansException;</pre>
+</div>
+<pre>* Set the ApplicationContext that this object runs in.<br>* Normally this call will be used to initialize the object.</pre>
+</div>
+概括一下上面表达的信息：如果一个类实现了ApplicationContextAware接口，Spring容器在初始化该类时候会自动回调该类的setApplicationContext()方法。这个接口主要用来让实现类得到Spring 容器上下文信息。</div>
+</div>
+<div>
+<h4 class="heading" data-id="heading-6">2.3 InitializingBean接口</h4>
+</div>
+<div>&nbsp;下面是<a href="https://link.juejin.im/?target=https%3A%2F%2Fdocs.spring.io%2Fspring-framework%2Fdocs%2Fcurrent%2Fjavadoc-api%2Forg%2Fspringframework%2Fbeans%2Ffactory%2FInitializingBean.html" rel="nofollow noopener noreferrer" target="_blank">官方介绍</a>：</div>
+<div>
+<pre>public interface <span class="typeNameLabel">InitializingBean</span></pre>
+<div class="block">Interface to be implemented by beans that need to react once all their properties have been set by a&nbsp;<a title="interface in org.springframework.beans.factory" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html"><code>BeanFactory</code></a>: e.g. to perform custom initialization, or merely to check that all mandatory properties have been set.</div>
+<div class="block">该接口只包含以下方法：</div>
+<div class="block">
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">void</span> afterPropertiesSet() <span style="color: rgba(0, 0, 255, 1)">throws</span> Exception;</pre>
+</div>
+<pre>* Invoked by a BeanFactory after it has set all bean properties supplied<br>* (and satisfied BeanFactoryAware and ApplicationContextAware).</pre>
+<div>
+<p>概括一下上面表达的信息：如果一个bean实现了该接口，Spring 容器初始化bean时会回调afterPropertiesSet()方法。这个接口的主要作用是让bean在初始化时可以实现一些自定义的操作。</p>
+<p>介绍完RequestMappingHandlerMapping类后我们开始对这个类的源码进行分析。</p>
+<h4 class="heading" data-id="heading-7">2.2.4 RequestMappingHandlerMapping类源码分析</h4>
+<p>既然RequestMappingHandlerMapping实现了ApplicationContextAware接口，那实例化时候肯定会执行setApplicationContext方法，我们查看其实现逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">final</span> <span style="color: rgba(0, 0, 255, 1)">void</span> setApplicationContext(ApplicationContext context) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> BeansException {
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (context == <span style="color: rgba(0, 0, 255, 1)">null</span> &amp;&amp; !<span style="color: rgba(0, 0, 0, 1)">isContextRequired()) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Reset internal context state.</span>
+            <span style="color: rgba(0, 0, 255, 1)">this</span>.applicationContext = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.messageSourceAccessor = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.applicationContext == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Initialize with passed-in context.</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">requiredContextClass().isInstance(context)) {
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> ApplicationContextException(
+                        </span>"Invalid application context: needs to be of type [" + requiredContextClass().getName() + "]"<span style="color: rgba(0, 0, 0, 1)">);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.applicationContext =<span style="color: rgba(0, 0, 0, 1)"> context;
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.messageSourceAccessor = <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> MessageSourceAccessor(context);
+            initApplicationContext(context);
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Ignore reinitialization if same context passed in.</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.applicationContext !=<span style="color: rgba(0, 0, 0, 1)"> context) {
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> ApplicationContextException(
+                        </span>"Cannot reinitialize with different application context: current one is [" +
+                        <span style="color: rgba(0, 0, 255, 1)">this</span>.applicationContext + "], passed-in one is [" + context + "]"<span style="color: rgba(0, 0, 0, 1)">);
+            }
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div>
+<p>可以看到此方法把容器上下文赋值给applicationContext变量，因为现在是Spring MVC容器创建流程，因此此处设置的值就是Spring MVC容器 。</p>
+<p>RequestMappingHandlerMapping也实现了InitializingBean接口，当设置完属性后肯定会回调afterPropertiesSet方法，再看afterPropertiesSet方法逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> afterPropertiesSet() {
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span>.config = <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> RequestMappingInfo.BuilderConfiguration();
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.config.setUrlPathHelper(getUrlPathHelper());
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.config.setPathMatcher(getPathMatcher());
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span>.config.setSuffixPatternMatch(<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.useSuffixPatternMatch);
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span>.config.setTrailingSlashMatch(<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.useTrailingSlashMatch);
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span>.config.setRegisteredSuffixPatternMatch(<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.useRegisteredSuffixPatternMatch);
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.config.setContentNegotiationManager(getContentNegotiationManager());
+
+        </span><span style="color: rgba(0, 0, 255, 1)">super</span><span style="color: rgba(0, 0, 0, 1)">.afterPropertiesSet();
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面调用了父类的afterPropertiesSet()方法，沿调用栈继续查看。</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> afterPropertiesSet() {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">初始化handler函数</span>
+<span style="color: rgba(0, 0, 0, 1)">        initHandlerMethods();
+    }</span></pre>
+</div>
+<p>进入initHandlerMethods初始化方法查看逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> initHandlerMethods() {
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+            logger.debug(</span>"Looking for request mappings in application context: " +<span style="color: rgba(0, 0, 0, 1)"> getApplicationContext());
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">1.获取容器中所有bean 的name。
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">根据detectHandlerMethodsInAncestorContexts bool变量的值判断是否获取父容器中的bean，默认为false。因此这里只获取Spring MVC容器中的bean，不去查找父容器</span>
+        String[] beanNames = (<span style="color: rgba(0, 0, 255, 1)">this</span>.detectHandlerMethodsInAncestorContexts ?<span style="color: rgba(0, 0, 0, 1)">
+                BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.</span><span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">) :
+                getApplicationContext().getBeanNamesForType(Object.</span><span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">));
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">循环遍历bean</span>
+        <span style="color: rgba(0, 0, 255, 1)">for</span><span style="color: rgba(0, 0, 0, 1)"> (String beanName : beanNames) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+                Class</span>&lt;?&gt; beanType = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+                </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                    beanType </span>=<span style="color: rgba(0, 0, 0, 1)"> getApplicationContext().getType(beanName);
+                }
+                </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Throwable ex) {
+                    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> An unresolvable bean type, probably from a lazy bean - let's ignore it.</span>
+                    <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+                        logger.debug(</span>"Could not resolve target class for bean with name '" + beanName + "'"<span style="color: rgba(0, 0, 0, 1)">, ex);
+                    }
+                }
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">2.判断bean是否含有@Controller或者@RequestMappin注解</span>
+                <span style="color: rgba(0, 0, 255, 1)">if</span> (beanType != <span style="color: rgba(0, 0, 255, 1)">null</span> &amp;&amp;<span style="color: rgba(0, 0, 0, 1)"> isHandler(beanType)) {
+                    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">3.对含有注解的bean进行处理，获取handler函数信息。</span>
+<span style="color: rgba(0, 0, 0, 1)">                    detectHandlerMethods(beanName);
+                }
+            }
+        }
+        handlerMethodsInitialized(getHandlerMethods());
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div>
+<p>上面函数分为3步。</p>
+<p>（1）获取Spring MVC容器中的bean。</p>
+<p>（2）找出含有含有@Controller或者@RequestMappin注解的bean。</p>
+<p>（3）对含有注解的bean进行解析。</p>
+<p>第1步很简单就是获取容器中所有的bean name，我们对第2、3步作分析。</p>
+<p>查看isHandler()方法实现逻辑。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">boolean</span> isHandler(Class&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)"> beanType) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> (AnnotatedElementUtils.hasAnnotation(beanType, Controller.<span style="color: rgba(0, 0, 255, 1)">class</span>) ||<span style="color: rgba(0, 0, 0, 1)">
+                AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.</span><span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">));
+    }</span></pre>
+</div>
+<div>
+<div>
+<p>上面逻辑很简单，就是判断该bean是否有@Controller或@RequestMapping注解，然后返回判断结果。</p>
+<p>如果含有这两个注解之一就进入detectHandlerMethods（）方法进行处理。</p>
+<p>查看detectHandlerMethods（）方法。</p>
+</div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span> detectHandlerMethods(<span style="color: rgba(0, 0, 255, 1)">final</span><span style="color: rgba(0, 0, 0, 1)"> Object handler) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">1.获取bean的类信息</span>
+        Class&lt;?&gt; handlerType = (handler <span style="color: rgba(0, 0, 255, 1)">instanceof</span> String ?<span style="color: rgba(0, 0, 0, 1)">
+                getApplicationContext().getType((String) handler) : handler.getClass());
+        </span><span style="color: rgba(0, 0, 255, 1)">final</span> Class&lt;?&gt; userType =<span style="color: rgba(0, 0, 0, 1)"> ClassUtils.getUserClass(handlerType);
+
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">2.遍历函数获取有@RequestMapping注解的函数信息</span>
+        Map&lt;Method, T&gt; methods =<span style="color: rgba(0, 0, 0, 1)"> MethodIntrospector.selectMethods(userType,
+                </span><span style="color: rgba(0, 0, 255, 1)">new</span> MethodIntrospector.MetadataLookup&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)">() {
+                    @Override
+                    </span><span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> T inspect(Method method) {
+                        </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果有@RequestMapping注解，则获取函数映射信息</span>
+                            <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> getMappingForMethod(method, userType);
+                        }
+                        </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Throwable ex) {
+                            </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> IllegalStateException("Invalid mapping on handler class [" +<span style="color: rgba(0, 0, 0, 1)">
+                                    userType.getName() </span>+ "]: " +<span style="color: rgba(0, 0, 0, 1)"> method, ex);
+                        }
+                    }
+                });
+
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+            logger.debug(methods.size() </span>+ " request handler methods found on " + userType + ": " +<span style="color: rgba(0, 0, 0, 1)"> methods);
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">3.遍历映射函数列表，注册handler</span>
+        <span style="color: rgba(0, 0, 255, 1)">for</span> (Map.Entry&lt;Method, T&gt;<span style="color: rgba(0, 0, 0, 1)"> entry : methods.entrySet()) {
+            Method invocableMethod </span>=<span style="color: rgba(0, 0, 0, 1)"> AopUtils.selectInvocableMethod(entry.getKey(), userType);
+            T mapping </span>=<span style="color: rgba(0, 0, 0, 1)"> entry.getValue();
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">注册handler函数</span>
+<span style="color: rgba(0, 0, 0, 1)">            registerHandlerMethod(handler, invocableMethod, mapping);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div>
+<p>上面方法中用了几个回调，可能看起来比较复杂，其主要功能就是获取该bean和父接口中所有用@RequestMapping注解的函数信息，并把这些保存到methodMap变量中。</p>
+<p>我们对上面方法进行逐步分析，看看如何对有@RequestMapping注解的函数进行解析。</p>
+<p>先进入selectMethods()方法查看实现逻辑。</p>
+</div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> &lt;T&gt; Map&lt;Method, T&gt; selectMethods(Class&lt;?&gt; targetType, <span style="color: rgba(0, 0, 255, 1)">final</span> MetadataLookup&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> metadataLookup) {
+        </span><span style="color: rgba(0, 0, 255, 1)">final</span> Map&lt;Method, T&gt; methodMap = <span style="color: rgba(0, 0, 255, 1)">new</span> LinkedHashMap&lt;Method, T&gt;<span style="color: rgba(0, 0, 0, 1)">();
+        Set</span>&lt;Class&lt;?&gt;&gt; handlerTypes = <span style="color: rgba(0, 0, 255, 1)">new</span> LinkedHashSet&lt;Class&lt;?&gt;&gt;<span style="color: rgba(0, 0, 0, 1)">();
+        Class</span>&lt;?&gt; specificHandlerType = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">把自身类添加到handlerTypes中</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">Proxy.isProxyClass(targetType)) {
+            handlerTypes.add(targetType);
+            specificHandlerType </span>=<span style="color: rgba(0, 0, 0, 1)"> targetType;
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取该bean所有的接口，并添加到handlerTypes中</span>
+<span style="color: rgba(0, 0, 0, 1)">        handlerTypes.addAll(Arrays.asList(targetType.getInterfaces()));
+
+        </span>/<span style="color: rgba(0, 0, 0, 1)">对自己及所有实现接口类进行遍历
+        </span><span style="color: rgba(0, 0, 255, 1)">for</span> (Class&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)"> currentHandlerType : handlerTypes) {
+            </span><span style="color: rgba(0, 0, 255, 1)">final</span> Class&lt;?&gt; targetClass = (specificHandlerType != <span style="color: rgba(0, 0, 255, 1)">null</span> ?<span style="color: rgba(0, 0, 0, 1)"> specificHandlerType : currentHandlerType);
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取函数映射信息</span>
+            ReflectionUtils.doWithMethods(currentHandlerType, <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> ReflectionUtils.MethodCallback() {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">循环获取类中的每个函数，通过回调处理</span>
+<span style="color: rgba(0, 0, 0, 1)">                @Override
+                </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> doWith(Method method) {
+                    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">对类中的每个函数进行处理</span>
+                    Method specificMethod =<span style="color: rgba(0, 0, 0, 1)"> ClassUtils.getMostSpecificMethod(method, targetClass);
+                    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">回调inspect（）方法给个函数生成RequestMappingInfo  </span>
+                    T result =<span style="color: rgba(0, 0, 0, 1)"> metadataLookup.inspect(specificMethod);
+                    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (result != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                        Method bridgedMethod </span>=<span style="color: rgba(0, 0, 0, 1)"> BridgeMethodResolver.findBridgedMethod(specificMethod);
+                        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将生成的RequestMappingInfo保存到methodMap中</span>
+<span style="color: rgba(0, 0, 0, 1)">                            methodMap.put(specificMethod, result);
+                        }
+                    }
+                }
+            }, ReflectionUtils.USER_DECLARED_METHODS);
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">返回保存函数映射信息后的methodMap</span>
+        <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> methodMap;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>上面逻辑中doWith()回调了inspect(),inspect()又回调了getMappingForMethod（）方法。</p>
+<p>我们看看getMappingForMethod()是如何生成函数信息的。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> RequestMappingInfo getMappingForMethod(Method method, Class&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)"> handlerType) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建函数信息</span>
+        RequestMappingInfo info =<span style="color: rgba(0, 0, 0, 1)"> createRequestMappingInfo(method);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (info != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            RequestMappingInfo typeInfo </span>=<span style="color: rgba(0, 0, 0, 1)"> createRequestMappingInfo(handlerType);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (typeInfo != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                info </span>=<span style="color: rgba(0, 0, 0, 1)"> typeInfo.combine(info);
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> info;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>查看createRequestMappingInfo()方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">private</span><span style="color: rgba(0, 0, 0, 1)"> RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果该函数含有@RequestMapping注解,则根据其注解信息生成RequestMapping实例，
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果该函数没有@RequestMapping注解则返回空</span>
+        RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+        RequestCondition</span>&lt;?&gt; condition = (element <span style="color: rgba(0, 0, 255, 1)">instanceof</span> Class ?<span style="color: rgba(0, 0, 0, 1)">
+                getCustomTypeCondition((Class</span>&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)">) element) : getCustomMethodCondition((Method) element));
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果requestMapping不为空，则生成函数信息MAP后返回</span>
+        <span style="color: rgba(0, 0, 255, 1)">return</span> (requestMapping != <span style="color: rgba(0, 0, 255, 1)">null</span> ? createRequestMappingInfo(requestMapping, condition) : <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>看看createRequestMappingInfo是如何实现的。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span><span style="color: rgba(0, 0, 0, 1)"> RequestMappingInfo createRequestMappingInfo(
+            RequestMapping requestMapping, RequestCondition</span>&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)"> customCondition) {
+
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> RequestMappingInfo
+                .paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
+                .methods(requestMapping.method())
+                .params(requestMapping.params())
+                .headers(requestMapping.headers())
+                .consumes(requestMapping.consumes())
+                .produces(requestMapping.produces())
+                .mappingName(requestMapping.name())
+                .customCondition(customCondition)
+                .options(</span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.config)
+                .build();
+    </span>可以看到上面把RequestMapping注解中的信息都放到一个RequestMappingInfo实例中后返回。当生成含有@RequestMapping注解的函数映射信息后，最后一步是调用registerHandlerMethod 注册handler和处理函数映射关系。    <span style="color: rgba(0, 0, 255, 1)">protected</span><span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> registerHandlerMethod(Object handler, Method method, T mapping) {</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.mappingRegistry.register(mapping, handler, method);
+    }</span></pre>
+</div>
+<p>看到把所有的handler方法都注册到了mappingRegistry这个变量中。</p>
+<p>到此就把RequestMappingHandlerMapping bean的实例化流程就分析完了。</p>
+<h3 class="heading" data-id="heading-8">3 获取RequestMapping bean</h3>
+这里我们回到Spring MVC容器初始化流程，查看在FrameworkServlet#initWebApplicationContext方法。</div>
+<div>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span><span style="color: rgba(0, 0, 0, 1)"> WebApplicationContext initWebApplicationContext() {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">1.获得rootWebApplicationContext</span>
+        WebApplicationContext rootContext =<span style="color: rgba(0, 0, 0, 1)">
+                WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        WebApplicationContext wac </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+
+        ......
+        
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (wac == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> No context instance is defined for this servlet -&gt; create a local one
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">2.创建 Spring 容器 </span>
+            wac =<span style="color: rgba(0, 0, 0, 1)"> createWebApplicationContext(rootContext);
+        }
+
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.refreshEventReceived) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Either the context is not a ConfigurableApplicationContext with refresh
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> support or the context injected at construction time had already been
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> refreshed -&gt; trigger initial onRefresh manually here.
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">3.初始化容器</span>
+<span style="color: rgba(0, 0, 0, 1)">            onRefresh(wac);
+        }
+
+        ......
+
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> wac;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>前两步我们在<a id="cb_post_title_url" href="https://www.cnblogs.com/grasp/p/11042580.html">spring与springmvc父子容器</a>一文中分析过，主要是创建Spring MVC容器，这里我们重点看第3步。</p>
+</div>
+<p>进入onRefresh()方法。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> onRefresh(ApplicationContext context) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">执行初始化策略 </span>
+<span style="color: rgba(0, 0, 0, 1)">        initStrategies(context);
+    }</span></pre>
+</div>
+<p>进入initStrategies方法，该方法进行了很多初始化行为，为减少干扰我们只过滤出与本文相关内容。</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> initStrategies(ApplicationContext context) {
+        ......
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">初始化HandlerMapping</span>
+<span style="color: rgba(0, 0, 0, 1)">        initHandlerMappings(context);
+        ......
+    }</span></pre>
+</div>
+<p>进入initHandlerMappings()方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> initHandlerMappings(ApplicationContext context) {
+        </span><span style="color: rgba(0, 0, 255, 1)">this</span>.handlerMappings = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.detectAllHandlerMappings) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">容器中查找HandlerMapping的实例</span>
+            Map&lt;String, HandlerMapping&gt; matchingBeans =<span style="color: rgba(0, 0, 0, 1)">
+                    BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.</span><span style="color: rgba(0, 0, 255, 1)">class</span>, <span style="color: rgba(0, 0, 255, 1)">true</span>, <span style="color: rgba(0, 0, 255, 1)">false</span><span style="color: rgba(0, 0, 0, 1)">);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">matchingBeans.isEmpty()) {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">把找到的bean放到hanlderMappings中。</span>
+                <span style="color: rgba(0, 0, 255, 1)">this</span>.handlerMappings = <span style="color: rgba(0, 0, 255, 1)">new</span> ArrayList&lt;HandlerMapping&gt;<span style="color: rgba(0, 0, 0, 1)">(matchingBeans.values());
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> We keep HandlerMappings in sorted order.</span>
+                AnnotationAwareOrderComparator.sort(<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.handlerMappings);
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                HandlerMapping hm </span>= context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+                </span><span style="color: rgba(0, 0, 255, 1)">this</span>.handlerMappings =<span style="color: rgba(0, 0, 0, 1)"> Collections.singletonList(hm);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (NoSuchBeanDefinitionException ex) {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Ignore, we'll add a default HandlerMapping later.</span>
+<span style="color: rgba(0, 0, 0, 1)">            }
+        }
+
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Ensure we have at least one HandlerMapping, by registering
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> a default HandlerMapping if no other mappings are found.</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.handlerMappings == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.handlerMappings = getDefaultStrategies(context, HandlerMapping.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+                logger.debug(</span>"No HandlerMappings found in servlet '" + getServletName() + "': using default"<span style="color: rgba(0, 0, 0, 1)">);
+            }
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>默认有多个实例，其中就有前面注册并实例化了的RequestMappingHandlerMapping bean</p>
+<p><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/738818-20190627222753202-369192074.png" alt=""></p>
+<h3 class="heading" data-id="heading-9">4 接收请求</h3>
+<p>DispatchServlet继承自Servlet，那所有的请求都会在service()方法中进行处理。</p>
+<p>查看service()方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> service(HttpServletRequest request, HttpServletResponse response)
+            </span><span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> ServletException, IOException {
+
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取请求方法</span>
+        HttpMethod httpMethod =<span style="color: rgba(0, 0, 0, 1)"> HttpMethod.resolve(request.getMethod());
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">若是patch请求执行此逻辑</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (HttpMethod.PATCH == httpMethod || httpMethod == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            processRequest(request, response);
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">其它请求走此逻辑</span>
+            <span style="color: rgba(0, 0, 255, 1)">super</span><span style="color: rgba(0, 0, 0, 1)">.service(request, response);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>我们跟着源码，得到不管get、post最后都会执行到DispatcherServlet#<span class="hljs-keyword">doDispatch(request, response);</span></p>
+<h3 class="heading" data-id="heading-10">5 获取handler</h3>
+<p>最终所有的web请求都由doDispatch()方法进行处理，查看其逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span> doDispatch(HttpServletRequest request, HttpServletResponse response) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Exception {
+        HttpServletRequest processedRequest </span>=<span style="color: rgba(0, 0, 0, 1)"> request;
+        HandlerExecutionChain mappedHandler </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        ......
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">根据请求获得真正处理的handler</span>
+        mappedHandler =<span style="color: rgba(0, 0, 0, 1)"> getHandler(processedRequest);
+        ......
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>查看getHandler()。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> HandlerExecutionChain getHandler(HttpServletRequest request) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Exception {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取HandlerMapping实例</span>
+        <span style="color: rgba(0, 0, 255, 1)">for</span> (HandlerMapping hm : <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.handlerMappings) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isTraceEnabled()) {
+                logger.trace(
+                        </span>"Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'"<span style="color: rgba(0, 0, 0, 1)">);
+            }
+             </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">得到处理请求的handler</span>
+            HandlerExecutionChain handler =<span style="color: rgba(0, 0, 0, 1)"> hm.getHandler(request);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (handler != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> handler;
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div>
+<div>
+<p>这里遍历handlerMappings获得所有HandlerMapping实例，还记得handlerMappings变量吧，这就是前面initHandlerMappings()方法中设置进去的值。</p>
+<p>可以看到接下来调了用HandlerMapping实例的getHanlder()方法查找handler，看其实现逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">final</span> HandlerExecutionChain getHandler(HttpServletRequest request) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Exception {
+        Object handler </span>=<span style="color: rgba(0, 0, 0, 1)"> getHandlerInternal(request);
+        ......
+        HandlerExecutionChain executionChain </span>=<span style="color: rgba(0, 0, 0, 1)"> getHandlerExecutionChain(handler, request);
+        ......
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> executionChain;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+</div>
+<p>进入getHandlerInternal()方法。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> HandlerMethod getHandlerInternal(HttpServletRequest request) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Exception {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取函数url</span>
+        String lookupPath =<span style="color: rgba(0, 0, 0, 1)"> getUrlPathHelper().getLookupPathForRequest(request);
+        ......
+        </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">查找HandlerMethod </span>
+            HandlerMethod handlerMethod =<span style="color: rgba(0, 0, 0, 1)"> lookupHandlerMethod(lookupPath, request);
+            ......
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">finally</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.mappingRegistry.releaseReadLock();
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>进入lookupHandlerMethod()。</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Exception {
+        List</span>&lt;Match&gt; matches = <span style="color: rgba(0, 0, 255, 1)">new</span> ArrayList&lt;Match&gt;<span style="color: rgba(0, 0, 0, 1)">();
+        List</span>&lt;T&gt; directPathMatches = <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.mappingRegistry.getMappingsByUrl(lookupPath);
+        ......
+    }</span></pre>
+</div>
+<div>
+<div>
+<p>可以看到上面方法中从mappingRegistry获取handler，这个mappingRegistry的值还记得是从哪里来的吗？</p>
+<p>就是前面RequestMappingHandlerMapping 实例化过程的最后一步调用registerHandlerMethod()函数时设置进去的。</p>
+<h3 class="heading" data-id="heading-11">6 handler处理请求</h3>
+<p>获取到相应的handler后剩下的事情就是进行业务逻辑。处理后返回结果，这里基本也没什么好说的。</p>
+<p>到此整个@RequestMapping的流程也分析完毕。</p>
+</div>
+</div>
+<div>
+<div>
+<h2 class="heading" data-id="heading-12">3.小结</h2>
+<p>认真读完上面深入分析@RequestMapping注解流程的同学，相信此时肯定对Spring MVC有了更深一步的认识。</p>
+<p>在@ReqestMapping解析过程中，initHandlerMethods()函数只是对Spring MVC 容器中的bean进行处理的，并没有去查找父容器的bean。因此不会对父容器中含有@RequestMapping注解的函数进行处理，更不会生成相应的handler。</p>
+<p>所以当请求过来时找不到处理的handler，导致404。</p>
+</div>
+<div>
+<div>
+<h2 class="heading" data-id="heading-13">4.尾声</h2>
+<p>从上面的分析中，我们知道要使用@RequestMapping注解，必须得把含有@RequestMapping的bean定义到spring-mvc.xml中。</p>
+<p>这里也给大家个建议：</p>
+<p>因为@RequestMapping一般会和@Controller搭配使。为了防止重复注册bean，建议在spring-mvc.xml配置文件中只扫描含有Controller bean的包，其它的共用bean的注册定义到spring.xml文件中。写法如下：</p>
+</div>
+spring-mvc.xml</div>
+<div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">&lt;!--</span><span style="color: rgba(0, 128, 0, 1)"> 只扫描@Controller注解 </span><span style="color: rgba(0, 128, 0, 1)">--&gt;</span>
+<span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">context:component-scan </span><span style="color: rgba(255, 0, 0, 1)">base-package</span><span style="color: rgba(0, 0, 255, 1)">="com.xxx.controller"</span><span style="color: rgba(255, 0, 0, 1)"> use-default-filters</span><span style="color: rgba(0, 0, 255, 1)">="false"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>
+    <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">context:include-filter </span><span style="color: rgba(255, 0, 0, 1)">type</span><span style="color: rgba(0, 0, 255, 1)">="annotation" </span><span style="color: rgba(255, 0, 0, 1)">expression</span><span style="color: rgba(0, 0, 255, 1)">="org.springframework.stereotype.Controller"</span> <span style="color: rgba(0, 0, 255, 1)">/&gt;</span>
+<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">context:component-scan</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span></pre>
+</div>
+<p>spring.xml</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">&lt;!--</span><span style="color: rgba(0, 128, 0, 1)"> 配置扫描注解,不扫描@Controller注解 </span><span style="color: rgba(0, 128, 0, 1)">--&gt;</span>
+<span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">context:component-scan </span><span style="color: rgba(255, 0, 0, 1)">base-package</span><span style="color: rgba(0, 0, 255, 1)">="com.xxx"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>
+    <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">context:exclude-filter </span><span style="color: rgba(255, 0, 0, 1)">type</span><span style="color: rgba(0, 0, 255, 1)">="annotation" </span><span style="color: rgba(255, 0, 0, 1)">expression</span><span style="color: rgba(0, 0, 255, 1)">="org.springframework.stereotype.Controller"</span> <span style="color: rgba(0, 0, 255, 1)">/&gt;</span>
+<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">context:component-scan</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>。</pre>
+</div>
+<p>use-default-filters属性默认为true，会扫描所有注解类型的bean 。如果配置成false，就只扫描白名单中定义的bean注解。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/grasp/category/1483309.html" target="_blank">spring源码</a></div>
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(11100124,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;7f58ef95-33d8-e411-b908-9dcfd8948a71&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/grasp/" target="_blank"><img src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/20180810101601.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/grasp/">xuanm</a><br>
+            <a href="https://home.cnblogs.com/u/grasp/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/grasp/followers/">粉丝 - 21</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;7f58ef95-33d8-e411-b908-9dcfd8948a71&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(11100124,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(11100124,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/grasp/archive/2004/01/13/11090136.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/grasp/archive/2004/01/13/11090136.html" title="发布于 2004-01-13 00:00">IDEA创建spring加struts2项目</a>
+    <br>
+    <a href="https://www.cnblogs.com/grasp/archive/2004/01/13/11105386.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/grasp/archive/2004/01/13/11105386.html" title="发布于 2004-01-13 00:00">RequestMappingHandlerAdapter和RequestParam原理分析</a>
+
+</div>
+</div>
+	</div>
+	
+	<div class="postfoot">
+		posted on 
+<span id="post-date">2019-06-27 22:48</span>&nbsp;
+<a href="https://www.cnblogs.com/grasp/">xuanm</a>&nbsp;
+阅读(<span id="post_view_count">1893</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=11100124" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(11100124);return false;">收藏</a>
+	</div>
+</div>
+
+
+<script src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 221102, cb_blogApp = 'grasp', cb_blogUserGuid = '7f58ef95-33d8-e411-b908-9dcfd8948a71';
+    var cb_entryId = 11100124, cb_entryCreatedDate = '2019-06-27 22:48', cb_postType = 1;
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/grasp/p/11100124.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/grasp/p/11100124.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.cnblogs.com/cmt/p/13704696.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网征文&#39;)">【推荐】为自己发“声” —— 声网RTC征文大赛在园子里征稿</a><br><a href="https://brands.cnblogs.com/agora" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网专区&#39;)">【推荐】未知数的距离，毫秒间的传递，声网与你实时互动</a><br><a href="https://brands.cnblogs.com/huawei" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】了不起的开发者，挡不住的华为，园子里的品牌专区</a><br><a href="https://www.sheca.com/assets/wwx/page1.html?site=bokeyuan" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-上海CA-SSL证书&#39;)">【推荐】SSL证书一站式服务，上海CA权威认证</a><br><a href="https://developer.aliyun.com/article/718700?utm_content=g_1000088931" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云开发者社区&#39;)">【推荐】免费下载《阿里工程师的自我修养》</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CLXHyoGViewCFYMIXAodhFEAmQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="@RequestMapping小技巧" href="https://www.cnblogs.com/tyoutetu/p/11991814.html" target="_blank" onclick="clickRecomItmem(11991814)">@RequestMapping小技巧</a><br>·  <a title="Spring@RequestMapping参数说明" href="https://www.cnblogs.com/hfultrastrong/p/12067661.html" target="_blank" onclick="clickRecomItmem(12067661)">Spring@RequestMapping参数说明</a><br>·  <a title="SpringBoot2（八）RequestMapping注意事项" href="https://www.cnblogs.com/chenss15060100790/p/12052328.html" target="_blank" onclick="clickRecomItmem(12052328)">SpringBoot2（八）RequestMapping注意事项</a><br>·  <a title="springmvc常用注解之@Controller和@RequestMapping" href="https://www.cnblogs.com/kaifaxiaoliu/p/11980146.html" target="_blank" onclick="clickRecomItmem(11980146)">springmvc常用注解之@Controller和@RequestMapping</a><br>·  <a title="SpringMVC详解一、@RequestMapping注解与Controller接收参数" href="https://www.cnblogs.com/dancser/p/12066112.html" target="_blank" onclick="clickRecomItmem(12066112)">SpringMVC详解一、@RequestMapping注解与Controller接收参数</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/11100124">更多推荐...</a></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="COvnyIGViewCFYMIXAodhFEAmQ"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/673834/" target="_blank">难倒创业团队的惊险一跃，是“李开复陷阱”</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/673833/" target="_blank">腾讯开放天籁AI降噪技术，发起“天籁行动”关注听障人群</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/673832/" target="_blank">创业公司该如何IPO？腾讯带他们到深交所看了看</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/673830/" target="_blank">“电竞第一股”雷蛇发生数据泄露，波及10亿游戏玩家个人信息</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/673831/" target="_blank">可编程的磁驱动软体机器人来了！Science 子刊：背后原理19世纪末提出</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverT2();
+        deliverC1C2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+
+
+</div>
+<div class="footer">
+<p id="footer">
+	Powered by: 
+	<br>
+	
+	<a href="https://www.cnblogs.com/" id="footer_site_link">博客园</a>
+	<br>
+	Copyright © 2020 xuanm
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+</p>
+
+
+</div>
+
+
+    
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?39b794a97f47c65b6b2e4e1741dcba38";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+<iframe id="google_osd_static_frame_3855264976023" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./RequestMapping原理分析和RequestMappingHandlerMapping - xuanm - 博客园_files/saved_resource(2).html"></iframe></body></html>
