@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://www.cnblogs.com/wade-luffy/p/6080767.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="BeanFactoryTransactionAttributeSourceAdvisor作为Advisor的实现类，自然要遵从Advisor的处理方式，当代理被调用时会调用这个类的增强方法，也就是此b">
+    <meta property="og:description" content="BeanFactoryTransactionAttributeSourceAdvisor作为Advisor的实现类，自然要遵从Advisor的处理方式，当代理被调用时会调用这个类的增强方法，也就是此b">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/bundle-banlieue13.min.css">
+    <link type="text/css" rel="stylesheet" href="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/custom.css">
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/bundle-banlieue13-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/wade-luffy/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/wade-luffy/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/wade-luffy/wlwmanifest.xml">
+    <script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/osd.js"></script><script async="" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/analytics.js"></script><script type="text/javascript" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/encoder.js"></script><script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/hm.js"></script><script>
+        var currentBlogId = 293616;
+        var currentBlogApp = 'wade-luffy';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Banlieue13';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2016-11-19 04:19';
+        </script>
+    <script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/jquery-2.2.0.min.js"></script>
+    <script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/blog-common.min.js"></script>
+    
+    
+    
+<script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/pubads_impl_2020092401.js" async=""></script><link rel="preload" href="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/f.txt" as="script"><script type="text/javascript" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/f.txt"></script><link rel="prefetch" href="https://fdd92fc30f1f1ef1e037cf0f303679c5.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body>
+    <a name="top"></a>
+    <div id="top_nav" class="navbar navbar-custom">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding">
+                    <a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/logo.svg" alt="博客园Logo"></a>
+                </li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="page_begin_html"><script type="text/javascript">window['__document_write_ajax_callbacks__']['2']();</script><script type="text/javascript">window['__document_write_ajax_callbacks__']['1']();</script></div>
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a href="https://www.cnblogs.com/wade-luffy/"><img id="blogLogo" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/wade-luffy/">wade&amp;luffy</a>
+</h1>
+<h2>
+生活最主要的还是感受，坚持是一种刻意的练习，不断寻找缺点突破缺点的过程，而不是重复做某件事情。
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/wade-luffy/">
+首页</a>
+</li>
+	<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/wade%26luffy">
+联系</a></li>
+	<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+	<li>
+
+	
+</li>
+</ul>
+
+
+
+			<div class="blogStats">
+				
+				<!--done-->
+随笔- 
+449&nbsp;
+文章- 
+0&nbsp;
+评论- 
+51&nbsp;
+
+
+
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/wade-luffy/p/6080767.html">
+    <span>Spring事务解析4-切面织入</span>
+    
+
+
+</a>
+
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			
+<div id="cnblogs_post_body" class="blogpost-body"><a name="_labelTop"></a><div id="navCategory" style="color:#152e97;"><p style="font-size:18px;"><b>目录</b></p><ul><li><a href="https://www.cnblogs.com/wade-luffy/p/6080767.html#_label0">创建事务</a></li></ul></div><p>&nbsp;</p><hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
+    <p>BeanFactoryTransactionAttributeSourceAdvisor作为Advisor的实现类，自然要遵从Advisor的处理方式，当代理被调用时会调用这个类的增强方法，也就是此bean的Advise，又因为在解析事务定义标签时我们把TransactionInterceptor类型的bean注入到了BeanFactoryTransactionAttributeSourceAdvisor中，所以，在调用事务增强器增强的代理类时会首先执行TransactionInterceptor进行增强，同时，也就是在TransactionInterceptor类中的invoke方法中完成了整个事务的逻辑。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">　　BeanFactoryTransactionAttributeSourceAdvisor.java
+    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Advice getAdvice() {
+        </span><span style="color: rgba(0, 0, 255, 1)">synchronized</span> (<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.adviceMonitor) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.advice == <span style="color: rgba(0, 0, 255, 1)">null</span> &amp;&amp; <span style="color: rgba(0, 0, 255, 1)">this</span>.adviceBeanName != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                Assert.state(</span><span style="color: rgba(0, 0, 255, 1)">this</span>.beanFactory != <span style="color: rgba(0, 0, 255, 1)">null</span>, "BeanFactory must be set to resolve 'adviceBeanName'"<span style="color: rgba(0, 0, 0, 1)">);
+                </span><span style="color: rgba(0, 0, 255, 1)">this</span>.advice = <span style="color: rgba(0, 0, 255, 1)">this</span>.beanFactory.getBean(<span style="color: rgba(0, 0, 255, 1)">this</span>.<span style="color: rgba(255, 0, 0, 1); background-color: rgba(255, 255, 0, 1)">adviceBeanName</span>, Advice.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.advice;
+        }
+    }
+</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">见标签解析,所以获取的是TransactionInterceptor
+</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将interceptorName的bean注入advisorDef的adviceBeanName属性中</span>
+advisorDef.getPropertyValues().add("adviceBeanName", interceptorName);</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>TransactionInterceptor支撑着整个事务功能的架构，逻辑还是相对复杂的，那么现在我们切入正题来分析此拦截器是如何实现事务特性的。TransactionInterceptor类继承自MethodInterceptor，所以调用该类是从其invoke方法开始的</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> Object invoke(<span style="color: rgba(0, 0, 255, 1)">final</span> MethodInvocation invocation) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Throwable {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Work out the target class: may be {@code null}.
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> The TransactionAttributeSource should be passed the target class
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> as well as the method, which may be from an interface.</span>
+        Class&lt;?&gt; targetClass = (invocation.getThis() != <span style="color: rgba(0, 0, 255, 1)">null</span> ? AopUtils.getTargetClass(invocation.getThis()) : <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Adapt to TransactionAspectSupport's invokeWithinTransaction...</span>
+        <span style="color: rgba(0, 0, 255, 1)">return</span> invokeWithinTransaction(invocation.getMethod(), targetClass, <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> InvocationCallback() {
+            @Override
+            </span><span style="color: rgba(0, 0, 255, 1)">public</span> Object proceedWithInvocation() <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Throwable {
+                </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> invocation.proceed();
+            }
+        });
+    }
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> Object invokeWithinTransaction(Method method, Class&lt;?&gt; targetClass, <span style="color: rgba(0, 0, 255, 1)">final</span><span style="color: rgba(0, 0, 0, 1)"> InvocationCallback invocation)
+            </span><span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> Throwable {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取对应事务属性</span>
+        <span style="color: rgba(0, 0, 255, 1)">final</span> TransactionAttribute txAttr =<span style="color: rgba(0, 0, 0, 1)"> getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取beanFactory中的transactionManager</span>
+        <span style="color: rgba(0, 0, 255, 1)">final</span> PlatformTransactionManager tm =<span style="color: rgba(0, 0, 0, 1)"> determineTransactionManager(txAttr);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">构造方法唯一标识（类.方法，如service.UserServiceImpl.save）</span>
+        <span style="color: rgba(0, 0, 255, 1)">final</span> String joinpointIdentification =<span style="color: rgba(0, 0, 0, 1)"> methodIdentification(method, targetClass);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">声明式事务处理</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (txAttr == <span style="color: rgba(0, 0, 255, 1)">null</span> || !(tm <span style="color: rgba(0, 0, 255, 1)">instanceof</span><span style="color: rgba(0, 0, 0, 1)"> CallbackPreferringPlatformTransactionManager)) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建TransactionInfo</span>
+            TransactionInfo txInfo =<span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1); background-color: rgba(255, 255, 0, 1)"> createTransactionIfNecessary</span>(tm, txAttr, joinpointIdentification);
+            Object retVal </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+            </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">执行被增强方法</span>
+                retVal =<span style="color: rgba(0, 0, 0, 1)"> invocation.proceedWithInvocation();
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Throwable ex) {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">异常回滚</span>
+<span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)">                completeTransactionAfterThrowing</span>(txInfo, ex);
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> ex;
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">finally</span><span style="color: rgba(0, 0, 0, 1)"> {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">清除信息</span>
+<span style="color: rgba(0, 0, 0, 1)">                cleanupTransactionInfo(txInfo);
+            }
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">提交事务</span>
+<span style="color: rgba(0, 0, 0, 1)">            commitTransactionAfterReturning(txInfo);
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> retVal;
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">编程式事务处理</span>
+        <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                Object result </span>=<span style="color: rgba(0, 0, 0, 1)"> ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
+                        </span><span style="color: rgba(0, 0, 255, 1)">new</span> TransactionCallback&lt;Object&gt;<span style="color: rgba(0, 0, 0, 1)">() {
+                            @Override
+                            </span><span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Object doInTransaction(TransactionStatus status) {
+                                TransactionInfo txInfo </span>=<span style="color: rgba(0, 0, 0, 1)"> prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
+                                </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                                    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> invocation.proceedWithInvocation();
+                                }
+                                </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Throwable ex) {
+                                    </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (txAttr.rollbackOn(ex)) {
+                                        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> A RuntimeException: will lead to a rollback.</span>
+                                        <span style="color: rgba(0, 0, 255, 1)">if</span> (ex <span style="color: rgba(0, 0, 255, 1)">instanceof</span><span style="color: rgba(0, 0, 0, 1)"> RuntimeException) {
+                                            </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> (RuntimeException) ex;
+                                        }
+                                        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                                            </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> ThrowableHolderException(ex);
+                                        }
+                                    }
+                                    </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                                        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> A normal return value: will lead to a commit.</span>
+                                        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> ThrowableHolder(ex);
+                                    }
+                                }
+                                </span><span style="color: rgba(0, 0, 255, 1)">finally</span><span style="color: rgba(0, 0, 0, 1)"> {
+                                    cleanupTransactionInfo(txInfo);
+                                }
+                            }
+                        });
+
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Check result: It might indicate a Throwable to rethrow.</span>
+                <span style="color: rgba(0, 0, 255, 1)">if</span> (result <span style="color: rgba(0, 0, 255, 1)">instanceof</span><span style="color: rgba(0, 0, 0, 1)"> ThrowableHolder) {
+                    </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> ((ThrowableHolder) result).getThrowable();
+                }
+                </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> result;
+                }
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (ThrowableHolderException ex) {
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> ex.getCause();
+            }
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class=" ">从上面的函数中，在Spring中支持两种事务处理的方式，分别是声明式事务处理与编程式事务处理，两者相对于开发人员来讲差别很大，但是对于Spring中的实现来讲，大同小异。在invoke中我们也可以看到这两种方式的实现。考虑到对事务的应用比声明式的事务处理使用起来方便，也相对流行些，我们就以此种方式进行分析。对于声明式的事务处理主要有以下几个步骤。</p>
+<p class=" ">（1）获取事务的属性。对于事务处理来说，最基础或者说最首要的工作便是获取事务属性了，这是支撑整个事务功能的基石，如果没有事务属性，其他功能也无从谈起，根据传播特性等属性进行事务创建。</p>
+<p class=" ">（2）加载配置中配置的TransactionManager。</p>
+<p class=" ">（3）不同的事务处理方式使用不同的逻辑。对于声明式事务的处理与编程式事务的处理，第一点区别在于事务属性上，因为编程式的事务处理是不需要有事务属性的，第二点区别就是在TransactionManager上，CallbackPreferringPlatformTransactionManager实现PlatformTransactionManager接口，暴露出一个方法用于执行事务处理中的回调。所以，这两种方式都可以用作事务处理方式的判断。</p>
+<p class=" ">（4）在目标方法执行前获取事务并收集事务信息。事务信息与事务属性并不相同，也就是TransactionInfo与TransactionAttribute并不相同，TransactionInfo中包含TransactionAttribute信息，但是，除了TransactionAttribute外还有其他事务信息，例如PlatformTransactionManager以及TransactionStatus相关信息。</p>
+<p class=" ">（5）执行目标方法。</p>
+<p class=" "><span style="color: rgba(255, 0, 0, 1)">（6）一旦出现异常，尝试异常处理。并不是所有异常，Spring都会将其回滚，</span><span style="color: rgba(255, 0, 0, 1)">默认情况下Spring中的事务异常处理机制只对RuntimeException和Error两种情况感兴趣</span>，当然你可以通过扩展来改变，不过，我们最常用的还是使用事务提供的属性设置，利用注解方式的使用，例如：<span class=" ">@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Exception.class)</span></p>
+<p class=" ">（7）提交事务前的事务信息清除。</p>
+<p class=" ">（8）提交事务。</p>
+<div style="text-align: right;"><a href="https://www.cnblogs.com/wade-luffy/p/6080767.html#_labelTop" style="color:#f68a33">回到顶部</a><a name="_label0"></a></div><h2 class=" " id="blogTitle0">创建事务</h2>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span><span style="color: rgba(0, 0, 0, 1)"> TransactionInfo createTransactionIfNecessary(
+            PlatformTransactionManager tm, TransactionAttribute txAttr, </span><span style="color: rgba(0, 0, 255, 1)">final</span><span style="color: rgba(0, 0, 0, 1)"> String joinpointIdentification) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果没有名称指定则使用方法唯一标识，并使用DelegatingTransactionAttribute封装txAttr
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">对于传入的TransactionAttribute类型的参数txAttr，当前的实际类型是RuleBasedTransactionAttribute，是由获取事务属性时生成，主要用于数据承载，
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">而这里之所以使用Delegating TransactionAttribute进行封装，当然是提供了更多的功能。</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (txAttr != <span style="color: rgba(0, 0, 255, 1)">null</span> &amp;&amp; txAttr.getName() == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            txAttr </span>= <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> DelegatingTransactionAttribute(txAttr) {
+                @Override
+                </span><span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> String getName() {
+                    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> joinpointIdentification;
+                }
+            };
+        }
+        TransactionStatus status </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (txAttr != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (tm != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取事务,获取TransactionStatus</span>
+                status =<span style="color: rgba(0, 0, 0, 1)"> tm.<span style="color: rgba(255, 0, 0, 1)">getTransaction</span>(txAttr);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+                    logger.debug(</span>"Skipping transactional joinpoint [" + joinpointIdentification +
+                            "] because no transaction manager has been configured"<span style="color: rgba(0, 0, 0, 1)">);
+                }
+            }
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">构建事务信息,根据指定的属性与status准备一个TransactionInfo
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">当已经建立事务连接并完成了事务信息的提取后，我们需要将所有的事务信息统一记录在TransactionInfo类型的实例中，
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">这个实例包含了目标方法开始前的所有状态信息，一旦事务执行失败，Spring会通过TransactionInfo类型的实例中的信息来进行回滚等后续工作。</span>
+        <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)"> prepareTransactionInfo</span>(tm, txAttr, joinpointIdentification, status);
+    }
+    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">final</span> TransactionStatus getTransaction(TransactionDefinition definition) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> TransactionException {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建对应的事务实例，这里使用的是DataSourceTransactionManager中的doGetTransaction方法
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建基于JDBC的事务实例。如果当前线程中存在关于dataSource的连接，那么直接使用。</span>
+        Object transaction =<span style="color: rgba(0, 0, 0, 1)"> doGetTransaction();
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Cache debug flag to avoid repeated checks.</span>
+        <span style="color: rgba(0, 0, 255, 1)">boolean</span> debugEnabled =<span style="color: rgba(0, 0, 0, 1)"> logger.isDebugEnabled();
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (definition == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Use defaults if no transaction definition given.</span>
+            definition = <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> DefaultTransactionDefinition();
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">判断当前线程是否存在事务，判读依据为当前线程记录的连接不为空且连接中(connectionHolder)中的transactionActive属性不为空</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (isExistingTransaction(transaction)) {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">当前线程已经存在事务,处理已经存在的事务。
+　　　　　　　</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">Spring中支持多种事务的传播规则，比如PROPAGATION_ NESTED、PROPAGATION_REQUIRES_NEW等，
+　　　　　　　</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">这些都是在已经存在事务的基础上进行进一步的处理
+　　　　　　　</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">（1）PROPAGATION_REQUIRES_NEW表示当前方法必须在它自己的事务里运行，一个新的事务将被启动，而如果有一个事务正在运行的话，则在这个方法运行期间被挂起。而Spring
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">中对于此种传播方式的处理与新事务建立最大的不同点在于使用suspend方法将原事务挂起。将信息挂起的目的当然是为了在当前事务执行完毕后在将原事务还原。
+　　　　　　　</span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">（2）PROPAGATION_NESTED表示如果当前正有一个事务在运行中，则该方法应该运行在一个嵌套的事务中，被嵌套的事务可以独立于封装事务进行提交或者回滚，如果封装事务不存
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">在，行为就像PROPAGATION_REQUIRES_NEW。对于嵌入式事务的处理，Spring中主要考虑了两种方式的处理。
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">Spring中允许嵌入事务的时候，则首选设置保存点的方式作为异常处理的回滚。对于其他方式，比如JTA无法使用保存点的方式，那么处理方式与PROPAGATION_REQUIRES_NEW相同
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">而一旦出现异常，则由Spring的事务异常处理机制去完成后续操作。
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">对于挂起操作的主要目的是记录原有事务的状态，以便于后续操作对事务的恢复。</span>
+            <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> handleExistingTransaction(definition, transaction, debugEnabled);
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">事务超时设置验证</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (definition.getTimeout() &lt;<span style="color: rgba(0, 0, 0, 1)"> TransactionDefinition.TIMEOUT_DEFAULT) {
+            </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> InvalidTimeoutException("Invalid transaction timeout"<span style="color: rgba(0, 0, 0, 1)">, definition.getTimeout());
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果当前线程不存在事务，但是propagationBehavior却被声明为PROPAGATION_MANDATORY抛出异常</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (definition.getPropagationBehavior() ==<span style="color: rgba(0, 0, 0, 1)"> TransactionDefinition.PROPAGATION_MANDATORY) {
+            </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> IllegalTransactionStateException(
+                    </span>"No existing transaction found for transaction marked with propagation 'mandatory'"<span style="color: rgba(0, 0, 0, 1)">);
+        }
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">PROPAGATION_REQUIRED、PROPAGATION_REQUIRES_NEW、PROPAGATION_NESTED都需要新建事务</span>
+        <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||<span style="color: rgba(0, 0, 0, 1)">
+                definition.getPropagationBehavior() </span>== TransactionDefinition.PROPAGATION_REQUIRES_NEW ||<span style="color: rgba(0, 0, 0, 1)">
+                definition.getPropagationBehavior() </span>==<span style="color: rgba(0, 0, 0, 1)"> TransactionDefinition.PROPAGATION_NESTED) {
+            SuspendedResourcesHolder suspendedResources </span>= suspend(<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (debugEnabled) {
+                logger.debug(</span>"Creating new transaction with name [" + definition.getName() + "]: " +<span style="color: rgba(0, 0, 0, 1)"> definition);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+                </span><span style="color: rgba(0, 0, 255, 1)">boolean</span> newSynchronization = (getTransactionSynchronization() !=<span style="color: rgba(0, 0, 0, 1)"> SYNCHRONIZATION_NEVER);
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">构建DefaultTransactionStatus</span>
+                DefaultTransactionStatus status =<span style="color: rgba(0, 0, 0, 1)"> newTransactionStatus(
+                        definition, transaction, </span><span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">, newSynchronization, debugEnabled, suspendedResources);
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">构造transaction,包括设置ConnectionHolder、隔离级别、timout如果是新连接，绑定到当前线程</span>
+<span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)">                doBegin</span>(transaction, definition);
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">新同步事务的设置，针对于当前线程的设置</span>
+<span style="color: rgba(0, 0, 0, 1)"><span style="color: rgba(255, 0, 0, 1)">                prepareSynchronization</span>(status, definition);
+                </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> status;
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (RuntimeException ex) {
+                resume(</span><span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">, suspendedResources);
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> ex;
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Error err) {
+                resume(</span><span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">, suspendedResources);
+                </span><span style="color: rgba(0, 0, 255, 1)">throw</span><span style="color: rgba(0, 0, 0, 1)"> err;
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Create "empty" transaction: no actual transaction, but potentially synchronization.</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span> (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT &amp;&amp;<span style="color: rgba(0, 0, 0, 1)"> logger.isWarnEnabled()) {
+                logger.warn(</span>"Custom isolation level specified but no actual transaction initiated; " +
+                        "isolation level will effectively be ignored: " +<span style="color: rgba(0, 0, 0, 1)"> definition);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">boolean</span> newSynchronization = (getTransactionSynchronization() ==<span style="color: rgba(0, 0, 0, 1)"> SYNCHRONIZATION_ALWAYS);
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span> prepareTransactionStatus(definition, <span style="color: rgba(0, 0, 255, 1)">null</span>, <span style="color: rgba(0, 0, 255, 1)">true</span>, newSynchronization, debugEnabled, <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+        }
+    }
+    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span><span style="color: rgba(0, 0, 0, 1)"> Object doGetTransaction() {
+        DataSourceTransactionObject txObject </span>= <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> DataSourceTransactionObject();
+        txObject.setSavepointAllowed(isNestedTransactionAllowed());
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">如果当前线程已经记录数据库连接则使用原有连接</span>
+        ConnectionHolder conHolder =<span style="color: rgba(0, 0, 0, 1)">
+                (ConnectionHolder) TransactionSynchronizationManager.getResource(</span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.dataSource);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">false表示非新创建连接。</span>
+        txObject.setConnectionHolder(conHolder, <span style="color: rgba(0, 0, 255, 1)">false</span><span style="color: rgba(0, 0, 0, 1)">);
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> txObject;
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>对于一些隔离级别、timeout等功能的设置并不是由Spring来完成的，而是委托给底层的数据库连接去做的，而对于数据库连接的设置就是在doBegin函数中处理的。</p>
+<p class=" ">可以说事务是从这个函数开始的，因为在这个函数中已经开始尝试了对数据库连接的获取，当然，在获取数据库连接的同时，一些必要的设置也是需要同步设置的。</p>
+<ol>
+<li class=" ">尝试获取连接。当然并不是每次都会获取新的连接，如果当前线程中的connectionHolder已经存在，则没有必要再次获取，或者，对于事务同步表示设置为true的需要重新获取连接。</li>
+<li class=" ">设置隔离级别以及只读标识。你是否有过这样的错觉？事务中的只读配置是Spring中做了一些处理呢？Spring中确实是针对只读操作做了一些处理，但是核心的实现是设置connection上的readOnly属性。同样，对于隔离级别的控制也是交由connection去控制的。</li>
+<li class=" ">更改默认的提交设置。如果事务属性是自动提交，那么需要改变这种设置，而将提交操作委托给Spring来处理。</li>
+<li class=" ">设置标志位，标识当前连接已经被事务激活。</li>
+<li class=" ">设置过期时间。</li>
+<li class=" ">将connectionHolder绑定到当前线程。</li>
+</ol>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">构造transaction,包括设置ConnectionHolder、隔离级别、timeout,如果是新连接，绑定到当前线程</span>
+<span style="color: rgba(0, 0, 0, 1)">    @Override
+    </span><span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> doBegin(Object transaction, TransactionDefinition definition) {
+        DataSourceTransactionObject txObject </span>=<span style="color: rgba(0, 0, 0, 1)"> (DataSourceTransactionObject) transaction;
+        Connection con </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        </span><span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (txObject.getConnectionHolder() == <span style="color: rgba(0, 0, 255, 1)">null</span> ||<span style="color: rgba(0, 0, 0, 1)">
+                    txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
+                Connection newCon </span>= <span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.dataSource.getConnection();
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+                    logger.debug(</span>"Acquired Connection [" + newCon + "] for JDBC transaction"<span style="color: rgba(0, 0, 0, 1)">);
+                }
+                txObject.setConnectionHolder(</span><span style="color: rgba(0, 0, 255, 1)">new</span> ConnectionHolder(newCon), <span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">);
+            }
+            txObject.getConnectionHolder().setSynchronizedWithTransaction(</span><span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">);
+            con </span>=<span style="color: rgba(0, 0, 0, 1)"> txObject.getConnectionHolder().getConnection();
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">设置隔离级别<br></span>　　　　　　　//设置隔离级别的prepareConnectionForTransaction函数用于负责对底层数据库连接的设置，<br>　　　　　　　//当然，只是包含只读标识和隔离级别的设置。由于强大的日志及异常处理，显得函数代码量比较大，但是单从业务角度去看，关键代码其实是不多的。
+            Integer previousIsolationLevel =<span style="color: rgba(0, 0, 0, 1)"> DataSourceUtils.prepareConnectionForTransaction(con, definition);
+            txObject.setPreviousIsolationLevel(previousIsolationLevel);
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">更改自动提交设置，由Spring控制提交</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (con.getAutoCommit()) {
+                txObject.setMustRestoreAutoCommit(</span><span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">);
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (logger.isDebugEnabled()) {
+                    logger.debug(</span>"Switching JDBC Connection [" + con + "] to manual commit"<span style="color: rgba(0, 0, 0, 1)">);
+                }
+                con.setAutoCommit(</span><span style="color: rgba(0, 0, 255, 1)">false</span><span style="color: rgba(0, 0, 0, 1)">);
+            }
+            txObject.getConnectionHolder().setTransactionActive(</span><span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">);
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">设置判断当前线程是否存在事务的依据</span>
+            <span style="color: rgba(0, 0, 255, 1)">int</span> timeout =<span style="color: rgba(0, 0, 0, 1)"> determineTimeout(definition);
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (timeout !=<span style="color: rgba(0, 0, 0, 1)"> TransactionDefinition.TIMEOUT_DEFAULT) {
+                txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
+            }
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将当前获取到的连接绑定到当前线程</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (txObject.isNewConnectionHolder()) {
+                TransactionSynchronizationManager.bindResource(getDataSource(), txObject.getConnectionHolder());
+            }
+        }
+        </span><span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (Throwable ex) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (txObject.isNewConnectionHolder()) {
+                DataSourceUtils.releaseConnection(con, </span><span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">.dataSource);
+                txObject.setConnectionHolder(</span><span style="color: rgba(0, 0, 255, 1)">null</span>, <span style="color: rgba(0, 0, 255, 1)">false</span><span style="color: rgba(0, 0, 0, 1)">);
+            }
+            </span><span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> CannotCreateTransactionException("Could not open JDBC Connection for transaction"<span style="color: rgba(0, 0, 0, 1)">, ex);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class=" ">将事务信息记录在当前线程中</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> prepareSynchronization(DefaultTransactionStatus status, TransactionDefinition definition) {
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (status.isNewSynchronization()) {
+            TransactionSynchronizationManager.setActualTransactionActive(status.hasTransaction());
+            TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
+                    definition.getIsolationLevel() </span>!= TransactionDefinition.ISOLATION_DEFAULT ?<span style="color: rgba(0, 0, 0, 1)">
+                            definition.getIsolationLevel() : </span><span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+            TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
+            TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
+            TransactionSynchronizationManager.initSynchronization();
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>Spring中对于回滚处理completeTransactionAfterThrowing的大致脉络如下：</p>
+<p class=" ">（1）首先是自定义触发器的调用，包括在回滚前、完成回滚后的调用，当然完成回滚包括正常回滚与回滚过程中出现异常，自定义的触发器会根据这些信息作进一步处理，而对于触发器的注册，常见是在回调过程中通过TransactionSynchronizationManager类中的静态方法直接注册：</p>
+<p class="ext_code_line"><span class=" ">public static void registerSynchronization(TransactionSynchronization synchronization)</span></p>
+<p class=" ">（2）除了触发监听函数外，就是真正的回滚逻辑处理了。当之前已经保存的事务信息中有保存点信息的时候，使用保存点信息进行回滚。常用于嵌入式事务，对于嵌入式的事务的处理，内嵌的事务异常并不会引起外部事务的回滚。根据保存点回滚的实现方式其实是根据底层的数据库连接进行的。这里使用的是JDBC的方式进行数据库连接，那么getSavepointManager()函数返回的是JdbcTransactionObjectSupport，也就是说上面函数会调用JdbcTransactionObjectSupport中的rollbackToSavepoint方法。当之前已经保存的事务信息中的事务为新事物，那么直接回滚。常用于单独事务的处理。对于没有保存点的回滚，Spring同样是使用底层数据库连接提供的API来操作的。由于我们使用的是DataSourceTransactionManager，那么doRollback函数会使用此类中的实现。当前事务信息中表明是存在事务的，又不属于以上两种情况，多数用于JTA，只做回滚标识，等到提交的时候统一不提交。</p>
+<p>（3）回滚后的信息清除，对于回滚逻辑执行结束后，无论回滚是否成功，都必须要做的事情就是事务结束后的收尾工作。事务处理的收尾处理工作包括如下内容。</p>
+<ol>
+<li class=" ">设置状态是对事务信息作完成标识以避免重复调用。</li>
+<li class=" ">如果当前事务是新的同步状态，需要将绑定到当前线程的事务信息清除。</li>
+<li class=" ">如果是新事物需要做些清除资源的工作。将数据库连接从当前线程中解除绑定，释放链接，恢复数据库连接的自动提交属性，重置数据库连接，如果当前事务时独立的新创建的事务则在事务完成时释放数据库连接。</li>
+</ol>
+<p>（4）如果在事务执行前有事务挂起，那么当前事务执行结束后需要将挂起事务恢复。</p>
+<p>Spring中对于提交事务commitTransactionAfterReturning的大致脉络如下：</p>
+<p><span style="line-height: 1.5">在真正的数据提交之前，还需要做个判断。在我们分析事务异常处理规则的时候，当某个事务既没有保存点又不是新事物，Spring对它的处理方式只是设置一个回滚标识。这个回滚标识在这里就会派上用场了，主要的应用场景如下，</span>某个事务是另一个事务的嵌入事务，但是，这些事务又不在Spring的管理范围内，或者无法设置保存点，那么Spring会通过设置回滚标识的方式来禁止提交。首先当某个嵌入事务发生回滚的时候会设置回滚标识，而等到外部事务提交时，一旦判断出当前事务流被设置了回滚标识，则由外部事务来统一进行整体事务的回滚。所以，当事务没有被异常捕获的时候也并不意味着一定会执行提交的过程。</p>
+<p class=" ">在提交过程中也并不是直接提交的，而是考虑了诸多的方面，符合提交的条件如下：</p>
+<ol>
+<li class=" ">当事务状态中有保存点信息的话便不会去提交事务。</li>
+<li class=" ">当事务非新事务的时候也不会去执行提交事务操作。</li>
+</ol>
+<p class=" ">此条件主要考虑内嵌事务的情况，对于内嵌事务，在Spring中正常的处理方式是将内嵌事务开始之前设置保存点，一旦内嵌事务出现异常便根据保存点信息进行回滚，但是如果没有出现异常，内嵌事务并不会单独提交，而是根据事务流由最外层事务负责提交，所以如果当前存在保存点信息便不是最外层事务，不做保存操作，对于是否是新事务的判断也是基于此考虑。如果程序流通过了事务的层层把关，最后顺利地进入了提交流程，那么同样，Spring会将事务提交的操作引导至底层数据库连接的API，进行事务提交。</p>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(6080767,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;ed144d26-3347-e611-9fc1-ac853d9f53cc&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/wade-luffy/" target="_blank"><img src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/20160712163123.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/wade-luffy/">wade&amp;luffy</a><br>
+            <a href="https://home.cnblogs.com/u/wade-luffy/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/wade-luffy/followers/">粉丝 - 141</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;ed144d26-3347-e611-9fc1-ac853d9f53cc&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(6080767,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(6080767,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/wade-luffy/archive/2004/01/13/6080533.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/wade-luffy/archive/2004/01/13/6080533.html" title="发布于 2004-01-13 00:00">Spring事务解析3-增强方法的获取</a>
+    <br>
+    <a href="https://www.cnblogs.com/wade-luffy/archive/2004/01/13/6084789.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/wade-luffy/archive/2004/01/13/6084789.html" title="发布于 2004-01-13 00:00">SpringMVC解析1-使用示例</a>
+
+</div>
+</div>
+		</div>
+		<div class="postDesc">posted @ 
+<span id="post-date">2016-11-19 16:19</span>&nbsp;
+<a href="https://www.cnblogs.com/wade-luffy/">wade&amp;luffy</a>&nbsp;
+阅读(<span id="post_view_count">2137</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=6080767" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(6080767);return false;">收藏</a></div>
+	</div>
+	
+	
+</div><!--end: topics 文章、评论容器-->
+<script src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 293616, cb_blogApp = 'wade-luffy', cb_blogUserGuid = 'ed144d26-3347-e611-9fc1-ac853d9f53cc';
+    var cb_entryId = 6080767, cb_entryCreatedDate = '2016-11-19 16:19', cb_postType = 1;
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/wade-luffy/p/6080767.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/wade-luffy/p/6080767.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.cnblogs.com/cmt/p/13704696.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网征文&#39;)">【推荐】为自己发“声” —— 声网RTC征文大赛在园子里征稿</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CO-ly6rukewCFQiWvQodjLEB7g"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="Spring---SpringIntegration" href="https://www.cnblogs.com/anpeiyong/p/11997741.html" target="_blank" onclick="clickRecomItmem(11997741)">Spring---SpringIntegration</a><br>·  <a title="【spring】springaop" href="https://www.cnblogs.com/kbian/p/12014605.html" target="_blank" onclick="clickRecomItmem(12014605)">【spring】springaop</a><br>·  <a title="Spring" href="https://www.cnblogs.com/lijianming180/p/12014160.html" target="_blank" onclick="clickRecomItmem(12014160)">Spring</a><br>·  <a title="Spring" href="https://www.cnblogs.com/liqian-/p/12069636.html" target="_blank" onclick="clickRecomItmem(12069636)">Spring</a><br>·  <a title="Spring" href="https://www.cnblogs.com/StarkBrothers/p/12061558.html" target="_blank" onclick="clickRecomItmem(12061558)">Spring</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/6080767">更多推荐...</a></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="CPCly6rukewCFQiWvQodjLEB7g"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/674134/" target="_blank">国内首家！B站升级HDR10真彩画质，向大会员开放</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674133/" target="_blank">马云即日起不再担任阿里巴巴集团董事</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674119/" target="_blank">十一黄金周为什么没有互联网“偷袭”战</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674132/" target="_blank">消息称特斯拉将推出磷酸铁锂电池的国产Model 3</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674131/" target="_blank">腾讯地图联合众多服务商 在全国上线聚合打车服务</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverT2();
+        deliverC1C2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/wade-luffy/">
+            wade&amp;luffy
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/wade-luffy/" title="入园时间：2016-07-11">
+            4年2个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/wade-luffy/followers/">
+            141
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/wade-luffy/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;ed144d26-3347-e611-9fc1-ac853d9f53cc&#39;)">+加关注</a></div>
+        <script>getFollowStatus('ed144d26-3347-e611-9fc1-ac853d9f53cc');</script>
+    </div>
+</div>
+</div>
+
+</div>
+
+<div id="sidebar_ad"></div>
+			<div id="calendar"><div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/09/01&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年10月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/11/01&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">27</td>
+                            <td class="CalOtherMonthDay" align="center">28</td>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                        <td class="CalTodayDay" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        3
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            4
+                        </td>
+                            <td class="" align="center">
+                                5
+                            </td>
+                            <td class="" align="center">
+                                6
+                            </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            10
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            11
+                        </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            17
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            18
+                        </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            24
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            25
+                        </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            31
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            1
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            7
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/wade-luffy/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/wade-luffy/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/wade-luffy/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/wade-luffy/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/wade-luffy/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+    <li><a id="itemListLink" onclick="this.blur();WarpClass(&#39;itemListLink&#39;, &#39;itemListLin_con&#39;);return false;" href="https://www.cnblogs.com/wade-luffy/p/6080767.html#">更多链接</a></li>
+</ul>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    <div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+        <li>
+            <a href="https://www.cnblogs.com/wade-luffy/tag/kafka/">kafka<span class="tag-count">(1)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/wade-luffy/tag/Protocol%20Buffers/">Protocol Buffers<span class="tag-count">(1)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/wade-luffy/tag/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构<span class="tag-count">(1)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/wade-luffy/tag/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/">消息中间件<span class="tag-count">(1)</span></a>
+        </li>
+    
+
+</ul>
+</div>
+
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+<div class="catListPostCategory">
+<h3 class="catListTitle">
+随笔分类
+
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/899179.html" rel="" target="">
+    Debug调优(11)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/856134.html" rel="" target="">
+    FrameWorks(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/853135.html" rel="" target="">
+    JDK基础(38)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/865120.html" rel="" target="">
+    JVM(14)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/904814.html" rel="" target="">
+    MySql入门经典(16)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/1189692.html" rel="" target="">
+    ZooKeeper(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/914685.html" rel="" target="">
+    常用命令(29)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/866095.html" rel="" target="">
+    工具使用指南(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/852100.html" rel="" target="">
+    数据结构(11)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/853462.html" rel="" target="">
+    数据库(23)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/865548.html" rel="" target="">
+    算法(24)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/928842.html" rel="" target="">
+    影评(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/category/878691.html" rel="" target="">
+    杂货店(8)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+<div class="catListPostArchive">
+<h3 class="catListTitle">
+随笔档案
+
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2020/07.html" rel="" target="">
+    2020年7月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2020/02.html" rel="" target="">
+    2020年2月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2019/07.html" rel="" target="">
+    2019年7月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2019/06.html" rel="" target="">
+    2019年6月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2019/02.html" rel="" target="">
+    2019年2月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/11.html" rel="" target="">
+    2018年11月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/10.html" rel="" target="">
+    2018年10月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/09.html" rel="" target="">
+    2018年9月(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/08.html" rel="" target="">
+    2018年8月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/07.html" rel="" target="">
+    2018年7月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/05.html" rel="" target="">
+    2018年5月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/04.html" rel="" target="">
+    2018年4月(11)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/03.html" rel="" target="">
+    2018年3月(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/02.html" rel="" target="">
+    2018年2月(4)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2018/01.html" rel="" target="">
+    2018年1月(6)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/11.html" rel="" target="">
+    2017年11月(5)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/10.html" rel="" target="">
+    2017年10月(24)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/09.html" rel="" target="">
+    2017年9月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/07.html" rel="" target="">
+    2017年7月(2)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/06.html" rel="" target="">
+    2017年6月(3)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/05.html" rel="" target="">
+    2017年5月(1)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/04.html" rel="" target="">
+    2017年4月(17)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/03.html" rel="" target="">
+    2017年3月(21)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/02.html" rel="" target="">
+    2017年2月(8)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2017/01.html" rel="" target="">
+    2017年1月(41)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/12.html" rel="" target="">
+    2016年12月(32)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/11.html" rel="" target="">
+    2016年11月(114)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/10.html" rel="" target="">
+    2016年10月(36)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/09.html" rel="" target="">
+    2016年9月(11)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/08.html" rel="" target="">
+    2016年8月(61)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/wade-luffy/archive/2016/07.html" rel="" target="">
+    2016年7月(17)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/wade-luffy/p/6292784.html">1. Re:B+树介绍</a></li>
+                    <li class="recent_comment_body">@墨、鱼的blog 所以国内不保护知识产权，你说的这么轻快，只是这一天没落到你头上而已...</li>
+                    <li class="recent_comment_author">--伊文Statistics</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/wade-luffy/p/6078301.html">2. Re:java.lang.instrument使用</a></li>
+                    <li class="recent_comment_body"><p>看《spring源码深度解析》书中的例子始终跑不通，有幸在这个博客里面看到了解决方法^_^</p>
+</li>
+                    <li class="recent_comment_author">--葱油拌面面面</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/wade-luffy/p/6292784.html">3. Re:B+树介绍</a></li>
+                    <li class="recent_comment_body">@AnthonyZhai 确实，作者的图分支数多于索引树，明显不符合B+树特性...</li>
+                    <li class="recent_comment_author">--qwewfd</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/wade-luffy/p/5753214.html">4. Re:JVM的GC理论详解</a></li>
+                    <li class="recent_comment_body">我刚出版了一本《深入解析Java编译器：源码剖析与实例详解》，下面打算全职研究HotSpot源代码，希望大家能共同研究。如果方便，麻烦留一下微信，或加我微信mazhimazh</li>
+                    <li class="recent_comment_author">--HotSpot-Researcher</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/wade-luffy/p/5925728.html">5. Re:Javac编译原理</a></li>
+                    <li class="recent_comment_body">结合实例 大佬讲的很清楚</li>
+                    <li class="recent_comment_author">--DanielToMax</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6292784.html">
+                            1. B+树介绍(69645)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6003668.html">
+                            2. RabbitMQ的安装和配置化可视界面(42861)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6072460.html">
+                            3. ClassPathXmlApplicationContext的启动(30781)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/8867144.html">
+                            4. SpringMvc中获取Request(28504)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6289183.html">
+                            5. InnoDB的行记录格式, Compact, Redundant, Compressed, Dynamic(24541)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6292784.html">
+                            1. B+树介绍(12)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6165671.html">
+                            2. TCP粘包/拆包问题(5)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6019743.html">
+                            3. Netty SSL性能调优(4)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6542539.html">
+                            4. Docker数据管理(数据卷&amp;数据卷容器)(3)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/wade-luffy/p/6289183.html">
+                            5. InnoDB的行记录格式, Compact, Redundant, Compressed, Dynamic(3)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    <div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/wade-luffy/p/6165671.html">
+                                1. TCP粘包/拆包问题(5)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/wade-luffy/p/5969418.html">
+                                2. 偏向锁，轻量级锁，自旋锁，重量级锁的详细介绍(5)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/wade-luffy/p/6292784.html">
+                                3. B+树介绍(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/wade-luffy/p/6072460.html">
+                                4. ClassPathXmlApplicationContext的启动(3)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/wade-luffy/p/5936234.html">
+                                5. Servlet工作原理解析(3)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 wade&amp;luffy
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    <div id="page_end_html">
+        <script language="javascript" type="text/javascript">
+// 生成目录索引列表
+function GenerateContentList()
+{
+    var mainContent = $('#cnblogs_post_body');
+    var h2_list = $('#cnblogs_post_body h2');//如果你的章节标题不是h2,只需要将这里的h2换掉即可
+
+    if(mainContent.length < 1)
+        return;
+ 
+    if(h2_list.length>0)
+    {
+        var content = '<a name="_labelTop"></a>';
+        content += '<div id="navCategory" style="color:#152e97;">';
+        content += '<p style="font-size:18px;"><b>目录</b></p>';
+        content += '<ul>';
+        for(var i=0; i<h2_list.length; i++)
+        {
+            var go_to_top = '<div style="text-align: right;"><a href="#_labelTop" style="color:#f68a33">回到顶部</a><a name="_label' + i + '"></a></div>';
+            $(h2_list[i]).before(go_to_top);
+            
+            var h3_list = $(h2_list[i]).nextAll("h3");
+            var li3_content = '';
+            for(var j=0; j<h3_list.length; j++)
+            {
+                var tmp = $(h3_list[j]).prevAll('h2').first();
+                if(!tmp.is(h2_list[i]))
+                    break;
+                var li3_anchor = '<a name="_label' + i + '_' + j + '"></a>';
+                $(h3_list[j]).before(li3_anchor);
+                li3_content += '<li><a href="#_label' + i + '_' + j + '">' + $(h3_list[j]).text() + '</a></li>';
+            }
+            
+            var li2_content = '';
+            if(li3_content.length > 0)
+                li2_content = '<li><a href="#_label' + i + '">' + $(h2_list[i]).text() + '</a><ul>' + li3_content + '</ul></li>';
+            else
+                li2_content = '<li><a href="#_label' + i + '">' + $(h2_list[i]).text() + '</a></li>';
+            content += li2_content;
+        }
+        content += '</ul>';
+        content += '</div><p>&nbsp;</p>';
+        content += '<hr style="height:1px;border:none;border-top:1px dashed #0066CC;"/>';
+        if($('#cnblogs_post_body').length != 0 )
+        {
+            $($('#cnblogs_post_body')[0]).prepend(content);
+        }
+    }   
+}
+
+GenerateContentList();
+</script>
+    </div>
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?39b794a97f47c65b6b2e4e1741dcba38";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+<script type="text/javascript">
+
+var BlogDirectory = {
+    /*
+        获取元素位置，距浏览器左边界的距离（left）和距浏览器上边界的距离（top）
+    */
+    getElementPosition:function (ele) {        
+        var topPosition = 0;
+        var leftPosition = 0;
+        while (ele){              
+            topPosition += ele.offsetTop;
+            leftPosition += ele.offsetLeft;        
+            ele = ele.offsetParent;     
+        }  
+        return {top:topPosition, left:leftPosition}; 
+    },
+
+    /*
+    获取滚动条当前位置
+    */
+    getScrollBarPosition:function () {
+        var scrollBarPosition = document.body.scrollTop || document.documentElement.scrollTop;
+        return  scrollBarPosition;
+    },
+    
+    /*
+    移动滚动条，finalPos 为目的位置，internal 为移动速度
+    */
+    moveScrollBar:function(finalpos, interval) {
+
+        //若不支持此方法，则退出
+        if(!window.scrollTo) {
+            return false;
+        }
+
+        //窗体滚动时，禁用鼠标滚轮
+        window.onmousewheel = function(){
+            return false;
+        };
+          
+        //清除计时
+        if (document.body.movement) { 
+            clearTimeout(document.body.movement); 
+        } 
+
+        var currentpos =BlogDirectory.getScrollBarPosition();//获取滚动条当前位置
+
+        var dist = 0; 
+        if (currentpos == finalpos) {//到达预定位置，则解禁鼠标滚轮，并退出
+            window.onmousewheel = function(){
+                return true;
+            }
+            return true; 
+        } 
+        if (currentpos < finalpos) {//未到达，则计算下一步所要移动的距离
+            dist = Math.ceil((finalpos - currentpos)/10); 
+            currentpos += dist; 
+        } 
+        if (currentpos > finalpos) { 
+            dist = Math.ceil((currentpos - finalpos)/10); 
+            currentpos -= dist; 
+        }
+        
+        var scrTop = BlogDirectory.getScrollBarPosition();//获取滚动条当前位置
+        window.scrollTo(0, currentpos);//移动窗口
+        if(BlogDirectory.getScrollBarPosition() == scrTop)//若已到底部，则解禁鼠标滚轮，并退出
+        {
+            window.onmousewheel = function(){
+                return true;
+            }
+            return true;
+        }
+        
+        //进行下一步移动
+        var repeat = "BlogDirectory.moveScrollBar(" + finalpos + "," + interval + ")"; 
+        document.body.movement = setTimeout(repeat, interval); 
+    },
+    
+    htmlDecode:function (text){
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    },
+
+    createBlogDirectory:function (id, mt, st, interval){
+         //获取博文正文div容器
+        var elem = document.getElementById(id);
+        if(!elem) return false;
+        //获取div中所有元素结点
+        var nodes = elem.getElementsByTagName("*");
+        //创建博客目录的div容器
+        var divSideBar = document.createElement('DIV');
+        divSideBar.className = 'uprightsideBar';
+        divSideBar.setAttribute('id', 'uprightsideBar');
+        var divSideBarTab = document.createElement('DIV');
+        divSideBarTab.setAttribute('id', 'sideBarTab');
+        divSideBar.appendChild(divSideBarTab);
+        var h2 = document.createElement('H2');
+        divSideBarTab.appendChild(h2);
+        var txt = document.createTextNode('目录导航');
+        h2.appendChild(txt);
+        var divSideBarContents = document.createElement('DIV');
+        divSideBarContents.style.display = 'none';
+        divSideBarContents.setAttribute('id', 'sideBarContents');
+        divSideBar.appendChild(divSideBarContents);
+        //创建自定义列表
+        var dlist = document.createElement("dl");
+        divSideBarContents.appendChild(dlist);
+        var num = 0;//统计找到的mt和st
+        mt = mt.toUpperCase();//转化成大写
+        st = st.toUpperCase();//转化成大写
+        //遍历所有元素结点
+        for(var i=0; i<nodes.length; i++)
+        {
+            if(nodes[i].nodeName == mt|| nodes[i].nodeName == st)    
+            {
+                //获取标题文本
+                var nodetext = nodes[i].innerHTML.replace(/<\/?[^>]+>/g,"");//innerHTML里面的内容可能有HTML标签，所以用正则表达式去除HTML的标签
+                nodetext = nodetext.replace(/ /ig, "");//替换掉所有的 
+                nodetext = BlogDirectory.htmlDecode(nodetext);
+                //插入锚        
+                nodes[i].setAttribute("id", "blogTitle" + num);
+                var item;
+                switch(nodes[i].nodeName)
+                {
+                    case mt:    //若为主标题 
+                        item = document.createElement("dt");
+                        break;
+                    case st:    //若为子标题
+                        item = document.createElement("dd");
+                        break;
+                }
+                
+                //创建锚链接
+                var itemtext = document.createTextNode(nodetext);
+                item.appendChild(itemtext);
+                item.setAttribute("name", num);
+                item.onclick = function(){        //添加鼠标点击触发函数
+                    var pos = BlogDirectory.getElementPosition(document.getElementById("blogTitle" + this.getAttribute("name")));
+                    if(!BlogDirectory.moveScrollBar(pos.top, interval)) return false;
+                };            
+                
+                //将自定义表项加入自定义列表中
+                dlist.appendChild(item);
+                num++;
+            }
+        }
+        
+        if(num == 0) return false; 
+        /*鼠标进入时的事件处理*/
+        divSideBarTab.onmouseenter = function(){
+            divSideBarContents.style.display = 'block';
+        }
+        /*鼠标离开时的事件处理*/
+        divSideBar.onmouseleave = function() {
+            divSideBarContents.style.display = 'none';
+        }
+
+        document.body.appendChild(divSideBar);
+    }
+    
+};
+
+window.onload=function(){
+    /*页面加载完成之后生成博客目录*/
+    BlogDirectory.createBlogDirectory("cnblogs_post_body","h2","h3",20);
+}
+</script><div class="uprightsideBar" id="uprightsideBar"><div id="sideBarTab"><h2>目录导航</h2></div><div id="sideBarContents" style="display: none;"><dl><dt name="0">创建事务</dt></dl></div></div><iframe id="google_osd_static_frame_9401716819529" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./Spring事务解析4-切面织入 - wade&amp;luffy - 开发者的网上家园_files/saved_resource(2).html"></iframe></body></html>
