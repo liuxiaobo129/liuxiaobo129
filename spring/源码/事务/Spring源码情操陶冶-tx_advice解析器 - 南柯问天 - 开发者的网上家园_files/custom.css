@@ -1,0 +1,45 @@
+#page-date + a {
+ text-decoration: none;
+    font-size: 20px;
+    text-shadow: 1px 1px;
+    color: #333;
+}
+
+body{
+ background:url('https://www.cnblogs.com/images/cnblogs_com/question-sky/1166057/o_sea.jpg') center fixed repeat-x;
+ background-size:cover;
+}
+
+
+
+#home{
+    opacity: 0.950;
+}
+
+#MySignature{
+         display: block;
+    border: 1px solid #222222;
+    border-radius: 3px;
+    background-color: #e0e0e0;
+    font-size: 14px;
+    color: #008200;
+    font-family: '微软雅黑';
+    line-height: 30px;
+    padding: 15px;
+}
+
+.cnblogs-markdown code, .cnblogs-post-body code{
+    border:1px solid #ccc!important;
+}
+
+.postTitle{
+ border-left: 5px solid #008200;
+}
+
+.sourceCode.hljs{
+    background-color: #ccc !important;
+}
+
+#cnblogs_post_body h4,#cnblogs_post_body h3{
+ height:auto !important;
+}

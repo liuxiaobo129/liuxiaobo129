@@ -1,0 +1,15 @@
+/**
+**cnblogs点赞样式
+*/
+#div_digg{
+	position: fixed;
+	bottom: 5px ;
+	width: 140px;
+	right: 300px ;
+	border: 2px solid #CBCFD2 ;
+	padding:10px;
+	background: #fff ;
+	border-radius: 5px 5px 5px 5px !important;
+	box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+	z-index: 1 ; 
+}

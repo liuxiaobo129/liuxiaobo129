@@ -1,0 +1,98 @@
+/*cnblogs姒涙ǹ顓婚弽宄扮础*/
+/**閺嶅洭顣界紘搴″**/
+#cnblogs_post_body
+{
+    color: black;      
+    font: 0.875em/1.5em "瀵邦喛钂嬮梿鍛寸拨" , "PTSans" , "Arial" ,sans-serif;
+    font-size: 15px;
+}
+#cnblogs_post_body h1    {
+    background: #333366;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "瀵邦喛钂嬮梿鍛寸拨" , "鐎瑰缍�" , "姒涙垳缍�" ,Arial;
+    font-size: 23px;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 18px 0 !important;
+    padding: 8px 0 5px 5px;
+    text-shadow: 2px 2px 3px #222222;
+}
+#cnblogs_post_body h2    {
+    background: #006699;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "瀵邦喛钂嬮梿鍛寸拨" , "鐎瑰缍�" , "姒涙垳缍�" ,Arial;
+    font-size: 20px;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 18px 0 !important;
+    padding: 8px 0 5px 5px;
+    text-shadow: 2px 2px 3px #222222;
+}
+#cnblogs_post_body h3    {
+    background: #2B6695;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "瀵邦喛钂嬮梿鍛寸拨" , "鐎瑰缍�" , "姒涙垳缍�" ,Arial;
+    font-size: 18px;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 18px 0 !important;
+    padding: 8px 0 5px 5px;
+    text-shadow: 2px 2px 3px #222222;
+}
+#cnblogs_post_body h4{
+    background: #2B6600;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "瀵邦喛钂嬮梿鍛寸拨" , "鐎瑰缍�" , "姒涙垳缍�" ,Arial;
+    font-size: 14px;
+    font-weight: bold;
+    height: 24px;
+    line-height: 23px;
+    margin: 12px 0 !important;
+    padding: 5px 0 5px 10px;
+    text-shadow: 2px 2px 3px #222222;
+}
+
+/**閻愮绂愰崶鐐垼鐠佸墽鐤�**/
+#div_digg{
+    position: fixed;
+    bottom: 100px;
+    right: 315px;
+    /* margin-bottom: 10px; */
+    /* margin-right: 30px; */
+    font-size: 12px;
+    width: 120px;
+    text-align: center;
+    /* margin-top: 10px;*/
+}
+
+/*瀵洜鏁ら弽宄扮础娣囶喗鏁�**/
+blockquote{
+	background: none;
+    border: 2px solid #fff;
+    box-shadow: 0px 0px 2px #4f4f4f;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 10px;
+}
+blockquote a{
+	color: cadetblue ;
+}
+
+#mylinks a{
+	text-shadow: 0px 2px 5px #000;
+    font-size: 15px;
+    color: #efefef;
+}

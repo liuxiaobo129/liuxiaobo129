@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://www.cnblogs.com/jintian315/p/8759383.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="自定义命名空间的每个标签都需要有去对应的解析器，且解析器需要实现BeanDefinitionParser，在parse方法中，解析将来在Spring配置文件中出现的标签元素。进入TxAdviceBea">
+    <meta property="og:description" content="自定义命名空间的每个标签都需要有去对应的解析器，且解析器需要实现BeanDefinitionParser，在parse方法中，解析将来在Spring配置文件中出现的标签元素。进入TxAdviceBea">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/bundle-coffee.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/bundle-coffee-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/jintian315/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/jintian315/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/jintian315/wlwmanifest.xml">
+    <script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/osd.js"></script><script async="" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/analytics.js"></script><script type="text/javascript" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/encoder.js"></script><script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/hm.js"></script><script>
+        var currentBlogId = 418920;
+        var currentBlogApp = 'jintian315';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'coffee';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-04-09 03:28';
+        </script>
+    <script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/jquery-2.2.0.min.js"></script>
+    <script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/blog-common.min.js"></script>
+    
+    
+    
+<script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/pubads_impl_2020092401.js" async=""></script><link rel="preload" href="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/f.txt" as="script"><script type="text/javascript" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/f.txt"></script><link rel="prefetch" href="https://9f5953bd6e1b559b0432b514f3e673cd.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body>
+    <a name="top"></a>
+    <div id="top_nav" class="navbar">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding">
+                    <a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/logo.svg" alt="博客园Logo"></a>
+                </li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a href="https://www.cnblogs.com/jintian315/"><img id="blogLogo" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/jintian315/">jintian315</a>
+</h1>
+<h2>
+
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/jintian315/">
+首页</a>
+</li>
+	<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/jintian315">
+联系</a></li>
+	<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+	<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/jintian315/rss/">
+订阅</a>
+	
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/jintian315/rss/">
+    <img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/xml.gif" alt="订阅">
+</a></li>
+</ul>
+
+
+
+			<div class="blogStats">
+				
+				<!--done-->
+随笔- 
+10&nbsp;
+文章- 
+0&nbsp;
+评论- 
+1&nbsp;
+
+
+
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/jintian315/p/8759383.html">
+    <span>Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser</span>
+    
+
+
+</a>
+
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			
+<div id="cnblogs_post_body" class="blogpost-body">
+    <p>自定义命名空间的每个标签都需要有去对应的解析器，且解析器需要实现BeanDefinitionParser，在parse方法中，解析将来在Spring配置文件中出现的标签元素。进入TxAdviceBeanDefinitionParser的parse方法（在org.springframework.beans.factory.xml.AbstractBeanDefinitionParser类实现）</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> //<span style="font-family: Courier New">org.springframework.beans.factory.xml.AbstractBeanDefinitionParser</span><br> 1</span> <span style="color: rgba(0, 0, 0, 1)">    @Override
+</span><span style="color: rgba(0, 128, 128, 1)"> 2</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">final</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinition parse(Element element, ParserContext parserContext) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span>         AbstractBeanDefinition definition =<span style="color: rgba(0, 0, 0, 1)"> parseInternal(element, parserContext);//类定义
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (definition != <span style="color: rgba(0, 0, 255, 1)">null</span> &amp;&amp; !<span style="color: rgba(0, 0, 0, 1)">parserContext.isNested()) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>             <span style="color: rgba(0, 0, 255, 1)">try</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span>                 String id =<span style="color: rgba(0, 0, 0, 1)"> resolveId(element, definition, parserContext);
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (!<span style="color: rgba(0, 0, 0, 1)">StringUtils.hasText(id)) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span> <span style="color: rgba(0, 0, 0, 1)">                    parserContext.getReaderContext().error(
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>                             "Id is required for element '" +<span style="color: rgba(0, 0, 0, 1)"> parserContext.getDelegate().getLocalName(element)
+</span><span style="color: rgba(0, 128, 128, 1)">10</span>                                     + "' when used as a top-level tag"<span style="color: rgba(0, 0, 0, 1)">, element);
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">12</span>                 String[] aliases = <span style="color: rgba(0, 0, 255, 1)">new</span> String[0<span style="color: rgba(0, 0, 0, 1)">];
+</span><span style="color: rgba(0, 128, 128, 1)">13</span>                 String name =<span style="color: rgba(0, 0, 0, 1)"> element.getAttribute(NAME_ATTRIBUTE);
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (StringUtils.hasLength(name)) {
+</span><span style="color: rgba(0, 128, 128, 1)">15</span>                     aliases =<span style="color: rgba(0, 0, 0, 1)"> StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
+</span><span style="color: rgba(0, 128, 128, 1)">16</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">17</span>                 BeanDefinitionHolder holder = <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> BeanDefinitionHolder(definition, id, aliases);
+</span><span style="color: rgba(0, 128, 128, 1)">18</span> <span style="color: rgba(0, 0, 0, 1)">                registerBeanDefinition(holder, parserContext.getRegistry());
+</span><span style="color: rgba(0, 128, 128, 1)">19</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (shouldFireEvents()) {
+</span><span style="color: rgba(0, 128, 128, 1)">20</span>                     BeanComponentDefinition componentDefinition = <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> BeanComponentDefinition(holder);
+</span><span style="color: rgba(0, 128, 128, 1)">21</span> <span style="color: rgba(0, 0, 0, 1)">                    postProcessComponentDefinition(componentDefinition);
+</span><span style="color: rgba(0, 128, 128, 1)">22</span> <span style="color: rgba(0, 0, 0, 1)">                    parserContext.registerComponent(componentDefinition);
+</span><span style="color: rgba(0, 128, 128, 1)">23</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">24</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">25</span>             <span style="color: rgba(0, 0, 255, 1)">catch</span><span style="color: rgba(0, 0, 0, 1)"> (BeanDefinitionStoreException ex) {
+</span><span style="color: rgba(0, 128, 128, 1)">26</span> <span style="color: rgba(0, 0, 0, 1)">                parserContext.getReaderContext().error(ex.getMessage(), element);
+</span><span style="color: rgba(0, 128, 128, 1)">27</span>                 <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">28</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">29</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">30</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> definition;
+</span><span style="color: rgba(0, 128, 128, 1)">31</span>     }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>第3行，解析标签为类定义AbstractBeanDefinition实例，跟进方法（org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser类实现）</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> //org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser<br> 1</span>     <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)">     * Creates a {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> BeanDefinitionBuilder} instance for the
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)">     * {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> #getBeanClass bean Class} and passes it to the
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)">     * {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> #doParse} strategy method.
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> element the element that is to be parsed into a single BeanDefinition
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> parserContext the object encapsulating the current state of the parsing process
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span><span style="color: rgba(0, 128, 0, 1)"> the BeanDefinition resulting from the parsing of the supplied {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> Element}
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@throws</span><span style="color: rgba(0, 128, 0, 1)"> IllegalStateException if the bean {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> Class} returned from
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span> <span style="color: rgba(0, 128, 0, 1)">     * {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> #getBeanClass(org.w3c.dom.Element)} is {</span><span style="color: rgba(128, 128, 128, 1)">@code</span><span style="color: rgba(0, 128, 0, 1)"> null}
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@see</span><span style="color: rgba(0, 128, 0, 1)"> #doParse
+</span><span style="color: rgba(0, 128, 128, 1)">11</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">12</span> <span style="color: rgba(0, 0, 0, 1)">    @Override
+</span><span style="color: rgba(0, 128, 128, 1)">13</span>     <span style="color: rgba(0, 0, 255, 1)">protected</span> <span style="color: rgba(0, 0, 255, 1)">final</span><span style="color: rgba(0, 0, 0, 1)"> AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>         BeanDefinitionBuilder builder =<span style="color: rgba(0, 0, 0, 1)"> BeanDefinitionBuilder.genericBeanDefinition();
+</span><span style="color: rgba(0, 128, 128, 1)">15</span>         String parentName =<span style="color: rgba(0, 0, 0, 1)"> getParentName(element);
+</span><span style="color: rgba(0, 128, 128, 1)">16</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (parentName != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">17</span> <span style="color: rgba(0, 0, 0, 1)">            builder.getRawBeanDefinition().setParentName(parentName);
+</span><span style="color: rgba(0, 128, 128, 1)">18</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">19</span>         Class&lt;?&gt; beanClass =<span style="color: rgba(0, 0, 0, 1)"> getBeanClass(element);//获取bean的类型Class对象
+</span><span style="color: rgba(0, 128, 128, 1)">20</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (beanClass != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">21</span> <span style="color: rgba(0, 0, 0, 1)">            builder.getRawBeanDefinition().setBeanClass(beanClass);
+</span><span style="color: rgba(0, 128, 128, 1)">22</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">23</span>         <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">24</span>             String beanClassName =<span style="color: rgba(0, 0, 0, 1)"> getBeanClassName(element);//获取类名
+</span><span style="color: rgba(0, 128, 128, 1)">25</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> (beanClassName != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">26</span> <span style="color: rgba(0, 0, 0, 1)">                builder.getRawBeanDefinition().setBeanClassName(beanClassName);
+</span><span style="color: rgba(0, 128, 128, 1)">27</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">28</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">29</span> <span style="color: rgba(0, 0, 0, 1)">        builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
+</span><span style="color: rgba(0, 128, 128, 1)">30</span>         <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (parserContext.isNested()) {
+</span><span style="color: rgba(0, 128, 128, 1)">31</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Inner bean definition must receive same scope as containing bean.</span>
+<span style="color: rgba(0, 128, 128, 1)">32</span> <span style="color: rgba(0, 0, 0, 1)">            builder.setScope(parserContext.getContainingBeanDefinition().getScope());
+</span><span style="color: rgba(0, 128, 128, 1)">33</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">34</span>         <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (parserContext.isDefaultLazyInit()) {
+</span><span style="color: rgba(0, 128, 128, 1)">35</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Default-lazy-init applies to custom bean definitions as well.</span>
+<span style="color: rgba(0, 128, 128, 1)">36</span>             builder.setLazyInit(<span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">37</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">38</span> <span style="color: rgba(0, 0, 0, 1)">        doParse(element, parserContext, builder);
+</span><span style="color: rgba(0, 128, 128, 1)">39</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> builder.getBeanDefinition();
+</span><span style="color: rgba(0, 128, 128, 1)">40</span>     }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>第19行，查找bean的类型即Class对象，跟进方法（在org.springframework.transaction.config.TxAdviceBeanDefinitionParser类中实现）</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 128, 1)">//org.springframework.transaction.config.TxAdviceBeanDefinitionParser<br>1</span> <span style="color: rgba(0, 0, 0, 1)">    @Override
+</span><span style="color: rgba(0, 128, 128, 1)">2</span>     <span style="color: rgba(0, 0, 255, 1)">protected</span> Class&lt;?&gt;<span style="color: rgba(0, 0, 0, 1)"> getBeanClass(Element element) {
+</span><span style="color: rgba(0, 128, 128, 1)">3</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> TransactionInterceptor.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">4</span>     }</pre>
+</div>
+<p>&lt;tx:advice/&gt;标签解析，最后得到了一个className为TransactionInterceptor的BeanDefinition并注册。</p>
+<p>我们看下TransactionInterceptor类的定义</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * AOP Alliance MethodInterceptor for declarative transaction
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> * management using the common Spring transaction infrastructure
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * ({</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> org.springframework.transaction.PlatformTransactionManager}).
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span> <span style="color: rgba(0, 128, 0, 1)"> *
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 128, 0, 1)"> * &lt;p&gt;Derives from the {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> TransactionAspectSupport} class which
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 128, 0, 1)"> * contains the integration with Spring's underlying transaction API.
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span> <span style="color: rgba(0, 128, 0, 1)"> * TransactionInterceptor simply calls the relevant superclass methods
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span> <span style="color: rgba(0, 128, 0, 1)"> * such as {</span><span style="color: rgba(128, 128, 128, 1)">@link</span><span style="color: rgba(0, 128, 0, 1)"> #invokeWithinTransaction} in the correct order.
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 128, 0, 1)"> *
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 128, 0, 1)"> * &lt;p&gt;TransactionInterceptors are thread-safe.
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> <span style="color: rgba(0, 128, 0, 1)"> *
+</span><span style="color: rgba(0, 128, 128, 1)">13</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> Rod Johnson
+</span><span style="color: rgba(0, 128, 128, 1)">14</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> Juergen Hoeller
+</span><span style="color: rgba(0, 128, 128, 1)">15</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@see</span><span style="color: rgba(0, 128, 0, 1)"> TransactionProxyFactoryBean
+</span><span style="color: rgba(0, 128, 128, 1)">16</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@see</span><span style="color: rgba(0, 128, 0, 1)"> org.springframework.aop.framework.ProxyFactoryBean
+</span><span style="color: rgba(0, 128, 128, 1)">17</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@see</span><span style="color: rgba(0, 128, 0, 1)"> org.springframework.aop.framework.ProxyFactory
+</span><span style="color: rgba(0, 128, 128, 1)">18</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">19</span> @SuppressWarnings("serial"<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">20</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> TransactionInterceptor <span style="color: rgba(0, 0, 255, 1)">extends</span> TransactionAspectSupport <span style="color: rgba(0, 0, 255, 1)">implements</span><span style="color: rgba(0, 0, 0, 1)"> MethodInterceptor, Serializable {
+</span><span style="color: rgba(0, 128, 128, 1)">21</span>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">省略代码</span>
+<span style="color: rgba(0, 128, 128, 1)">22</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>TransactionInterceptor实现了MethodInterceptor接口，所以这个类本质是一个Spring AOP 的advice，也就不难理解事物的配置能通过Spring AOP产生作用了。在此不分析事物处理的细节部分，对于Spring AOP需要读者有一定了解，在此也不在赘述。</p>
+<p>★★★★★基于 &lt;tx&gt; 的事务管理示例配置文件★★★★★</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> &lt;beans......&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 0, 0, 1)">......
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> &lt;bean id="bankService" <span style="color: rgba(0, 0, 255, 1)">class</span>="footmark.spring.core.tx.declare.namespace.BankServiceImpl"&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 5</span>    &lt;property name="bankDao" ref="bankDao"/&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> &lt;/bean&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 7</span> &lt;tx:advice id="bankAdvice" transaction-manager="transactionManager"&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 8</span>    &lt;tx:attributes&gt;
+<span style="color: rgba(0, 128, 128, 1)"> 9</span>        &lt;tx:method name="transfer" propagation="REQUIRED"/&gt;
+<span style="color: rgba(0, 128, 128, 1)">10</span>    &lt;/tx:attributes&gt;
+<span style="color: rgba(0, 128, 128, 1)">11</span> &lt;/tx:advice&gt;
+<span style="color: rgba(0, 128, 128, 1)">12</span>  
+<span style="color: rgba(0, 128, 128, 1)">13</span> &lt;aop:config&gt;
+<span style="color: rgba(0, 128, 128, 1)">14</span>    &lt;aop:pointcut id="bankPointcut" expression="execution(* *.transfer(..))"/&gt;
+<span style="color: rgba(0, 128, 128, 1)">15</span>    &lt;aop:advisor advice-ref="bankAdvice" pointcut-ref="bankPointcut"/&gt;
+<span style="color: rgba(0, 128, 128, 1)">16</span> &lt;/aop:config&gt;
+<span style="color: rgba(0, 128, 128, 1)">17</span> <span style="color: rgba(0, 0, 0, 1)">......
+</span><span style="color: rgba(0, 128, 128, 1)">18</span> &lt;/beans&gt;</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/jintian315/tag/Spring/">Spring</a>,             <a href="https://www.cnblogs.com/jintian315/tag/Spring%E6%BA%90%E7%A0%81/">Spring源码</a>,             <a href="https://www.cnblogs.com/jintian315/tag/Spring%E5%88%9D%E5%A7%8B%E5%8C%96/">Spring初始化</a>,             <a href="https://www.cnblogs.com/jintian315/tag/%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">加载配置文件</a>,             <a href="https://www.cnblogs.com/jintian315/tag/%E8%A7%A3%E6%9E%90%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">解析配置文件</a>,             <a href="https://www.cnblogs.com/jintian315/tag/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">源码解析</a>,             <a href="https://www.cnblogs.com/jintian315/tag/bean/">bean</a>,             <a href="https://www.cnblogs.com/jintian315/tag/bean%E5%88%9B%E5%BB%BA/">bean创建</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(8759383,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;66680b5a-8249-4321-9add-08d5866282ce&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jintian315/" target="_blank"><img src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jintian315/">jintian315</a><br>
+            <a href="https://home.cnblogs.com/u/jintian315/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/jintian315/followers/">粉丝 - 2</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;66680b5a-8249-4321-9add-08d5866282ce&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(8759383,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(8759383,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/jintian315/archive/2004/01/13/8759377.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/jintian315/archive/2004/01/13/8759377.html" title="发布于 2004-01-13 00:00">Spring 源码解析（七）解析自定义命名空间的标签</a>
+    <br>
+    <a href="https://www.cnblogs.com/jintian315/archive/2004/01/13/8796469.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/jintian315/archive/2004/01/13/8796469.html" title="发布于 2004-01-13 00:00">Servlet3.0 开启异步两种方式</a>
+
+</div>
+</div>
+		</div>
+		<div class="postDesc">posted @ 
+<span id="post-date">2018-04-09 15:28</span>&nbsp;
+<a href="https://www.cnblogs.com/jintian315/">jintian315</a>&nbsp;
+阅读(<span id="post_view_count">89</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8759383" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8759383);return false;">收藏</a></div>
+	</div>
+	
+	
+</div><!--end: topics 文章、评论容器-->
+<script src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 418920, cb_blogApp = 'jintian315', cb_blogUserGuid = '66680b5a-8249-4321-9add-08d5866282ce';
+    var cb_entryId = 8759383, cb_entryCreatedDate = '2018-04-09 15:28', cb_postType = 1;
+    loadViewCount(cb_entryId);
+</script><a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<script>
+    var commentManager = new blogCommentManager();
+    commentManager.renderComments(0);
+</script>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/jintian315/p/8759383.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/jintian315/p/8759383.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    注册用户登录后才能发表评论，请 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a>
+     或 
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页。
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】超50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://www.cnblogs.com/cmt/p/13704696.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网征文&#39;)">【推荐】为自己发“声” —— 声网RTC征文大赛在园子里征稿</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CK3dwLr1kewCFRbHfAodwSgI-Q"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news"><div class="recomm-block"><b>相关博文：</b><br>·  <a title="Spring---SpringIntegration" href="https://www.cnblogs.com/anpeiyong/p/11997741.html" target="_blank" onclick="clickRecomItmem(11997741)">Spring---SpringIntegration</a><br>·  <a title="【spring】springaop" href="https://www.cnblogs.com/kbian/p/12014605.html" target="_blank" onclick="clickRecomItmem(12014605)">【spring】springaop</a><br>·  <a title="Spring" href="https://www.cnblogs.com/lijianming180/p/12014160.html" target="_blank" onclick="clickRecomItmem(12014160)">Spring</a><br>·  <a title="Spring" href="https://www.cnblogs.com/liqian-/p/12069636.html" target="_blank" onclick="clickRecomItmem(12069636)">Spring</a><br>·  <a title="Spring" href="https://www.cnblogs.com/StarkBrothers/p/12061558.html" target="_blank" onclick="clickRecomItmem(12061558)">Spring</a><br>»  <a target="_blank" href="https://recomm.cnblogs.com/blogpost/8759383">更多推荐...</a></div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="CK7dwLr1kewCFRbHfAodwSgI-Q"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/674134/" target="_blank">国内首家！B站升级HDR10真彩画质，向大会员开放</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674133/" target="_blank">马云即日起不再担任阿里巴巴集团董事</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674119/" target="_blank">十一黄金周为什么没有互联网“偷袭”战</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674132/" target="_blank">消息称特斯拉将推出磷酸铁锂电池的国产Model 3</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/674131/" target="_blank">腾讯地图联合众多服务商 在全国上线聚合打车服务</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+        fixPostBody();
+        deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);        deliverT2();
+        deliverC1C2();
+        loadNewsAndKb();
+        loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);        LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+        GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+        loadOptUnderPost();
+        GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div></div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_news" class="newsItem"><!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/jintian315/">
+            jintian315
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/jintian315/" title="入园时间：2018-03-15">
+            2年6个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/jintian315/followers/">
+            2
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/jintian315/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;66680b5a-8249-4321-9add-08d5866282ce&#39;)">+加关注</a></div>
+        <script>getFollowStatus('66680b5a-8249-4321-9add-08d5866282ce');</script>
+    </div>
+</div>
+</div>
+
+</div>
+
+<div id="sidebar_ad" style="display: block;"><div id="cnblogs_c3">
+    <div id="div-gpt-ad-1598349888178-0" style="width: 300px; height: 250px;" data-google-query-id="CK_dwLr1kewCFRbHfAodwSgI-Q">
+        
+    <div id="google_ads_iframe_/1090369/C3_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C3_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C3_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="3" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/saved_resource(2).html"></iframe></div></div>
+</div></div>
+			<div id="calendar"><div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/09/01&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年10月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/11/01&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">27</td>
+                            <td class="CalOtherMonthDay" align="center">28</td>
+                            <td class="CalOtherMonthDay" align="center">29</td>
+                            <td class="CalOtherMonthDay" align="center">30</td>
+                        <td class="CalTodayDay" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        3
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            4
+                        </td>
+                            <td class="" align="center">
+                                5
+                            </td>
+                            <td class="" align="center">
+                                6
+                            </td>
+                            <td class="" align="center">
+                                7
+                            </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            10
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            11
+                        </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                            <td class="" align="center">
+                                14
+                            </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            17
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            18
+                        </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                            <td class="" align="center">
+                                21
+                            </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            24
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            25
+                        </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                            <td class="" align="center">
+                                28
+                            </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            31
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            1
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            7
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn">
+<!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+    <div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/jintian315/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/jintian315/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/jintian315/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/jintian315/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/jintian315/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+    <li><a id="itemListLink" onclick="this.blur();WarpClass(&#39;itemListLink&#39;, &#39;itemListLin_con&#39;);return false;" href="https://www.cnblogs.com/jintian315/p/8759383.html#">更多链接</a></li>
+</ul>
+</div>
+
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block">
+    <div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/bean/">bean<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/bean%E5%88%9B%E5%BB%BA/">bean创建<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/Spring/">Spring<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/Spring%E5%88%9D%E5%A7%8B%E5%8C%96/">Spring初始化<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/Spring%E6%BA%90%E7%A0%81/">Spring源码<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">加载配置文件<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/%E8%A7%A3%E6%9E%90%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/">解析配置文件<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">源码解析<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/%26lt%3Btx%3Aadvice%26gt%3B/">&lt;tx:advice&gt;<span class="tag-count">(1)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jintian315/tag/Tomcat/">Tomcat<span class="tag-count">(1)</span></a>
+        </li>
+    <li>
+        <a href="https://www.cnblogs.com/jintian315/tag/">更多</a>
+    </li>
+
+</ul>
+</div>
+
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+    
+<div class="catListPostArchive">
+<h3 class="catListTitle">
+随笔档案
+
+
+</h3>
+
+
+<ul>
+
+<li>
+<a href="https://www.cnblogs.com/jintian315/archive/2018/04.html" rel="" target="">
+    2018年4月(7)
+</a>
+ 
+</li>
+<li>
+<a href="https://www.cnblogs.com/jintian315/archive/2018/03.html" rel="" target="">
+    2018年3月(3)
+</a>
+ 
+</li>
+
+</ul>
+
+
+</div>
+
+
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block">
+    <div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/jintian315/p/8628873.html">1. Re:Web开发中Listener、Filter、Servlet的初始化及调用</a></li>
+                    <li class="recent_comment_body">支持</li>
+                    <li class="recent_comment_author">--牛腩</li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+    <div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8759377.html">
+                            1. Spring 源码解析（七）解析自定义命名空间的标签(976)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8668596.html">
+                            2. Spring 源码解析（一）加载配置文件1(203)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8628873.html">
+                            3. Web开发中Listener、Filter、Servlet的初始化及调用(162)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8709191.html">
+                            4. Spring 源码解析（三）加载配置文件3(117)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8743530.html">
+                            5. Spring 源码解析（五）解析&lt;bean&gt;&lt;/bean&gt;(104)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block">
+    <div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jintian315/p/8628873.html">
+                            1. Web开发中Listener、Filter、Servlet的初始化及调用(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+    
+</div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 jintian315
+<br><span id="poweredby">Powered by .NET Core on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?39b794a97f47c65b6b2e4e1741dcba38";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+<iframe id="google_osd_static_frame_2106872443153" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./Spring 源码解析（八）自定命名空间标签解析器 BeanDefinitionParser - jintian315 - 开发者的网上家园_files/saved_resource(3).html"></iframe></body></html>
