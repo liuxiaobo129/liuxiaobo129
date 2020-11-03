@@ -1,0 +1,40 @@
+
+ @Test
+public void test(){
+    List<A> list = new ArrayList();
+    Vister vister = new Vister();
+    list.add(new B());
+    list.add(new C());
+
+    for(A a : list){
+        a.get(vister);
+    }
+}
+
+interface A {
+    void get(Vister Vister);
+}
+
+class B implements A{
+    @Override
+    public void get(Vister vister) {
+        vister.accpt(this);
+    }
+}
+
+class C implements A{
+    @Override
+    public void get(Vister vister) {
+        vister.accpt(this);
+    }
+
+}
+
+class Vister{
+    public  void accpt(C c) {
+
+    }
+    public  void accpt(B b) {
+
+    }
+}
