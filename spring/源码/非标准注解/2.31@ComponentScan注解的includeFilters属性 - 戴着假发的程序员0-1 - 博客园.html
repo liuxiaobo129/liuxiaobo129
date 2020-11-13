@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)https://www.cnblogs.com/jiafa/p/13806633.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="戴着假发的程序员出品 抖音ID：戴着假发的程序员 欢迎关注 [查看视频教程] 这里的includeFilters和context:include-filter标签的作用完全一致。 我们已经知道Comp">
+    <meta property="og:description" content="戴着假发的程序员出品 抖音ID：戴着假发的程序员 欢迎关注 [查看视频教程] 这里的includeFilters和context:include-filter标签的作用完全一致。 我们已经知道Comp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/bundle-blacklowkey.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/bundle-blacklowkey-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/jiafa/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/jiafa/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/jiafa/wlwmanifest.xml">
+    <script async="" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/analytics.js"></script><script type="text/javascript" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/encoder.js"></script><script>
+        var currentBlogId = 635937;
+        var currentBlogApp = 'jiafa';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'BlackLowKey';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2020-10-13 08:19';
+        </script>
+    <script src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/blog-common.min.js"></script>
+    
+    
+    
+<script src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/pubads_impl_2020111001.js" async=""></script><link rel="preload" href="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/f.txt"></script><link rel="prefetch" href="https://78c6055d6e4e136afc1d9ce6e148cb6e.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="bannerbar" class="formobile">
+        <a href="https://brands.cnblogs.com/aws/free?source=mobile-banner" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;aws-mobile-bannerbar&#39;)"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/35695-20201104135303888-13496776.png" alt=""></a>
+    </div>
+    <div id="top_nav" class="navbar">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://brands.cnblogs.com/aws/free?source=blog_navbar" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-aws&#39;)">云上钜惠</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/jiafa/"><img id="blogLogo" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/jiafa/">戴着假发的程序员</a>
+</h1>
+<h2>
+纯粹的分享技术
+</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/jiafa/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E6%88%B4%E7%9D%80%E5%81%87%E5%8F%91%E7%9A%84%E7%A8%8B%E5%BA%8F%E5%91%980-1">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/jiafa/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<span id="stats_post_count">随笔 - 
+106&nbsp; </span>
+<span id="stats_article_count">文章 - 
+1&nbsp; </span>
+<span id="stats-comment_count">评论 - 
+0</span>
+
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/jiafa/p/13806633.html">
+    <span>2.31@ComponentScan注解的includeFilters属性</span>
+    
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body">
+    <p><strong>戴着假发的程序员</strong>出品&nbsp; 抖音ID：<strong>戴着假发的程序员&nbsp;&nbsp;</strong>欢迎关注</p>
+<p>[<a href="https://www.bilibili.com/video/BV1th41197NR/?p=31" target="_blank">查看视频教程</a>]</p>
+<p class="md-end-block md-p"><span class="md-plain">这里的includeFilters和context:include-filter标签的作用完全一致。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">我们已经知道ComponentScan的配置可以通知spring扫描拥有spring标准注解的类。这些标注大致是：@Component、@Controller、@Service、@Repository。但是我们也可以通过includeFilters属性配置通知spring扫描一些没有标准注解但是我们希望spring帮我们管理的类。</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">includeFilters的值是一个数组，可以配置多个，includeFilters中配置的是一个Filter类型的注解。Filter的源码如下：</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 0, 0, 1)">@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+</span><span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 0, 0, 1)">@java.lang.annotation.Target({})
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 0, 255, 1)">static</span> @<span style="color: rgba(0, 0, 255, 1)">interface</span><span style="color: rgba(0, 0, 0, 1)"> Filter {
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span>     org.springframework.context.annotation.FilterType type() <span style="color: rgba(0, 0, 255, 1)">default</span><span style="color: rgba(0, 0, 0, 1)"> org.springframework.context.annotation.FilterType.ANNOTATION;
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 6</span>     @org.springframework.core.annotation.AliasFor("classes"<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>     java.lang.Class&lt;?&gt;[] value() <span style="color: rgba(0, 0, 255, 1)">default</span><span style="color: rgba(0, 0, 0, 1)"> {};
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 9</span>     @org.springframework.core.annotation.AliasFor("value"<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">10</span>     java.lang.Class&lt;?&gt;[] classes() <span style="color: rgba(0, 0, 255, 1)">default</span><span style="color: rgba(0, 0, 0, 1)"> {};
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> 
+<span style="color: rgba(0, 128, 128, 1)">12</span>     java.lang.String[] pattern() <span style="color: rgba(0, 0, 255, 1)">default</span><span style="color: rgba(0, 0, 0, 1)"> {};
+</span><span style="color: rgba(0, 128, 128, 1)">13</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p md-focus"><span class="md-plain">Filter中有4个属性，分别是</span></p>
+<p class="md-end-block md-p"><span class="md-plain">type：用来配置Filter的类型，这个类型是一个枚举，这个类型一共有五种，下面再详细解释。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">value：根据type的不同，这个表达式的配置方式也不同。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">classes：当我们的type为ANNOTATION或者ASSIGNABLE_TYPE时，我们可以将对应的类配置在value属性中也可以配置在calsses属性中</span></p>
+<p class="md-end-block md-p"><span class="md-plain">pattern：当我们的type是REGEX时，我们可以将表达式配置的pattern中。</span></p>
+<p class="md-end-block md-p">&nbsp;</p>
+<p class="md-end-block md-p"><span class="md-plain">type属性的五个值：</span></p>
+<blockquote>
+<p class="md-end-block md-p"><span class="md-plain">ANNOTATION:-指定扫描使用某个注解的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">ASSIGNABLE_TYPE:指定扫描某个接口派生出来的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">ASPECTJ:指定扫描AspectJ表达式相匹配的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">REGEX:指定扫描符合正则表达式的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">CUSTOM:指定扫描自定义的实现了org.springframework.core.type.filter.TypeFilter接口的类</span></p>
+</blockquote>
+<p class="md-end-block md-p">&nbsp;</p>
+<p class="md-end-block md-p"><span class="md-plain">就这个五个类型，我准备五个案例看看</span></p>
+<p class="md-end-block md-p"><span class="md-plain">[1]ANNOTATION:-指定扫描使用某个注解的类，将其加载进spring的容器。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">我们准备如下的类目录结构:</span></p>
+<p class="md-end-block md-p"><span class="md-plain"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/2172049-20201013081534436-2055417589.png" alt="" loading="lazy"></span></p>
+<p class="md-end-block md-p"><span class="md-plain">其中Person类实现:</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">Person有Spring的标准注解@Component.</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> @Component<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">Person类交给spring管理</span>
+<span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> Person{
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Person(){
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         System.out.println("实例化Person类"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p"><span class="md-plain">Dog类的实现：</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">Dog类并没有Spring的标准注解，添加添加了我们自定义的注解：</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@DkAnnotation
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> Dog {
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Dog(){
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         System.out.println("实例化Dog类"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>我们自定的注解@DkAnnotation</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)">1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)">3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)">4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)">5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> @<span style="color: rgba(0, 0, 255, 1)">interface</span><span style="color: rgba(0, 0, 0, 1)"> DkAnnotation {
+</span><span style="color: rgba(0, 128, 128, 1)">7</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p"><span class="md-plain">添加一个配置类：</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">配置类中给ComponentScan添加属性excludeFilters，类型为ANNOTATION,value为DkAnnotation.class。当然也可以使用classes代替value，注意value和classes都是数组，可以同时配置多个。</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@Configuration()
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 0, 1)">@ComponentScan(
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         basePackages = "com. st.dk.demo6.beans"<span style="color: rgba(0, 0, 0, 1)">,
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         includeFilters = {@ComponentScan.Filter(type= FilterType.ANNOTATION,value= DkAnnotation.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">)}
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AppConfig {
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>测试：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 128, 1)">1</span> <span style="color: rgba(0, 0, 0, 1)">@Test
+</span><span style="color: rgba(0, 128, 128, 1)">2</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> testIncludeFilters(){
+</span><span style="color: rgba(0, 128, 128, 1)">3</span>     ApplicationContext ac =
+<span style="color: rgba(0, 128, 128, 1)">4</span>             <span style="color: rgba(0, 0, 255, 1)">new</span> AnnotationConfigApplicationContext(AppConfig.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">5</span> }</pre>
+</div>
+<p>结果：</p>
+<p><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/2172049-20201013081704447-356377182.png" alt="" loading="lazy"></p>
+<p class="md-end-block md-p"><span class="md-plain">我们会发现spring会将有标注注解的Person类和我们有我们自定义注解的Dog都加载。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">[2]ASSIGNABLE_TYPE:指定扫描某个接口派生出来的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">案例：</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">我们修改上面的案例，添加一个接口Info。</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)">1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)">3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)">4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)">5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">interface</span><span style="color: rgba(0, 0, 0, 1)"> Info {
+</span><span style="color: rgba(0, 128, 128, 1)">7</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<div class="code-tooltip md-tooltip-hide" align="right"><span class="ty-input ty-input-after ty-cm-lang-input">java</span></div>
+<p class="md-end-block md-p"><span class="md-plain">修改Dog类，删除Dog类上方的注解，但是让Dog类实现接口Info。</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> Dog <span style="color: rgba(0, 0, 255, 1)">implements</span><span style="color: rgba(0, 0, 0, 1)"> Info {
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Dog(){
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         System.out.println("实例化Dog类"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>修改配置类，修改type属性为ASSIGNABLE_TYPE，value或者classes属性配置为Info .class。表示实现了Info接口的类要求spring加载。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@Configuration()
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 0, 1)">@ComponentScan(
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         basePackages = "com. st.dk.demo6.beans"<span style="color: rgba(0, 0, 0, 1)">,
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         includeFilters = {@ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE,value={Info.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">})}
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AppConfig {
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p"><span class="md-plain">再测试，我们会发现spring依然会加载Dog类。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">[3]ASPECTJ:指定扫描AspectJ表达式相匹配的类，比如要求加载某个类的派生类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">案例：</span></p>
+<p class="md-end-block md-p md-focus"><span class="md-plain">我们添加一个Animal类：</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)">1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)">3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)">4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)">5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> Animal {
+</span><span style="color: rgba(0, 128, 128, 1)">7</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>修改Dog，继承Animal。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> Dog <span style="color: rgba(0, 0, 255, 1)">extends</span><span style="color: rgba(0, 0, 0, 1)"> Animal {
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Dog(){
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         System.out.println("实例化Dog类"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>修改配置类,type配置为ASPECTJ，这里注意去掉value或者calsses属性，添加pattern属性，值为：com. st.dk.demo6.beans.Animal+</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@Configuration()
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 0, 1)">@ComponentScan(
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         basePackages = "com. st.dk.demo6.beans"<span style="color: rgba(0, 0, 0, 1)">,
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         includeFilters = {@ComponentScan.Filter(type= FilterType.ASPECTJ,pattern = "com. st.dk.demo6.beans.Animal+"<span style="color: rgba(0, 0, 0, 1)">)}
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AppConfig {
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p md-focus"><span class="md-plain">再测试，我们会发现spring依然会加载Dog类。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">[4]REGEX:指定扫描符合正则表达式的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">我们可以通过REGEX配置一个正则表达式，spring会根据正则匹配加载对应的类。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">案例：我们修改Dog类，不实现接口，不继承其他类，没有注解。</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> Dog{
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> Dog(){
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         System.out.println("实例化Dog类"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><span class="md-plain md-expand">修改配置类，type修改为REGEX，pattern修改为：“.<span>*<span class="md-plain">.<span>*<span class="md-plain">og”,表示加载og结尾的类。</span></span></span></span></span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@Configuration()
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 0, 1)">@ComponentScan(
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         basePackages = "com. st.dk.demo6.beans"<span style="color: rgba(0, 0, 0, 1)">,
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         includeFilters = {@ComponentScan.Filter(type= FilterType.REGEX,pattern = ".*.*og"<span style="color: rgba(0, 0, 0, 1)">)}
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AppConfig {
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p class="md-end-block md-p md-focus"><span class="md-plain">再测试，我们会发现spring依然会加载Dog类。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">[5]CUSTOM:指定扫描自定义的实现了org.springframework.core.type.filter.TypeFilter接口的类</span></p>
+<p class="md-end-block md-p"><span class="md-plain">CUSTOM允许我们自定义加载策略，我们可以自己实现一个TypeFilter，实现自己的加载策略。</span></p>
+<p class="md-end-block md-p"><span class="md-plain">案例：我们自己实现一个Filter，用来加载Dog类。添加一个自己的类实现接口TypeFilter</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> DkFilter  <span style="color: rgba(0, 0, 255, 1)">implements</span><span style="color: rgba(0, 0, 0, 1)"> TypeFilter {
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">关于metadataReader和metadataReaderFactory可以关注spring源码解读部分</span>
+<span style="color: rgba(0, 128, 128, 1)"> 8</span> <span style="color: rgba(0, 0, 0, 1)">    @Override
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">boolean</span> match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) <span style="color: rgba(0, 0, 255, 1)">throws</span><span style="color: rgba(0, 0, 0, 1)"> IOException {
+</span><span style="color: rgba(0, 128, 128, 1)">10</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">获取当前正在扫描的类的类名</span>
+<span style="color: rgba(0, 128, 128, 1)">11</span>         String className =<span style="color: rgba(0, 0, 0, 1)"> metadataReader.getClassMetadata().getClassName();
+</span><span style="color: rgba(0, 128, 128, 1)">12</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">判断是不是Dog的class</span>
+<span style="color: rgba(0, 128, 128, 1)">13</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(className.equals(Dog.<span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)">.getName())){
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">返回true表示让spring加载当前的类.</span>
+<span style="color: rgba(0, 128, 128, 1)">15</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">16</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">17</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">返回false表示不让spring加载当前类</span>
+<span style="color: rgba(0, 128, 128, 1)">18</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">false</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">19</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">20</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>修改配置类，type修改为CUSTOM，value或者classes中配置DkFilter.class</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> 戴着假发的程序员
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *  
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * @description
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span> <span style="color: rgba(0, 0, 0, 1)">@Configuration()
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span> <span style="color: rgba(0, 0, 0, 1)">@ComponentScan(
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         basePackages = "com. st.dk.demo6.beans"<span style="color: rgba(0, 0, 0, 1)">,
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         includeFilters = {@ComponentScan.Filter(type= FilterType.CUSTOM,value =<span style="color: rgba(0, 0, 0, 1)"> DkFilter.cl
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> <span style="color: rgba(0, 0, 0, 1)">        )}
+</span><span style="color: rgba(0, 128, 128, 1)">11</span> <span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AppConfig {
+</span><span style="color: rgba(0, 128, 128, 1)">13</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>再测试，我们会发现spring依然会加载Dog类。</p>
+<p class="md-end-block md-p">&nbsp;</p>
+</div>
+<div id="MySignature" style="display: block;">我是戴着假发的程序员，分享技术，分享经验，如果要转载，请注明：出自戴着假发的程序员</div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/jiafa/category/1857727.html" target="_blank">spring操作手册</a></div>
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/jiafa/tag/spring/">spring</a>,             <a href="https://www.cnblogs.com/jiafa/tag/java/">java</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(13806633,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;4bca0f62-ca05-4528-e40c-08d861ce4c5c&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jiafa/" target="_blank"><img src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/jiafa/">戴着假发的程序员0-1</a><br>
+            <a href="https://home.cnblogs.com/u/jiafa/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/jiafa/followers/">粉丝 - 1</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;4bca0f62-ca05-4528-e40c-08d861ce4c5c&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(13806633,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(13806633,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/jiafa/p/13806627.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/jiafa/p/13806627.html" title="发布于 2020-10-13 08:14">2.30@ComponentScan注解的scopeResolver属性</a>
+    <br>
+    <a href="https://www.cnblogs.com/jiafa/p/13806635.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/jiafa/p/13806635.html" title="发布于 2020-10-13 08:21">2.32@ComponentScan注解的excludeFilters属性</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2020-10-13 08:19</span>&nbsp;
+<a href="https://www.cnblogs.com/jiafa/">戴着假发的程序员0-1</a>&nbsp;
+阅读(<span id="post_view_count">43</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=13806633" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(13806633);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 635937, cb_blogApp = 'jiafa', cb_blogUserGuid = '4bca0f62-ca05-4528-e40c-08d861ce4c5c';
+    var cb_entryId = 13806633, cb_entryCreatedDate = '2020-10-13 08:19', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/jiafa/p/13806633.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/jiafa/p/13806633.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页
+</div>
+<div class="under-comment-nav">
+        <a href="https://brands.cnblogs.com/aws/free?source=blog_under_login_tip" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-login-tip-aws&#39;)">博客园派送云上免费午餐，AWS注册立享12个月免费套餐</a>
+</div></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.softbam.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode-1103&#39;)">【推荐】News: 大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载</a><br><a href="https://www.cnblogs.com/himmr/p/13968494.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-Himmr&#39;)">【推荐】博客园 &amp; 陌上花开HIMMR 给单身的程序员小哥哥助力脱单啦～</a><br><a href="https://www.slidestalk.com/m/318?__fuid=31832" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-示说网2&#39;)">【推荐】博客园 &amp; 示说网联合策划，AI实战系列公开课第二期</a><br><a href="https://brands.cnblogs.com/huawei" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】了不起的开发者，挡不住的华为，园子里的品牌专区</a><br><a href="https://brands.cnblogs.com/agora" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网专区&#39;)">【推荐】未知数的距离，毫秒间的传递，声网与你实时互动</a><br><a href="https://brands.cnblogs.com/aws/free?source=CH" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-AWS&#39;)">【福利】AWS携手博客园为开发者送免费套餐与抵扣券</a><br><a href="http://click.aliyun.com/m/1000196436/" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云双11&#39;)">【推荐】 阿里云折扣价格返场，错过再等一年</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="COrLwZfbgO0CFZR9vQodjLQH0Q"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" style="border: 0px; vertical-align: bottom;" data-google-container-id="1" data-load-complete="true" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news"></div>
+    <div id="cnblogs_c2" class="c_ad_block"><a href="https://brands.cnblogs.com/agora" target="_blank"><img width="468" height="60" src="./2.31@ComponentScan注解的includeFilters属性 - 戴着假发的程序员0-1 - 博客园_files/35695-20200825173352536-363708157.png" alt="声网专区" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;C2-声网专区&#39;);"></a></div>
+    <div id="under_post_kb">
+<div class="itnews c_ad_block">
+    <b>最新 IT 新闻</b>:
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/677317/" target="_blank">揭秘控制狂苹果的供应链操控术</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/677316/" target="_blank">支撑史上最流畅猫晚 阿里推首款全自研4K实时硬件编码器XGH265</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/677315/" target="_blank">微软今天正式终止Win7嵌入式系统支持 花钱可买三年补丁</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/677314/" target="_blank">DXO预告iPhone 12 Pro评测：接连艾特库克 未获回应</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/677313/" target="_blank">比特币价格三年来首次突破16000美元 总市值超过工行</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+   </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/jiafa/">
+            戴着假发的程序员0-1
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/jiafa/" title="入园时间：2020-10-02">
+            1个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/jiafa/followers/">
+            1
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/jiafa/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;4bca0f62-ca05-4528-e40c-08d861ce4c5c&#39;)">+加关注</a></div>
+        <script>getFollowStatus('4bca0f62-ca05-4528-e40c-08d861ce4c5c');</script>
+    </div>
+</div>
+
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/10/14&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2020年11月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2020/12/14&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                        <td class="CalWeekendDay" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            <a href="https://www.cnblogs.com/jiafa/archive/2020/11/04.html"><u>4</u></a>
+                        </td>
+                        <td class="" align="center">
+                            5
+                        </td>
+                        <td class="" align="center">
+                            6
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        7
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            8
+                        </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                            <td class="" align="center">
+                                13
+                            </td>
+                        <td class="CalTodayDay" align="center">
+                            14
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            15
+                        </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                            <td class="" align="center">
+                                20
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            21
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            22
+                        </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                            <td class="" align="center">
+                                27
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            28
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            29
+                        </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            5
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            6
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                10
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                11
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            12
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block"><div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/jiafa/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/jiafa/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/jiafa/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/jiafa/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/jiafa/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+</div>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block"><div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+        <li>
+            <a href="https://www.cnblogs.com/jiafa/tag/spring/">spring<span class="tag-count">(107)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jiafa/tag/java/">java<span class="tag-count">(105)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jiafa/tag/aop/">aop<span class="tag-count">(26)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jiafa/tag/IOC/">IOC<span class="tag-count">(6)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/jiafa/tag/springbean%E5%8A%A0%E8%BD%BD/">springbean加载<span class="tag-count">(1)</span></a>
+        </li>
+    
+
+</ul>
+</div>
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+        <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+随笔分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jiafa/category/1857727.html" rel="" target="">
+    spring操作手册(104)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+            <h3 class="catListTitle">
+                
+随笔档案
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jiafa/archive/2020/11.html" rel="" target="">
+    2020年11月(6)
+</a>
+ 
+
+                        </li>
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jiafa/archive/2020/10.html" rel="" target="">
+    2020年10月(100)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+        <div id="sidebar_articlecategory" class="catListArticleCategory sidebar-block">
+            <h3 class="catListTitle">
+                
+文章分类
+
+
+
+            </h3>
+
+
+            <ul>
+
+                        <li>
+                            
+<a href="https://www.cnblogs.com/jiafa/category/1857729.html" rel="" target="">
+    spring操作手册-1(1)
+</a>
+ 
+
+                        </li>
+
+            </ul>
+
+
+        </div>
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block"></div>
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block"><div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/jiafa/p/13835951.html">
+                            1. 3.16 @Pointcut的表达式-@annotation(175)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jiafa/p/13806635.html">
+                            2. 2.32@ComponentScan注解的excludeFilters属性(131)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jiafa/p/13800766.html">
+                            3. 2.23@ComponentScan和@ComponentScans注解(122)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jiafa/p/13800770.html">
+                            4. 2.24@ComponentScan注解的basePackageClasses 属性(108)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/jiafa/p/13776311.html">
+                            5. 2.3@Bean的value和name属性(97)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block"></div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block"></div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2020 戴着假发的程序员0-1
+<br><span id="poweredby">Powered by .NET 5.0.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+
+</body></html>

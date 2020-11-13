@@ -38,3 +38,9 @@ class Vister{
 
     }
 }
+
+
+
+SELECT * FROM tcbiz_rcs_data.RiskListDims where  name like '%现金贷%'  LIMIT 100;
+
+SELECT * FROM tcbiz_fq_rcs.RuleScript where scriptBody like '%%' LIMIT 100;
