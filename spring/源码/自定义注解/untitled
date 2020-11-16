@@ -1,0 +1,327 @@
+
+博客园Logo
+首页
+新闻
+博问
+专区
+闪存
+班级
+代码改变世界
+搜索
+注册
+登录
+返回主页
+wcong
+博客园
+首页
+新随笔
+联系
+订阅
+管理
+深入Spring:自定义注解加载和使用
+前言
+在工作中经常使用Spring的相关框架，免不了去看一下Spring的实现方法，了解一下Spring内部的处理逻辑。特别是开发Web应用时，我们会频繁的定义@Controller，@Service等JavaBean组件，通过注解，Spring自动扫描加载了这些组件，并提供相关的服务。
+Spring是如何读取注解信息，并注入到bean容器中的，本文就是通过嵌入Spring的Bean加载，来描述Spring的实现方法。完整的例子都在Github上了。
+
+自定义注解
+先看一个最简单的例子，在使用SpringWeb应用中的过程中，大家免不了会使用@Controller，@Service，@Repository等注解来定义JavaBean。那么怎么自己定义一个注解，Spring可以自动加载呢。所以就有了第一个例子。
+
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface MyComponent {
+    String value() default "";
+}
+@Configuration
+public class ComponentAnnotationTest {
+  public static void main(String[] args) {
+    AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext();
+annotationConfigApplicationContext.register(ComponentAnnotationTest.class);
+    annotationConfigApplicationContext.refresh();
+    InjectClass injectClass = annotationConfigApplicationContext.getBean(InjectClass.class);
+        injectClass.print();
+  }
+  @MyComponent
+  public static class InjectClass {
+    public void print() {
+        System.out.println("hello world");
+    }
+  }
+}
+运行这个例子，就会发现，@MyComponent 注解的类，也被Spring加载进来了，而且可以当成普通的JavaBean正常的使用。查看Spring的源码会发现，Spring是使用ClassPathScanningCandidateComponentProvider扫描package,这个类有这样的注释
+
+A component provider that scans the classpath from a base package. 
+It then applies exclude and include filters to the resulting classes to find candidates.
+这个类的 registerDefaultFilters 方法有这样几行代码
+
+protected void registerDefaultFilters() {   
+   this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+   ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+   try {    
+      this.includeFilters.add(new AnnotationTypeFilter(((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false)); 
+      logger.debug("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning"); 
+   }   catch (ClassNotFoundException ex) {     
+     // JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.   
+   }   
+   try {      
+      this.includeFilters.add(new AnnotationTypeFilter(((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));      
+      logger.debug("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");   
+   }  
+   catch (ClassNotFoundException ex) {     
+   // JSR-330 API not available - simply skip.  
+   }
+}
+这里就会发现Spring在扫描类信息的使用只会判断被@Component注解的类，所以任何自定义的注解只要带上@Component（当然还要有String value() default "";的方法，因为Spring的Bean都是有beanName唯一标示的），都可以被Spring扫描到，并注入容器内。
+
+定制功能
+但上面的方法太局限了，没办法定制，而且也没有实际的意义。如何用特殊的注解来实现定制的功能呢，一般有两种方式：
+
+还是用上面的方法，在注入Spring的容器后，再取出来做自己定制的功能，Spring-MVC就是使用这样的方法。AbstractDetectingUrlHandlerMapping 中的 detectHandlers方法,这个方法取出了所有的bean，然后循环查找带有Controller的bean，并提取其中的RequestMapping信息
+protected void detectHandlers() throws BeansException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
+        }
+        String[] beanNames = (this.detectHandlersInAncestorContexts ?
+                BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
+                getApplicationContext().getBeanNamesForType(Object.class));
+
+        // Take any bean name that we can determine URLs for.
+        for (String beanName : beanNames) {
+            String[] urls = determineUrlsForHandler(beanName);
+            if (!ObjectUtils.isEmpty(urls)) {
+                // URL paths found: Let's consider it a handler.
+                registerHandler(urls, beanName);
+            }
+            else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Rejected bean name '" + beanName + "': no URL paths identified");
+                }
+            }
+        }
+    }
+不依赖@Component，自定义扫描。所以就有了第二个例子。
+自定义扫描
+结构比较复杂，可以参考完整的例子，这里是关键的几个类
+
+还是定义一个注解，只不过不再需要@Component了
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CustomizeComponent {
+     String value() default "";
+}
+注解修饰的类
+@CustomizeComponent
+public class ScanClass1 {
+    public void print() {
+        System.out.println("scanClass1");
+    }
+}
+BeanScannerConfigurer用于嵌入到Spring的加载过程的中，这里用到了BeanFactoryPostProcessor 和 ApplicationContextAware。
+Spring提供了一些的接口使程序可以嵌入Spring的加载过程。这个类中的继承ApplicationContextAware接口，Spring会读取ApplicationContextAware类型的的JavaBean，并调用setApplicationContext(ApplicationContext applicationContext)传入Spring的applicationContext。
+同样继承BeanFactoryPostProcessor接口，Spring会在BeanFactory的相关处理完成后调用postProcessBeanFactory方法，进行定制的功能。
+@Component
+public static class BeanScannerConfigurer implements  BeanFactoryPostProcessor, ApplicationContextAware {
+    private ApplicationContext applicationContext;
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
+    }
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+      Scanner scanner = new Scanner((BeanDefinitionRegistry) beanFactory);
+      scanner.setResourceLoader(this.applicationContext);
+      scanner.scan("org.wcong.test.spring.scan");
+    }
+  }
+Scanner继承的ClassPathBeanDefinitionScanner是Spring内置的Bean定义的扫描器。
+includeFilter里定义了类的过滤器，newAnnotationTypeFilter(CustomizeComponent.class)表示只取被CustomizeComponent修饰的类。
+doScan里扫面了包底下的读取道德BeanDefinitionHolder，自定义GenericBeanDefinition相关功能。
+public final static class Scanner extends ClassPathBeanDefinitionScanner {
+      public Scanner(BeanDefinitionRegistry registry) {
+          super(registry);
+      }
+      public void registerDefaultFilters() {
+          this.addIncludeFilter(new AnnotationTypeFilter(CustomizeComponent.class));
+      }
+      public Set<BeanDefinitionHolder> doScan(String... basePackages) {
+          Set<BeanDefinitionHolder> beanDefinitions =   super.doScan(basePackages);
+          for (BeanDefinitionHolder holder : beanDefinitions) {
+              GenericBeanDefinition definition = (GenericBeanDefinition) holder.getBeanDefinition();
+              definition.getPropertyValues().add("innerClassName", definition.getBeanClassName());
+              definition.setBeanClass(FactoryBeanTest.class);
+          }
+          return beanDefinitions;
+      }
+      public boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+         return super.isCandidateComponent(beanDefinition) && beanDefinition.getMetadata()
+.hasAnnotation(CustomizeComponent.class.getName());
+      }
+}
+FactoryBean是Spring中比较重要的一个类。它的描述如下
+Interface to be implemented by objects used within a BeanFactory which are themselves factories. 
+If a bean implements this interface, it is used as a factory for an object to expose, not directly as a bean* instance that will be exposed itself
+普通的JavaBean是直接使用类的实例，但是如果一个Bean继承了这个借口，就可以通过getObject()方法来自定义实例的内容，在FactoryBeanTest的getObject()就通过代理了原始类的方法，自定义类的方法。
+
+public static class FactoryBeanTest<T> implements InitializingBean, FactoryBean<T> {
+      private String innerClassName;
+      public void setInnerClassName(String innerClassName) {
+          this.innerClassName = innerClassName;
+      }
+      public T getObject() throws Exception {
+          Class innerClass = Class.forName(innerClassName);
+          if (innerClass.isInterface()) {
+              return (T) InterfaceProxy.newInstance(innerClass);
+          } else {
+              Enhancer enhancer = new Enhancer();
+              enhancer.setSuperclass(innerClass);
+              enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+              enhancer.setCallback(new MethodInterceptorImpl());
+              return (T) enhancer.create();
+          }
+      }
+      public Class<?> getObjectType() {
+          try {
+                return Class.forName(innerClassName);
+          } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+          }
+          return null;
+      }
+      public boolean isSingleton() {
+          return true;
+      }
+      public void afterPropertiesSet() throws Exception {
+      }
+}
+public static class InterfaceProxy implements InvocationHandler {
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          System.out.println("ObjectProxy execute:" + method.getName());
+          return method.invoke(proxy, args);
+      }
+      public static <T> T newInstance(Class<T> innerInterface) {
+          ClassLoader classLoader = innerInterface.getClassLoader();
+          Class[] interfaces = new Class[] { innerInterface };
+          InterfaceProxy proxy = new InterfaceProxy();
+          return (T) Proxy.newProxyInstance(classLoader, interfaces, proxy);
+      }
+     }
+     public static class MethodInterceptorImpl implements MethodInterceptor {
+          public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+          System.out.println("MethodInterceptorImpl:" + method.getName());
+          return methodProxy.invokeSuper(o, objects);
+      }
+}
+main函数
+@Configuration
+public class CustomizeScanTest {
+    public static void main(String[] args) {
+        AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext();                
+        annotationConfigApplicationContext.register(CustomizeScanTest.class);
+        annotationConfigApplicationContext.refresh();
+        ScanClass1 injectClass = annotationConfigApplicationContext.getBean(ScanClass1.class);
+        injectClass.print();
+    }
+ }
+至此一个完整的例子就完成了，这里主要用到了BeanFactoryPostProcessor，ApplicationContextAware，FactoryBean等Spring内置的接口，来嵌入Spring的加载和使用过程，这样就实现了自定义注解，和自定义代理了。
+
+分类: spring
+标签: spring java web
+好文要顶 关注我 收藏该文  
+wcong
+关注 - 0
+粉丝 - 2
++加关注
+00
+
+» 下一篇： 深入Spring:自定义IOC
+posted @ 2016-05-11 16:04  wcong  阅读(27961)  评论(3)  编辑  收藏
+
+评论列表
+  #1楼 2016-08-23 11:08 饕盡天下
+没有提供import
+支持(0) 反对(0)
+  #2楼 2016-10-09 20:24 zhangxf
+你好，请问你的github地址是哪个额
+支持(0) 反对(0)
+  #3楼 [楼主] 2016-10-10 19:52 wcong
+@ zhangxf
+博客园的markdown的链接不明显，地址是这个
+https://github.com/wcong/learn-java/tree/master/src/main/java/org/wcong/test/spring
+支持(0) 反对(0)
+刷新评论刷新页面返回顶部
+登录后才能发表评论，立即 登录 或 注册， 访问 网站首页
+博客园派送云上免费午餐，AWS注册立享12个月免费套餐
+【推荐】News: 大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载
+【推荐】博客园 & 陌上花开HIMMR 给单身的程序员小哥哥助力脱单啦～
+【推荐】了不起的开发者，挡不住的华为，园子里的品牌专区
+【推荐】未知数的距离，毫秒间的传递，声网与你实时互动
+【福利】AWS携手博客园为开发者送免费套餐与抵扣券
+【推荐】 阿里云折扣价格返场，错过再等一年
+
+相关博文：
+· 深入Spring:自定义注解加载和使用
+· 深入Spring:自定义IOC
+· 深入Spring:自定义注解加载和使用
+· 在Spring中自定义注解
+· 深入Spring:自定义事务管理
+» 更多推荐...
+声网专区
+最新 IT 新闻:
+· 《魔兽世界：暗影国度》光追效果被质疑：看起来跟没开一样
+· 中国电动车公司蔚来被美国做空机构香橼盯上 股价狂跌！
+· 我国IPv6活跃用户数达3.65亿 这3大因素限制普及
+· PS5玩家需注意游戏版本
+· 如何用一元钱 体验iPhone 12 mini
+» 更多新闻...
+公告
+昵称： wcong
+园龄： 4年6个月
+粉丝： 2
+关注： 0
++加关注
+aws免费套餐
+<   2020年11月    >
+日   一   二   三   四   五   六
+1   2   3   4   5   6   7
+8   9   10  11  12  13  14
+15  16  17  18  19  20  21
+22  23  24  25  26  27  28
+29  30  1   2   3   4   5
+6   7   8   9   10  11  12
+搜索
+ 
+ 
+我的标签
+spring java web(2)
+dagger(1)
+java(1)
+随笔分类
+spring(2)
+随笔档案
+2016年12月(1)
+2016年11月(1)
+2016年10月(1)
+2016年5月(1)
+最新评论
+1. Re:深入Spring:自定义注解加载和使用
+@ zhangxf博客园的markdown的链接不明显，地址是这个...
+--wcong
+2. Re:深入Spring:自定义注解加载和使用
+你好，请问你的github地址是哪个额
+--zhangxf
+3. Re:深入Spring:自定义注解加载和使用
+没有提供import
+--饕盡天下
+阅读排行榜
+1. 深入Spring:自定义注解加载和使用(27961)
+2. 深入Dagger:JavaPoet的使用(2756)
+3. 深入Spring:自定义IOC(2000)
+4. 深入Dagger:自定义AutoValue(378)
+评论排行榜
+1. 深入Spring:自定义注解加载和使用(3)
+推荐排行榜
+1. 深入Dagger:JavaPoet的使用(1)
+2. 深入Spring:自定义IOC(1)
+Copyright © 2020 wcong
+Powered by .NET 5.0.0 on Kubernetes
