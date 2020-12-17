@@ -1,0 +1,46 @@
+package com.ly.fn.biz.rcs.cmc.srv;
+
+import com.alibaba.fastjson.TypeReference;
+import com.ly.fn.biz.rcs.cmc.model.collection.AssignCollectionTaskName;
+import com.ly.fn.biz.rcs.cmc.model.collection.strategy.CompanyStrategy;
+import com.ly.fn.inf.rcs.common.utils.TextUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+public class Test {
+    public static void main(String[] args) throws InterruptedException {
+//        // 类型声明
+//        MathOperation addition = (int a, int b) -> a + b;
+//        // 不用类型声明
+//        MathOperation subtraction = (a, b) -> a - b;
+//
+//        // 大括号中的返回语句
+//        MathOperation multiplication = (int a, int b) -> { return a * b; };
+//
+//        // 没有大括号及返回语句
+//        MathOperation division = (int a, int b) -> a / b;
+//
+//        addition.operation(1,2);
+//
+////        subtraction.operation()
+//
+//        List<Integer> num = Arrays.asList(1,2,3,4,5);
+//        List<Integer> collect1 = num.stream().map(n -> n * 2).collect(Collectors.toList());
+        add((a, b) -> a - b);
+    }
+    public static void add(MathOperation m){
+        m.operation(2,3);
+    }
+}
+
+interface MathOperation {
+    int operation(int a, int b);
+}
+
