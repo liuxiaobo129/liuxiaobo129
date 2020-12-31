@@ -9,177 +9,305 @@
 搜索
 注册
 登录
-声明：现大部分文章为寻找问题时在网上相互转载，在此博客中做个记录，方便自己也方便有类似问题的朋友，故原出处已不好查到，如有侵权，请发邮件表明文章和原出处地址，我一定在文章中注明。谢谢。
-董俊杰
-xd502djj@163.com---识大势，懂取舍！分主次，懂先后！
-开放、透明、反思。
-业务思维、结果导向、成本意识。
-随笔- 584  文章- 0  评论- 136 
-博客园    首页    新随笔    联系   管理    订阅  订阅
-Spring自定义扩展NamespaceHandler--自定义标签
-在很多情况下，我们需要为系统提供可配置化支持，简单的做法可以直接基于Spring的标准Bean来配置，但配置较为复杂或者需要更多丰富控制的 时候，会显得非常笨拙。一般的做法会用原生态的方式去解析定义好的xml文件，然后转化为配置对象，这种方式当然可以解决所有问题，但实现起来比较繁琐， 特别是是在配置非常复杂的时候，解析工作是一个不得不考虑的负担。Spring提供了可扩展Schema的支持，这是一个不错的折中方案，完成一个自定义 配置一般需要以下步骤：
+返回主页
+wpbxin
+Do the right thing and do the thing right.
+博客园首页新随笔联系管理订阅订阅随笔- 86  文章- 0  评论- 5 
+Spring5源码分析(012)——IoC篇之解析bean标签：解析 BeanDefinition
+注：《Spring5源码分析》汇总可参考：Spring5源码分析(002)——博客汇总
 
-[1] 设计配置属性和JavaBean
-[2] 编写XSD文件
-[3] 编写NamespaceHandler和BeanDefinitionParser完成解析工作
-[4] 编写spring.handlers和spring.schemas串联起所有部件
-[5] 在Bean文件中应用
-下面结合一个小例子来实战以上过程
+　　bean 标签解析的第一步，就是委托 BeanDefinitionParserDelegate.parseBeanDefinitionElement(Element ele) 方法进行元素解析，返回 BeanDefinitionHolder 实例对象 bdHolder ，即 解析 BeanDefinition 。
 
-1）设计配置属性和JavaBean
+如果解析成功，则 bdHolder 实例已经包含配置文件的各种属性，例如 class 、 name 、 id 、 alias 之类的属性。
+BeanDefinitionHolder 内部有 beanDefinition 、 beanName 、 aliases 3 个属性，而其中的 beanDefinition 则是 bean 的具体定义。
+如果解析失败，则 bdHolder 实例为 null 。
+接下来会对 parseBeanDefinitionElement(Element ele) 方法分析。本文目录结构如下：
 
-首先当然得设计好配置项，并通过JavaBean来建模，本例中需要配置People实体，配置属性name和age（id是默认需要的）
-
-public class People {  
-    private String id;  
-    private String name;  
-    private Integer age;  
-}  
+1、parseBeanDefinitionElement(Element ele)
+2、parseBeanDefinitionElement( Element ele, String beanName, @Nullable BeanDefinition containingBean)
+2.1、createBeanDefinition
+3、总结
+4、参考
  
 
-2）编写XSD文件
+1、parseBeanDefinitionElement(Element ele)
+　　BeanDefinitionParserDelegate.parseBeanDefinitionElement(Element ele) 方法，对 <bean> 标签进行元素解析，也即是解析 BeanDefinition 的过程，代码如下：
 
-为上一步设计好的配置项编写XSD文件，XSD是schema的定义文件，配置的输入和解析输出都是以XSD为契约，本例中XSD如下：
+复制代码
+/**
+ * Parses the supplied {@code <bean>} element. May return {@code null}
+ * if there were errors during parse. Errors are reported to the
+ * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
+ * <p>解析提供的 <bean> 标签元素。如果在解析过程中出现错误，可以返回 null 。
+ * 错误将会报告给 {@link org.springframework.beans.factory.parsing.ProblemReporter} 进行处理。
+ */
+@Nullable
+public BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
+    return parseBeanDefinitionElement(ele, null);
+}
+
+/**
+ * Parses the supplied {@code <bean>} element. May return {@code null}
+ * if there were errors during parse. Errors are reported to the
+ * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
+ */
+@Nullable
+public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+    // 1.1、解析 id 、 name 属性
+    String id = ele.getAttribute(ID_ATTRIBUTE);
+    String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
+
+    // 1.2、分割 name 属性，作为别名 alias 集合
+    List<String> aliases = new ArrayList<>();
+    if (StringUtils.hasLength(nameAttr)) {
+        String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+        aliases.addAll(Arrays.asList(nameArr));
+    }
+    // 1.3、beanName ： 先默认使用 id
+    String beanName = id;
+    if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
+        // 若 id 没有设置，则使用别名 alias 的第一个，同时移除这个别名
+        beanName = aliases.remove(0);
+        if (logger.isTraceEnabled()) {
+            logger.trace("No XML 'id' specified - using '" + beanName +
+                    "' as bean name and " + aliases + " as aliases");
+        }
+    }
+    // 1.4、检查 beanName 和 alias 的唯一性
+    if (containingBean == null) {
+        checkNameUniqueness(beanName, aliases, ele);
+    }
+    // 2、解析属性，构造 AbstractBeanDefinition 对象
+    AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
+    if (beanDefinition != null) {
+        // 再次检查 beanName
+        if (!StringUtils.hasText(beanName)) {
+            try {
+                if (containingBean != null) {
+                    // 3.1、beanName 还是不存在，则根据 Spring 提供的命名规则生成唯一的 beanName ，
+                    // 这个是内部 bean ，比较常见的格式就是： 类全限定名#十六进制字符串（对象的标识哈希码）
+                    beanName = BeanDefinitionReaderUtils.generateBeanName(
+                            beanDefinition, this.readerContext.getRegistry(), true);
+                }
+                else {
+                    // 3.2、生成唯一的 beanName ，比较常见的格式就是： 类全限定名#counter(从0开始)
+                    beanName = this.readerContext.generateBeanName(beanDefinition);
+                    // Register an alias for the plain bean class name, if still possible,
+                    // if the generator returned the class name plus a suffix.
+                    // This is expected for Spring 1.2/2.0 backwards compatibility.
+                    // 增加别名 beanClassName ，兼容 1.2/2.0
+                    String beanClassName = beanDefinition.getBeanClassName();
+                    if (beanClassName != null &&
+                            beanName.startsWith(beanClassName) && beanName.length() > beanClassName.length() &&
+                            !this.readerContext.getRegistry().isBeanNameInUse(beanClassName)) {
+                        aliases.add(beanClassName);
+                    }
+                }
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Neither XML 'id' nor 'name' specified - " +
+                            "using generated bean name [" + beanName + "]");
+                }
+            }
+            catch (Exception ex) {
+                error(ex.getMessage(), ele);
+                return null;
+            }
+        }
+        // 4、创建 BeanDefinitionHolder 对象
+        String[] aliasesArray = StringUtils.toStringArray(aliases);
+        return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
+    }
+
+    return null;
+}
+复制代码
+　　这个方法大致可以分为3个部分，实际的 bean 解析也只是进行了委托处理。这 3 个部分处理如下：
+
+1、beanName 和 aliad 的确定，即 beanNam 的命名规则，上面注释中的 1.1-1.4 和 3.1-3.2 便是这部分，命名规则如下
+1.1、如果 <bean /> 标签的属性 id 不为空，则 beanName = id
+1.2和1.3、如果 id 为空，但是 name 属性不为空，则会将其第一个配置设置为 beanName ，其他的依旧为 alias 。然后检查 id 和 alias 的唯一性。
+1.4、如果都没有，则在解析完 bean 之后使用默认规则来设置 beanName：
+如果是 innerBean ，则生成规则是：类全限定名#十六进制字符串（对象的标识哈希码）
+如不是，则为：类全限定名#counter(从0开始)。
+具体参考 ： BeanDefinitionReaderUtils.generateBeanName(...)
+检查 id 和 alias 唯一性的代码如下：
+复制代码
+/**
+ * Validate that the specified bean name and aliases have not been used already
+ * within the current level of beans element nesting.
+ */
+protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
+    // 检查 beanName 和 alias 是否已经被使用
+    String foundName = null;
+
+    if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
+        foundName = beanName;
+    }
+    if (foundName == null) {
+        foundName = CollectionUtils.findFirstMatch(this.usedNames, aliases);
+    }
+    // 如果 beanName 已存在，则使用 problemReporter 提示错误
+    if (foundName != null) {
+        error("Bean name '" + foundName + "' is already used in this <beans> element", beanElement);
+    }
+    // 将 beanName 和 alias 添加到 usedNames 集合中
+    this.usedNames.add(beanName);
+    this.usedNames.addAll(aliases);
+}
+复制代码
+2、解析属性，构造 AbstractBeanDefinition 对象：此处调用了 parseBeanDefinitionElement(Element ele, String beanName, @Nullable BeanDefinition containingBean) 方法，对 bean 标签进行解析并封装成 AbstractBeanDefinition 实例 beanDefinition ，实则是 GenericBeanDefinition 实例对象后面会及进行分析。
+3、根据 beanDefinition 、 beanName 、 aliases 构造 BeanDefinitionHolder 实例对象，然后返回。前面提到 BeanDefinitionHolder 有如下内部属性用于承载 bean：
+private final BeanDefinition beanDefinition;
+
+private final String beanName;
+
+@Nullable
+private final String[] aliases;
+ 
+
+2、parseBeanDefinitionElement( Element ele, String beanName, @Nullable BeanDefinition containingBean)
+　　这个方法就是 bean 解析的重头戏了，这里对 bean 标签的属性和子元素一一进行解析然后封装成 AbstractBeanDefinition 类型的 GenericBeanDefinition 实例对象，代码如下：
 
 复制代码
+/**
+ * Parse the bean definition itself, without regard to name or aliases. May return
+ * {@code null} if problems occurred during the parsing of the bean definition.
+ */
+@Nullable
+public AbstractBeanDefinition parseBeanDefinitionElement(
+        Element ele, String beanName, @Nullable BeanDefinition containingBean) {
+
+    this.parseState.push(new BeanEntry(beanName));
+
+    // 解析 class 属性
+    String className = null;
+    if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
+        className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
+    }
+    // 解析 parent 属性
+    String parent = null;
+    if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
+        parent = ele.getAttribute(PARENT_ATTRIBUTE);
+    }
+
+    try {
+        // 创建用于承载属性的 AbstractBeanDefinition 类型的 GenericBeanDefinition 实例对象
+        AbstractBeanDefinition bd = createBeanDefinition(className, parent);
+        // 解析默认 bean 标签的各种属性
+        parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
+        // 提取 description
+        bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
+
+        /// 下面这些是解析 bean 标签的子元素
+
+        // 解析元数据 <meta />
+        parseMetaElements(ele, bd);
+        // 解析 lookup-method 子元素 <lookup-method />
+        parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+        // 解析 replaced-method 子元素 <replaced-method />
+        parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
+
+        // 解析构造函数参数 <constructor-arg />
+        parseConstructorArgElements(ele, bd);
+        // 解析 property 子元素 <property />
+        parsePropertyElements(ele, bd);
+        // 解析 qualifier 子元素 <qualifier />
+        parseQualifierElements(ele, bd);
+
+        bd.setResource(this.readerContext.getResource());
+        bd.setSource(extractSource(ele));
+
+        return bd;
+    }
+    catch (ClassNotFoundException ex) {
+        error("Bean class [" + className + "] not found", ele, ex);
+    }
+    catch (NoClassDefFoundError err) {
+        error("Class that bean class [" + className + "] depends on not found", ele, err);
+    }
+    catch (Throwable ex) {
+        error("Unexpected failure during bean definition parsing", ele, ex);
+    }
+    finally {
+        this.parseState.pop();
+    }
+
+    return null;
+}
 复制代码
-<?xml version="1.0" encoding="UTF-8"?>  
-<xsd:schema   
-    xmlns="http://blog.csdn.net/cutesource/schema/people"  
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"   
-    xmlns:beans="http://www.springframework.org/schema/beans"  
-    targetNamespace="http://blog.csdn.net/cutesource/schema/people"  
-    elementFormDefault="qualified"   
-    attributeFormDefault="unqualified">  
-    <xsd:import namespace="http://www.springframework.org/schema/beans" />  
-    <xsd:element name="people">  
-        <xsd:complexType>  
-            <xsd:complexContent>  
-                <xsd:extension base="beans:identifiedType">  
-                    <xsd:attribute name="name" type="xsd:string" />  
-                    <xsd:attribute name="age" type="xsd:int" />  
-                </xsd:extension>  
-            </xsd:complexContent>  
-        </xsd:complexType>  
-    </xsd:element>  
-</xsd:schema> 
+　　到这里已经看到了 XML 配置中， bean 标签的很多属性以及各种子元素了。这里解析出来的 BeanDefinition 可以算是基本成型了。
+
+ 
+
+2.1、createBeanDefinition
+　　解析之前，当然就是先创建一个能够承载各种属性的 BeanDefinition 了，这里使用的是 AbstractBeanDefinition 类型的 GenericBeanDefinition 实例对象：
+
 复制代码
+/**
+ * Create a bean definition for the given class name and parent name.
+ * @param className the name of the bean class
+ * @param parentName the name of the bean's parent bean
+ * @return the newly created bean definition
+ * @throws ClassNotFoundException if bean class resolution was attempted but failed
+ */
+protected AbstractBeanDefinition createBeanDefinition(@Nullable String className, @Nullable String parentName)
+        throws ClassNotFoundException {
+
+    return BeanDefinitionReaderUtils.createBeanDefinition(
+            parentName, className, this.readerContext.getBeanClassLoader());
+}
+
+/// org.springframework.beans.factory.support.BeanDefinitionReaderUtils
+
+/**
+ * Create a new GenericBeanDefinition for the given parent name and class name,
+ * eagerly loading the bean class if a ClassLoader has been specified.
+ * @param parentName the name of the parent bean, if any
+ * @param className the name of the bean class, if any
+ * @param classLoader the ClassLoader to use for loading bean classes
+ * (can be {@code null} to just register bean classes by name)
+ * @return the bean definition
+ * @throws ClassNotFoundException if the bean class could not be loaded
+ */
+public static AbstractBeanDefinition createBeanDefinition(
+        @Nullable String parentName, @Nullable String className, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
+
+    GenericBeanDefinition bd = new GenericBeanDefinition();
+    bd.setParentName(parentName);
+    if (className != null) {
+        if (classLoader != null) {
+            bd.setBeanClass(ClassUtils.forName(className, classLoader));
+        }
+        else {
+            bd.setBeanClassName(className);
+        }
+    }
+    return bd;
+}
 复制代码
  
 
-关于xsd:schema的各个属性具体含义就不作过多解释，可以参见http://www.w3school.com.cn/schema/schema_schema.asp
-
-<xsd:element name="people">对应着配置项节点的名称，因此在应用中会用people作为节点名来引用这个配置
-
-<xsd:attribute name="name" type="xsd:string" />和<xsd:attribute name="age" type="xsd:int" />对应着配置项people的两个属性名，因此在应用中可以配置name和age两个属性，分别是string和int类型
-
-完成后需把xsd存放在classpath下，一般都放在META-INF目录下（本例就放在这个目录下）
-
-3）编写NamespaceHandler和BeanDefinitionParser完成解析工作
-
-下面需要完成解析工作，会用到NamespaceHandler和BeanDefinitionParser这两个概念。具体说来 NamespaceHandler会根据schema和节点名找到某个BeanDefinitionParser，然后由 BeanDefinitionParser完成具体的解析工作。因此需要分别完成NamespaceHandler和 BeanDefinitionParser的实现类，Spring提供了默认实现类NamespaceHandlerSupport和 AbstractSingleBeanDefinitionParser，简单的方式就是去继承这两个类。本例就是采取这种方式：
-
-复制代码
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;  
-public class MyNamespaceHandler extends NamespaceHandlerSupport {  
-    public void init() {  
-        registerBeanDefinitionParser("people", new PeopleBeanDefinitionParser());  
-    }  
-}  
-复制代码
- 
-
-其中registerBeanDefinitionParser("people", new PeopleBeanDefinitionParser());就是用来把节点名和解析类联系起来，在配置中引用people配置项时，就会用 PeopleBeanDefinitionParser来解析配置。PeopleBeanDefinitionParser就是本例中的解析类：
-
-复制代码
-复制代码
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;  
-import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;  
-import org.springframework.util.StringUtils;  
-import org.w3c.dom.Element;  
-public class PeopleBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {  
-    protected Class getBeanClass(Element element) {  
-        return People.class;  
-    }  
-    protected void doParse(Element element, BeanDefinitionBuilder bean) {  
-        String name = element.getAttribute("name");  
-        String age = element.getAttribute("age");  
-        String id = element.getAttribute("id");  
-        if (StringUtils.hasText(id)) {  
-            bean.addPropertyValue("id", id);  
-        }  
-        if (StringUtils.hasText(name)) {  
-            bean.addPropertyValue("name", name);  
-        }  
-        if (StringUtils.hasText(age)) {  
-            bean.addPropertyValue("age", Integer.valueOf(age));  
-        }  
-    }  
-}  
-复制代码
-复制代码
-其中element.getAttribute就是用配置中取得属性值，bean.addPropertyValue就是把属性值放到bean中。
-
-4）编写spring.handlers和spring.schemas串联起所有部件
-
-上面几个步骤走下来会发现开发好的handler与xsd还没法让应用感知到，就这样放上去是没法把前面做的工作纳入体系中的，spring提供了 spring.handlers和spring.schemas这两个配置文件来完成这项工作，这两个文件需要我们自己编写并放入META-INF文件夹 中，这两个文件的地址必须是META-INF/spring.handlers和META-INF/spring.schemas，spring会默认去 载入它们，本例中spring.handlers如下所示：
-
-http\://blog.csdn.net/cutesource/schema/people=study.schemaExt.MyNamespaceHandler
-以上表示当使用到名为"http://blog.csdn.net/cutesource/schema/people"的schema引用时，会通过study.schemaExt.MyNamespaceHandler来完成解析
-
-spring.schemas如下所示：
-
-http\://blog.csdn.net/cutesource/schema/people.xsd=META-INF/people.xsd
-以上就是载入xsd文件
-
-5）在Bean文件中应用
-
-到此为止一个简单的自定义配置以完成，可以在具体应用中使用了。使用方法很简单，和配置一个普通的spring bean类似，只不过需要基于我们自定义schema，本例中引用方式如下所示：
-
-复制代码
-复制代码
-<beans xmlns="http://www.springframework.org/schema/beans"  
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
-    xmlns:cutesource="http://blog.csdn.net/cutesource/schema/people"  
-    xsi:schemaLocation="  
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
-http://blog.csdn.net/cutesource/schema/people http://blog.csdn.net/cutesource/schema/people.xsd">  
-    <cutesource:people id="cutesource" name="袁志俊" age="27"/>  
-</beans> 
-复制代码
-复制代码
-其中xmlns:cutesource="http://blog.csdn.net/cutesource/schema/people" 是用来指定自定义schema，xsi:schemaLocation用来指定xsd文件。<cutesource:people id="cutesource" name="zhijun.yuanzj" age="27"/>是一个具体的自定义配置使用实例。
-
-最后就可以在具体程序中使用基本的bean载入方式来载入我们的自定义配置对象了，如：
-
-ApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml");  
-People p = (People)ctx.getBean("cutesource");  
-System.out.println(p.getId());  
-System.out.println(p.getName());  
-System.out.println(p.getAge());   
-会输出：
-cutesource
-袁志俊
-27
+3、总结
+　　至此已初步看到了 bean 标签的各种属性和子元素的解析委托了，而 bean 标签的属性和子元素比较多，后续将继续进行注意的分析。
 
  
 
-转自 http://blog.sina.com.cn/s/blog_4e345ce70101no1q.html
+4、参考
+spring 官方文档 5.2.3.RELEASE：https://docs.spring.io/spring-framework/docs/5.2.3.RELEASE/spring-framework-reference/core.html
+Spring源码深度解析（第2版），郝佳，P44-P72
+相关注释可参考笔者 github 链接：https://github.com/wpbxin/spring-framework
+ 
 
-参考 https://blog.csdn.net/gaoshan12345678910/article/details/78287140 
-
- https://www.iteye.com/blog/wangxinchun-2301263
-
-标签: Java
+分类: Spring5源码分析
 好文要顶 关注我 收藏该文  
-茄子_2008
-关注 - 12
-粉丝 - 544
+wpbxin
+关注 - 1
+粉丝 - 3
 +加关注
 00
-« 上一篇： supervisor更改某项目配置后 需要重新启动才有效
-» 下一篇： MySQL总长字符类型优化
-posted on 2020-06-30 21:42  茄子_2008  阅读(258)  评论(0)  编辑  收藏
+« 上一篇： Spring5源码分析(011)——IoC篇之解析bean标签总览
+» 下一篇： Spring5源码分析(013)——IoC篇之解析bean标签：BeanDefinition 和 AbstractBeanDefinition
+posted @ 2020-08-23 23:17  wpbxin  阅读(51)  评论(0)  编辑  收藏
 刷新评论刷新页面返回顶部
 登录后才能发表评论，立即 登录 或 注册， 访问 网站首页
 写给园友们的一封求助信
@@ -191,41 +319,38 @@ posted on 2020-06-30 21:42  茄子_2008  阅读(258)  评论(0)  编辑  收藏
 【推荐】新一代 NoSQL 数据库，Aerospike专区新鲜入驻
 
 相关博文：
-· Spring---SpringIntegration
-· 【spring】springaop
-· Spring
-· Spring
-· Spring
+· 【归纳】springboot中的IOC注解：注册bean和使用bean
+· Spring基础——IOC九种bean声明方式
+· spring5源码分析系列（六）——IOC容器的初始化（四）
+· spring5源码分析系列（三）——IOC容器的初始化（一）
+· spring5源码分析系列（四）——IOC容器的初始化（二）
 » 更多推荐...
 
 最新 IT 新闻:
-· 广东省唯一新晋平台！腾讯WeMake入选国家级双跨工业互联网平台行列
-· 加速的B站，滞后的社区治理
-· 天猫回应被市场监管总局处罚：全面整改所涉问题
-· 携程CEO孙洁发表跨年署名文章：2020年每一位旅业人都是英雄
-· MIT研发出可通过光让药物直接作用于靶子区域的方法：且无副作用
+· 中芯国际的转机在哪里？
+· 淘宝年度十大冷门职业公布：丝袜调色师、寿衣模特等入选
+· Uber等为欧洲市场合同工提供最低工资和工作保险
+· 苹果行动！App Store中国区今日下架近5万款游戏 要提交游戏版号
+· “比特币购车”闹乌龙？蔚来声明：只是广汽蔚来投资人，无其他关系
 » 更多新闻...
-< 2020年12月  >
-日 一 二 三 四 五 六
-29  30  1 2 3 4 5
-6 7 8 9 10  11  12
+历史上的今天：
+2020-08-23 Spring5源码分析(011)——IoC篇之解析bean标签总览
+昵称： wpbxin
+园龄： 2年9个月
+粉丝： 3
+关注： 1
++加关注
+
+<   2020年12月    >
+日   一   二   三   四   五   六
+29  30  1   2   3   4   5
+6   7   8   9   10  11  12
 13  14  15  16  17  18  19
 20  21  22  23  24  25  26
-27  28  29  30  31  1 2
-3 4 5 6 7 8 9
-如果一件事情你觉得难的完不成，你可以把它分为若干步,并不断寻找合适的方法。最后你会发现你是个超人。不要给自己找麻烦，但遇到麻烦绝不怕，更不要退缩。
-电工查找电路不通点的最快方法是：分段诊断排除，快速定位。你有什么启示吗?
-求知若饥，虚心若愚。
-当你对一个事情掌控不足的时候，你需要做的就是“梳理”，并制定相应的规章制度，并使资源各司其职。
-官网永远是获得第一时间获得第一手资料的最佳通道。
-去繁归简:作为一个程序员，最痛恨的代码就是如老婆的裹脚布又臭又长一样的代码；最崇尚的就是清晰、简洁、模块化的代码。
-忌犹豫，宜果断。左右为难作不出决定是一个最坏的决定。
-昵称： 茄子_2008
-园龄： 12年
-粉丝： 544
-关注： 12
-+加关注
+27  28  29  30  31  1   2
+3   4   5   6   7   8   9
 搜索
+ 
  
 常用链接
 我的随笔
@@ -233,74 +358,68 @@ posted on 2020-06-30 21:42  茄子_2008  阅读(258)  评论(0)  编辑  收藏
 我的参与
 最新评论
 我的标签
-我的标签
-Linux(109)
-Java(80)
-Road(58)
-Oracle(42)
-Mysql(39)
-C++(25)
-Tools(25)
-hadoop(21)
-hive(18)
-PHP(18)
-更多
+随笔分类
+Eclipse(2)
+Git和GitHub(1)
+IntelliJ IDEA(3)
+Java基础(2)
+Java集合框架(10)
+LeetCode(8)
+Log4j(1)
+Maven(12)
+Spring5源码分析(19)
+SpringBoot2(15)
+Web(2)
+备忘-技术网站/博客链接整理(1)
+设计模式(11)
 随笔档案
-2020年12月(1)
+2020年12月(2)
 2020年11月(1)
-2020年10月(3)
+2020年10月(1)
 2020年9月(2)
-2020年8月(2)
-2020年7月(10)
-2020年6月(8)
-2020年4月(3)
+2020年8月(8)
+2020年7月(5)
+2020年6月(5)
+2020年5月(1)
+2020年4月(5)
 2020年3月(1)
-2020年2月(1)
-2020年1月(4)
+2020年1月(3)
 2019年12月(1)
-2019年11月(1)
-2019年10月(2)
-2019年9月(2)
+2019年11月(6)
+2019年10月(7)
+2019年1月(1)
 更多
 最新评论
-1. Re:volatile关键字的作用
-试过了确实是
+1. Re:Maven:程序包不存在，找不到符号
+@漫步花海下的oldman 1、在组件的pom.xml里面直接添加对相关jar的引用声明，不要用默认的传递依赖。 2、如果是新增的类找不到，需要先打包到项目所用的私服（起码是本地缓存） 3、jar 包...
+--wpbxin
+2. Re:Maven:程序包不存在，找不到符号
+怎么解决？？
 
---pecool
-2. Re:安装docker No package docker available
-还是不行
+--漫步花海下的oldman
+3. Re:Maven:sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+这个问题找了那么多解决方法，楼主这才是标准答案！！
 
---冷安
-3. Re:Linux下如何查看系统启动时间和运行时间
-666
-
---Serendipity2020
-4. Re:volatile关键字的作用
-@Override public void run() { while (!flag){ i++; } System.out.println(flag);//这句话没输出，说明循环没结束...
---蓝雨人
-5. Re:安装docker No package docker available
-还是这样
-No package docker-io available.
-
---Leigegeya
+恭祝楼主代码 NO Bug
+--℡↗深念↖
+4. Re:浅析设计模式(五)——原型模式
+@ 我是坏男孩谢谢指正。补上clone()的官方注释，String是不可变对象，按照约定，只会复制引用。假如原来的String对象改变了，也只是原来的对象引用指向了新的引用，不会影响到克隆后的对象引用...
+--wpbxin
+5. Re:浅析设计模式(五)——原型模式
+@Override27 public Title clone() throws CloneNotSupportedException {28 Title title = (Title)super.cl...
+--我是坏男孩
 阅读排行榜
-1. Linux查看CPU和内存使用情况(1156901)
-2. Linux 的cp命令(599442)
-3. Linux添加/删除用户和用户组(586262)
-4. java取整和java四舍五入方法(230429)
-5. linux shell 中的sleep命令(204899)
+1. Maven:Failed to read artifact descriptor for xxx(29215)
+2. Maven:sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target(8247)
+3. Maven:Failure executing javac, but could not parse the error:javac: 无效的目标发行版: 1.8(4489)
+4. Maven:程序包不存在，找不到符号(4305)
+5. idea导入新项目后右键main方法没有Run xxx.main()(4278)
 评论排行榜
-1. Linux查看CPU和内存使用情况(12)
-2. volatile关键字的作用(9)
-3. Linux添加/删除用户和用户组(9)
-4. Linux下如何查看系统启动时间和运行时间(8)
-5. C++ Virtual详解(5)
+1. Maven:程序包不存在，找不到符号(2)
+2. 浅析设计模式(五)——原型模式(2)
+3. Maven:sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target(1)
 推荐排行榜
-1. Linux查看CPU和内存使用情况(27)
-2. Linux添加/删除用户和用户组(21)
-3. Linux 的cp命令(11)
-4. C++ Virtual详解(10)
-5. 透彻的掌握 Spring 中@transactional 的使用(8)
-Copyright © 2020 茄子_2008
+1. Maven:sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target(4)
+2. Maven:Unable to import maven project: See logs for details(1)
+Copyright © 2020 wpbxin
 Powered by .NET 5.0 on Kubernetes
-声明：现大部分文章为寻找问题时在网上相互转载，在此博客中做个记录，方便自己也方便有类似问题的朋友，故原出处已不好查到，如有侵权，请发邮件表明文章和原出处地址，我一定在文章中注明。谢谢。
