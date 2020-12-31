@@ -1,0 +1,306 @@
+博客园Logo
+首页
+新闻
+博问
+专区
+闪存
+班级
+代码改变世界
+搜索
+注册
+登录
+声明：现大部分文章为寻找问题时在网上相互转载，在此博客中做个记录，方便自己也方便有类似问题的朋友，故原出处已不好查到，如有侵权，请发邮件表明文章和原出处地址，我一定在文章中注明。谢谢。
+董俊杰
+xd502djj@163.com---识大势，懂取舍！分主次，懂先后！
+开放、透明、反思。
+业务思维、结果导向、成本意识。
+随笔- 584  文章- 0  评论- 136 
+博客园    首页    新随笔    联系   管理    订阅  订阅
+Spring自定义扩展NamespaceHandler--自定义标签
+在很多情况下，我们需要为系统提供可配置化支持，简单的做法可以直接基于Spring的标准Bean来配置，但配置较为复杂或者需要更多丰富控制的 时候，会显得非常笨拙。一般的做法会用原生态的方式去解析定义好的xml文件，然后转化为配置对象，这种方式当然可以解决所有问题，但实现起来比较繁琐， 特别是是在配置非常复杂的时候，解析工作是一个不得不考虑的负担。Spring提供了可扩展Schema的支持，这是一个不错的折中方案，完成一个自定义 配置一般需要以下步骤：
+
+[1] 设计配置属性和JavaBean
+[2] 编写XSD文件
+[3] 编写NamespaceHandler和BeanDefinitionParser完成解析工作
+[4] 编写spring.handlers和spring.schemas串联起所有部件
+[5] 在Bean文件中应用
+下面结合一个小例子来实战以上过程
+
+1）设计配置属性和JavaBean
+
+首先当然得设计好配置项，并通过JavaBean来建模，本例中需要配置People实体，配置属性name和age（id是默认需要的）
+
+public class People {  
+    private String id;  
+    private String name;  
+    private Integer age;  
+}  
+ 
+
+2）编写XSD文件
+
+为上一步设计好的配置项编写XSD文件，XSD是schema的定义文件，配置的输入和解析输出都是以XSD为契约，本例中XSD如下：
+
+复制代码
+复制代码
+<?xml version="1.0" encoding="UTF-8"?>  
+<xsd:schema   
+    xmlns="http://blog.csdn.net/cutesource/schema/people"  
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"   
+    xmlns:beans="http://www.springframework.org/schema/beans"  
+    targetNamespace="http://blog.csdn.net/cutesource/schema/people"  
+    elementFormDefault="qualified"   
+    attributeFormDefault="unqualified">  
+    <xsd:import namespace="http://www.springframework.org/schema/beans" />  
+    <xsd:element name="people">  
+        <xsd:complexType>  
+            <xsd:complexContent>  
+                <xsd:extension base="beans:identifiedType">  
+                    <xsd:attribute name="name" type="xsd:string" />  
+                    <xsd:attribute name="age" type="xsd:int" />  
+                </xsd:extension>  
+            </xsd:complexContent>  
+        </xsd:complexType>  
+    </xsd:element>  
+</xsd:schema> 
+复制代码
+复制代码
+ 
+
+关于xsd:schema的各个属性具体含义就不作过多解释，可以参见http://www.w3school.com.cn/schema/schema_schema.asp
+
+<xsd:element name="people">对应着配置项节点的名称，因此在应用中会用people作为节点名来引用这个配置
+
+<xsd:attribute name="name" type="xsd:string" />和<xsd:attribute name="age" type="xsd:int" />对应着配置项people的两个属性名，因此在应用中可以配置name和age两个属性，分别是string和int类型
+
+完成后需把xsd存放在classpath下，一般都放在META-INF目录下（本例就放在这个目录下）
+
+3）编写NamespaceHandler和BeanDefinitionParser完成解析工作
+
+下面需要完成解析工作，会用到NamespaceHandler和BeanDefinitionParser这两个概念。具体说来 NamespaceHandler会根据schema和节点名找到某个BeanDefinitionParser，然后由 BeanDefinitionParser完成具体的解析工作。因此需要分别完成NamespaceHandler和 BeanDefinitionParser的实现类，Spring提供了默认实现类NamespaceHandlerSupport和 AbstractSingleBeanDefinitionParser，简单的方式就是去继承这两个类。本例就是采取这种方式：
+
+复制代码
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;  
+public class MyNamespaceHandler extends NamespaceHandlerSupport {  
+    public void init() {  
+        registerBeanDefinitionParser("people", new PeopleBeanDefinitionParser());  
+    }  
+}  
+复制代码
+ 
+
+其中registerBeanDefinitionParser("people", new PeopleBeanDefinitionParser());就是用来把节点名和解析类联系起来，在配置中引用people配置项时，就会用 PeopleBeanDefinitionParser来解析配置。PeopleBeanDefinitionParser就是本例中的解析类：
+
+复制代码
+复制代码
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;  
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;  
+import org.springframework.util.StringUtils;  
+import org.w3c.dom.Element;  
+public class PeopleBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {  
+    protected Class getBeanClass(Element element) {  
+        return People.class;  
+    }  
+    protected void doParse(Element element, BeanDefinitionBuilder bean) {  
+        String name = element.getAttribute("name");  
+        String age = element.getAttribute("age");  
+        String id = element.getAttribute("id");  
+        if (StringUtils.hasText(id)) {  
+            bean.addPropertyValue("id", id);  
+        }  
+        if (StringUtils.hasText(name)) {  
+            bean.addPropertyValue("name", name);  
+        }  
+        if (StringUtils.hasText(age)) {  
+            bean.addPropertyValue("age", Integer.valueOf(age));  
+        }  
+    }  
+}  
+复制代码
+复制代码
+其中element.getAttribute就是用配置中取得属性值，bean.addPropertyValue就是把属性值放到bean中。
+
+4）编写spring.handlers和spring.schemas串联起所有部件
+
+上面几个步骤走下来会发现开发好的handler与xsd还没法让应用感知到，就这样放上去是没法把前面做的工作纳入体系中的，spring提供了 spring.handlers和spring.schemas这两个配置文件来完成这项工作，这两个文件需要我们自己编写并放入META-INF文件夹 中，这两个文件的地址必须是META-INF/spring.handlers和META-INF/spring.schemas，spring会默认去 载入它们，本例中spring.handlers如下所示：
+
+http\://blog.csdn.net/cutesource/schema/people=study.schemaExt.MyNamespaceHandler
+以上表示当使用到名为"http://blog.csdn.net/cutesource/schema/people"的schema引用时，会通过study.schemaExt.MyNamespaceHandler来完成解析
+
+spring.schemas如下所示：
+
+http\://blog.csdn.net/cutesource/schema/people.xsd=META-INF/people.xsd
+以上就是载入xsd文件
+
+5）在Bean文件中应用
+
+到此为止一个简单的自定义配置以完成，可以在具体应用中使用了。使用方法很简单，和配置一个普通的spring bean类似，只不过需要基于我们自定义schema，本例中引用方式如下所示：
+
+复制代码
+复制代码
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+    xmlns:cutesource="http://blog.csdn.net/cutesource/schema/people"  
+    xsi:schemaLocation="  
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+http://blog.csdn.net/cutesource/schema/people http://blog.csdn.net/cutesource/schema/people.xsd">  
+    <cutesource:people id="cutesource" name="袁志俊" age="27"/>  
+</beans> 
+复制代码
+复制代码
+其中xmlns:cutesource="http://blog.csdn.net/cutesource/schema/people" 是用来指定自定义schema，xsi:schemaLocation用来指定xsd文件。<cutesource:people id="cutesource" name="zhijun.yuanzj" age="27"/>是一个具体的自定义配置使用实例。
+
+最后就可以在具体程序中使用基本的bean载入方式来载入我们的自定义配置对象了，如：
+
+ApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml");  
+People p = (People)ctx.getBean("cutesource");  
+System.out.println(p.getId());  
+System.out.println(p.getName());  
+System.out.println(p.getAge());   
+会输出：
+cutesource
+袁志俊
+27
+
+ 
+
+转自 http://blog.sina.com.cn/s/blog_4e345ce70101no1q.html
+
+参考 https://blog.csdn.net/gaoshan12345678910/article/details/78287140 
+
+ https://www.iteye.com/blog/wangxinchun-2301263
+
+标签: Java
+好文要顶 关注我 收藏该文  
+茄子_2008
+关注 - 12
+粉丝 - 544
++加关注
+00
+« 上一篇： supervisor更改某项目配置后 需要重新启动才有效
+» 下一篇： MySQL总长字符类型优化
+posted on 2020-06-30 21:42  茄子_2008  阅读(259)  评论(0)  编辑  收藏
+刷新评论刷新页面返回顶部
+登录后才能发表评论，立即 登录 或 注册， 访问 网站首页
+写给园友们的一封求助信
+【推荐】News: 大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载
+【推荐】有你助力，更好为你——博客园用户消费观调查，附带小惊喜！
+【推荐】博客园x丝芙兰-圣诞特别活动：圣诞选礼，美力送递
+【推荐】了不起的开发者，挡不住的华为，园子里的品牌专区
+【推荐】未知数的距离，毫秒间的传递，声网与你实时互动
+【推荐】新一代 NoSQL 数据库，Aerospike专区新鲜入驻
+
+相关博文：
+· Spring---SpringIntegration
+· 【spring】springaop
+· Spring
+· Spring
+· Spring
+» 更多推荐...
+
+最新 IT 新闻:
+· 烧钱、并购、倒闭：教育赛道混战2020
+· SpaceX星链遭投诉，马斯克回怼：只是影响你家生意了
+· 中芯国际的转机在哪里？
+· 淘宝年度十大冷门职业公布：丝袜调色师、寿衣模特等入选
+· Uber等为欧洲市场合同工提供最低工资和工作保险
+» 更多新闻...
+<	2020年12月	>
+日	一	二	三	四	五	六
+29	30	1	2	3	4	5
+6	7	8	9	10	11	12
+13	14	15	16	17	18	19
+20	21	22	23	24	25	26
+27	28	29	30	31	1	2
+3	4	5	6	7	8	9
+如果一件事情你觉得难的完不成，你可以把它分为若干步,并不断寻找合适的方法。最后你会发现你是个超人。不要给自己找麻烦，但遇到麻烦绝不怕，更不要退缩。
+电工查找电路不通点的最快方法是：分段诊断排除，快速定位。你有什么启示吗?
+求知若饥，虚心若愚。
+当你对一个事情掌控不足的时候，你需要做的就是“梳理”，并制定相应的规章制度，并使资源各司其职。
+官网永远是获得第一时间获得第一手资料的最佳通道。
+去繁归简:作为一个程序员，最痛恨的代码就是如老婆的裹脚布又臭又长一样的代码；最崇尚的就是清晰、简洁、模块化的代码。
+忌犹豫，宜果断。左右为难作不出决定是一个最坏的决定。
+昵称： 茄子_2008
+园龄： 12年
+粉丝： 544
+关注： 12
++加关注
+搜索
+ 
+常用链接
+我的随笔
+我的评论
+我的参与
+最新评论
+我的标签
+我的标签
+Linux(109)
+Java(80)
+Road(58)
+Oracle(42)
+Mysql(39)
+C++(25)
+Tools(25)
+hadoop(21)
+hive(18)
+PHP(18)
+更多
+随笔档案
+2020年12月(1)
+2020年11月(1)
+2020年10月(3)
+2020年9月(2)
+2020年8月(2)
+2020年7月(10)
+2020年6月(8)
+2020年4月(3)
+2020年3月(1)
+2020年2月(1)
+2020年1月(4)
+2019年12月(1)
+2019年11月(1)
+2019年10月(2)
+2019年9月(2)
+更多
+最新评论
+1. Re:volatile关键字的作用
+试过了确实是
+
+--pecool
+2. Re:安装docker No package docker available
+还是不行
+
+--冷安
+3. Re:Linux下如何查看系统启动时间和运行时间
+666
+
+--Serendipity2020
+4. Re:volatile关键字的作用
+@Override public void run() { while (!flag){ i++; } System.out.println(flag);//这句话没输出，说明循环没结束...
+--蓝雨人
+5. Re:安装docker No package docker available
+还是这样
+No package docker-io available.
+
+--Leigegeya
+阅读排行榜
+1. Linux查看CPU和内存使用情况(1156919)
+2. Linux 的cp命令(599443)
+3. Linux添加/删除用户和用户组(586271)
+4. java取整和java四舍五入方法(230430)
+5. linux shell 中的sleep命令(204907)
+评论排行榜
+1. Linux查看CPU和内存使用情况(12)
+2. volatile关键字的作用(9)
+3. Linux添加/删除用户和用户组(9)
+4. Linux下如何查看系统启动时间和运行时间(8)
+5. C++ Virtual详解(5)
+推荐排行榜
+1. Linux查看CPU和内存使用情况(27)
+2. Linux添加/删除用户和用户组(21)
+3. Linux 的cp命令(11)
+4. C++ Virtual详解(10)
+5. 透彻的掌握 Spring 中@transactional 的使用(8)
+Copyright © 2020 茄子_2008
+Powered by .NET 5.0 on Kubernetes
+声明：现大部分文章为寻找问题时在网上相互转载，在此博客中做个记录，方便自己也方便有类似问题的朋友，故原出处已不好查到，如有侵权，请发邮件表明文章和原出处地址，我一定在文章中注明。谢谢。
