@@ -1,0 +1,287 @@
+博客园Logo
+首页
+新闻
+博问
+专区
+闪存
+班级
+代码改变世界
+搜索
+注册
+登录
+返回主页
+记录技术百态
+博客园
+首页
+新随笔
+联系
+订阅
+管理
+Spring中常见的设计模式——适配器模式
+一、适配器模式的应用场景　　
+　　适配器模式（Adapter Pattern）是指将一个类的接口转换成用户期待的另一个接口，使原本接口不兼容的类可以一起工作，属于构造设计模式。
+
+　　适配器适用于以下几种业务场景：
+
+已经存在的类的方法和需求不匹配（方法结果相同或相似）的情况。
+适配器模式不是软件初始阶段应该考虑的设计模式，是随着软件的开发，由于不同产品、不同厂家造成功能类似而接口不同的问题的解决方案，有点亡羊补牢的感觉。
+二、重构第三方登录自由适配的业务场景
+　　将原来的单一支持用户名和密码登录，扩展为可以支持微信和手机登录。
+
+　　创建统一返回结果ResultMsg：
+
+复制代码
+@Data
+public class ResultMsg {
+    private Integer code;
+    private String msg;
+    private Object data;
+
+    public ResultMsg(Integer code, String msg, Object data) {
+        this.code = code;
+        this.data = data;
+        this.msg = msg;
+    }
+}
+复制代码
+　　老系统登录代码如下：
+
+复制代码
+public class SignInService {
+    public ResultMsg regist(String userName, String passWord) {
+        return new ResultMsg(200, "注册成功", new Member());
+    }
+
+    public ResultMsg login(String userName, String passWord) {
+        return null;
+    }
+}
+复制代码
+　　为了遵循开闭原则，我们不修改老系统代码，下面是Member类：
+
+复制代码
+@Data
+public class Member {
+    private String userName;
+    private String passWord;
+    private String mid;
+    private String info;
+}
+复制代码
+　　我们优雅的根据不同登录方式创建不同的“Adapter”，首先创建LoginAdapter：
+
+public interface LoginAdapter {
+    boolean support(Object adapter);
+
+    ResultMsg login(String id, Object adapter);
+}
+　　手机登录：
+
+复制代码
+public class LoginForTelAdapter implements LoginAdapter {
+    @Override
+    public boolean support(Object adapter) {
+        return adapter instanceof LoginForTelAdapter;
+    }
+
+    @Override
+    public ResultMsg login(String id, Object adapter) {
+        return null;
+    }
+}
+复制代码
+　　微信登录：
+
+复制代码
+public class LoginForWechatAdapter implements LoginAdapter {
+    @Override
+    public boolean support(Object adapter) {
+        return adapter instanceof LoginForWechatAdapter;
+    }
+
+    @Override
+    public ResultMsg login(String id, Object adapter) {
+        return null;
+    }
+}
+复制代码
+　　接着，创建第三方登录兼容接口IPassportForThid：
+
+复制代码
+public interface IPassportForThird {
+    ResultMsg loginForTel(String telephone, String code);
+
+    ResultMsg loginForWechat(String id);
+
+    ResultMsg loginForResist(String userName, String passWord);
+}
+复制代码
+　　实现兼容PassportForThirdAdapter：
+
+复制代码
+public class PassportForThirdAdapter extends SignInService implements IPassportForThird {
+    @Override
+    public ResultMsg loginForTel(String telephone, String code) {
+        return null;
+    }
+
+    @Override
+    public ResultMsg loginForWechat(String id) {
+        return null;
+    }
+
+    @Override
+    public ResultMsg loginForResist(String userName, String passWord) {
+        super.regist(userName, passWord);
+        return super.login(userName, passWord);
+    }
+
+    //这里使用简单工厂及策略模式
+    private ResultMsg procssLogin(String key, Class<? extends LoginAdapter> clazz) {
+        try {
+            LoginAdapter adapter = clazz.newInstance();
+            if (adapter.support(adapter)) {
+                return adapter.login(key, adapter);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+复制代码
+　　前面每个适配器都加上了support()方法，用来判断箭筒。support()方法的参数也是Object类型，而support()来自接口。适配器并不依赖接口，我们使用接口只是为了代码规范。
+
+三、适配器模式在源码中的体现
+　　Spring中的AOP中AdvisorAdapter类，它有三个实现：MethodBeforAdviceAdapter、AfterReturnningAdviceAdapter、ThrowsAdviceAdapter。
+
+　　先看顶层接口AdviceAdapter的源代码：
+
+public interface AdvisorAdapter {
+    boolean supportsAdvice(Advice var1);
+
+    MethodInterceptor getInterceptor(Advisor var1);
+}
+　　再看MethodBeforAdviceAdapter：
+
+复制代码
+public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
+    private final MethodBeforeAdvice advice;
+
+    public MethodBeforeAdviceInterceptor(MethodBeforeAdvice advice) {
+        Assert.notNull(advice, "Advice must not be null");
+        this.advice = advice;
+    }
+
+    public Object invoke(MethodInvocation mi) throws Throwable {
+        this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis());
+        return mi.proceed();
+    }
+}
+复制代码
+　　其他两个类就不看了。Spring会根据不同的AOP配置来使用对应的“Advice”，与策略模式不同的是，一个方法可以同时拥有多个“Advice”。
+
+四、适配器模式的优缺点
+　　优点：
+能提高类的透明性和复用性，现有的类会被复用但不需要改变。
+目标类和适配器类解耦，可以提高程序的扩展性。
+在很多业务场景中符合开闭原则。
+　　缺点：
+在适配器代码编写过程中需要进行全面考虑，可能会增加系统复杂度。
+增加代码阅读难度，过多使用适配器会使系统代码变得凌乱。
+　　
+
+好文要顶 关注我 收藏该文  
+皮肤黝黑的小白
+关注 - 1
+粉丝 - 2
++加关注
+00
+« 上一篇： Spring中常见的设计模式——模板模式
+» 下一篇： Spring中常见的设计模式——装饰者模式
+posted @ 2020-01-14 10:19  皮肤黝黑的小白  阅读(1519)  评论(0)  编辑  收藏
+刷新评论刷新页面返回顶部
+登录后才能发表评论，立即 登录 或 注册， 访问 网站首页
+【推荐】News: 大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载
+【推荐】有你助力，更好为你——博客园用户消费观调查，附带小惊喜！
+【推荐】AWS携手博客园为开发者送福利，注册立享12个月免费套餐
+【推荐】七牛云新老用户同享 1 分钱抢 CDN 1TB流量大礼包！
+【推荐】了不起的开发者，挡不住的华为，园子里的品牌专区
+【推荐】未知数的距离，毫秒间的传递，声网与你实时互动
+【推荐】新一代 NoSQL 数据库，Aerospike专区新鲜入驻
+
+相关博文：
+· Spring---SpringIntegration
+· 【spring】springaop
+· Spring
+· Spring
+· Spring
+» 更多推荐...
+
+最新 IT 新闻:
+· 683亿美元！加密货币周一创单日交易量最高纪录
+· 蔚来承包宁德时代一条磷酸铁锂电池生产线？
+· 拼多多事件：除了抱怨996，你真的在乎吗？
+· “独夫”贝壳：利益面前 “反贝壳联盟”不堪一击
+· 揭秘互联网加班：无法脱逃的青春熔炉
+» 更多新闻...
+公告
+昵称： 皮肤黝黑的小白
+园龄： 3年6个月
+粉丝： 2
+关注： 1
++加关注
+<   2021年1月 >
+日   一   二   三   四   五   六
+27  28  29  30  31  1   2
+3   4   5   6   7   8   9
+10  11  12  13  14  15  16
+17  18  19  20  21  22  23
+24  25  26  27  28  29  30
+31  1   2   3   4   5   6
+搜索
+ 
+ 
+最新随笔
+1.数组、链表、跳表得基本实现和特性
+2.搜索时 搜索条件在被搜索范围内
+3.Spring RestTemplet https请求
+4.微信三方平台接入
+5.在安装RedisDesktopManager的时候遇到 .dll文件缺失解决办法
+6.Mybatis面试问题集锦
+7.Spring中常见的设计模式——装饰者模式
+8.Spring中常见的设计模式——适配器模式
+9.Spring中常见的设计模式——模板模式
+10.Spring中常见的设计模式——策略模式
+积分与排名
+积分 - 19779
+排名 - 51095
+随笔档案
+2020年10月(1)
+2020年6月(2)
+2020年4月(1)
+2020年2月(1)
+2020年1月(5)
+2019年12月(4)
+2019年11月(9)
+2019年10月(5)
+文章档案
+2020年6月(3)
+2020年2月(2)
+2020年1月(2)
+2019年12月(7)
+2019年11月(1)
+2019年10月(7)
+阅读排行榜
+1. ThreadPoolExecutor使用方法(5277)
+2. Spring中常见的设计模式——适配器模式 (1519)
+3. Spring中常见的设计模式——工厂模式(1460)
+4. Spring中常见的设计模式——单例模式(1253)
+5. Spring中常见的设计模式——装饰者模式 (1046)
+推荐排行榜
+1. 关于spring boot项目配置文件的一些想法(3)
+2. Spring中常见的设计模式——代理模式(1)
+3. 让你的sql开启氮气加速(1)
+4. ThreadPoolExecutor使用方法(1)
+Copyright © 2021 皮肤黝黑的小白
+Powered by .NET 5.0 on Kubernetes
