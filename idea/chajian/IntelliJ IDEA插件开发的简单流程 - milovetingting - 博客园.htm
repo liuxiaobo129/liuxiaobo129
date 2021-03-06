@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)https://www.cnblogs.com/milovetingting/p/12853621.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="never">
+    <meta name="description" content="个人博客 &amp;quot;http://www.milovetingting.cn&amp;quot; IntelliJ IDEA插件开发的简单流程 前言 平时用 开发项目时，我们都会或多或少接触到一些插件，这些">
+    <meta property="og:description" content="个人博客 &amp;quot;http://www.milovetingting.cn&amp;quot; IntelliJ IDEA插件开发的简单流程 前言 平时用 开发项目时，我们都会或多或少接触到一些插件，这些">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/bundle-coffee.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/bundle-coffee-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/milovetingting/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/milovetingting/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/milovetingting/wlwmanifest.xml">
+    <script src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/osd.js"></script><script async="" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/analytics.js"></script><script>
+        var currentBlogId = 180151;
+        var currentBlogApp = 'milovetingting';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'coffee';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2020-05-08 10:56';
+        </script>
+    <script src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/blog-common.min.js"></script><style type="text/css">.medium-zoom-overlay{position:fixed;top:0;right:0;bottom:0;left:0;opacity:0;transition:opacity .3s;will-change:opacity}.medium-zoom--opened .medium-zoom-overlay{cursor:pointer;cursor:zoom-out;opacity:1}.medium-zoom-image{cursor:pointer;cursor:zoom-in;transition:transform .3s cubic-bezier(.2,0,.2,1)!important}.medium-zoom-image--hidden{visibility:hidden}.medium-zoom-image--opened{position:relative;cursor:pointer;cursor:zoom-out;will-change:transform}</style>
+    
+    
+    
+<meta http-equiv="origin-trial" content="A+b/H0b8RPXNaJgaNFpO0YOFuGK6myDQXlwnJB3SwzvNMfcndat4DZYMrP4ClJIzYWo3/yP2S+8FTZ/lpqbPAAEAAABueyJvcmlnaW4iOiJodHRwczovL2ltYXNkay5nb29nbGVhcGlzLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzVGhpcmRQYXJ0eSI6dHJ1ZX0="><meta http-equiv="origin-trial" content="A9ZgbRtm4pU3oZiuNzOsKcC8ppFSZdcjP2qYcdQrFKVzkmiWH1kdYY1Mi9x7G8+PS8HV9Ha9Cz0gaMdKsiVZIgMAAAB7eyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="AxL6oBxcpn5rQDPKSAs+d0oxNyJYq2/4esBUh3Yx5z8QfcLu+AU8iFCXYRcr/CEEfDnkxxLTsvXPJFQBxHfvkgMAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXRhZ3NlcnZpY2VzLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A9KPtG5kl3oLTk21xqynDPGQ5t18bSOpwt0w6kGa6dEWbuwjpffmdUpR3W+faZDubGT+KIk2do0BX2ca16x8qAcAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXN5bmRpY2F0aW9uLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A3HucHUo1oW9s+9kIKz8mLkbcmdaj5lxt3eiIMp1Nh49dkkBlg1Fhg4Fd/r0vL69mRRA36YutI9P/lJUfL8csQoAAACFeyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiQ29udmVyc2lvbk1lYXN1cmVtZW50IiwiZXhwaXJ5IjoxNjI2MjIwNzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ=="><script src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/pubads_impl_2021030201.js" async=""></script><link rel="preload" href="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/f.txt"></script><link rel="prefetch" href="https://a8a8cd100a30326c4e7ee53c537e0382.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://www.cnblogs.com/cmt/p/14408628.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;aws-blog-mobile-banner&#39;)">
+                <img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/35695-20210101110709031-1748833382.jpg" alt="">
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔" style="display: none;">
+                        <img id="new_post_icon" class="navbar-icon" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/newpost.svg" alt="写随笔">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a href="https://www.cnblogs.com/milovetingting/"><img id="blogLogo" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/milovetingting/">milovetingting</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<ul id="navList">
+	<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+	<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/milovetingting/">
+首页</a>
+</li>
+	<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+	<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/milovetingting">
+联系</a></li>
+	<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+	<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/milovetingting/rss/">
+订阅</a>
+	
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/milovetingting/rss/">
+    <img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/xml.gif" alt="订阅">
+</a></li>
+</ul>
+
+
+
+			<div class="blogStats">
+				
+				<!--done-->
+随笔- 121&nbsp;
+文章- 0&nbsp;
+评论- 10&nbsp;
+阅读- 
+<span title="总阅读数: 44800">
+44800</span>&nbsp;
+
+
+
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/milovetingting/p/12853621.html">
+    <span>IntelliJ IDEA插件开发的简单流程</span>
+    
+
+
+</a>
+
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body" class="blogpost-body cnblogs-markdown">
+<blockquote>
+<p>个人博客</p>
+<p><a href="http://www.milovetingting.cn/" target="_blank">http://www.milovetingting.cn</a></p>
+</blockquote>
+<h1 id="intellij-idea插件开发的简单流程">IntelliJ IDEA插件开发的简单流程</h1>
+<h2 id="前言">前言</h2>
+<p>平时用<code>Android Studio</code>开发项目时，我们都会或多或少接触到一些插件，这些插件能帮助我们提高开发效率。如果我们有一些特定的需求，但还没有插件可以满足这些需求，那么可以通过自定义插件来实现。</p>
+<h2 id="自定义插件">自定义插件</h2>
+<h3 id="创建插件工程">创建插件工程</h3>
+<ol>
+<li><code>File-New-Project</code>,在创建工程的界面，选择<code>IntelliJ Platform Plugin</code>,右侧选择<code>SDK</code>，这里需要选择<code>IntelliJ IDEA</code>安装目录下的SDK，这个SDK包含后面插件开发所需要的jar。</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6c96ee6581" alt="创建工程.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="2">
+<li>点击<code>Next</code>后，在弹出的界面配置工程信息，包括工程名称，保存地址。</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6c94696c0c" alt="创建工程2.png" loading="lazy" class="medium-zoom-image"></p>
+<h3 id="配置sdk">配置SDK</h3>
+<p>如果前面创建工程时，没有IntelliJ IDEA的SDK可选，可以在这里配置</p>
+<ol>
+<li>File-Project Structure-Platform Settings-SDKs.</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6ca0cd4ef6" alt="配置SDK.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="2">
+<li>如果右侧没有任何可选的SDK，那么需要先配置<code>JDK</code>。点<code>+</code>号-<code>Add JDK</code></li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6c9a597ae6" alt="配置SDK2.png" loading="lazy"></p>
+<ol start="3">
+<li>选择JDK的位置</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6c9d3948a9" alt="配置SDK3.png" loading="lazy"></p>
+<ol start="4">
+<li>添加JDK后</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6c9ee10ebd" alt="配置SDK4.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="5">
+<li>添加IntelliJ IDEA SDK</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cc50ad520" alt="配置SDK5.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="6">
+<li>选择IntelliJ IDEA的安装位置</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cdde392f9" alt="配置SDK6.png" loading="lazy"></p>
+<ol start="7">
+<li>然后选择JDK</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cce138d38" alt="配置SDK7.png" loading="lazy"></p>
+<ol start="8">
+<li>配置好后</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cd4fb8a58" alt="配置SDK8.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="9">
+<li>点击Project Settings-Project,在右侧的Project SDK中选择刚才配置的SDK</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cd84fb376" alt="配置SDK9.png" loading="lazy" class="medium-zoom-image"></p>
+<h3 id="配置插件信息">配置插件信息</h3>
+<p>主要配置插件id,插件名称,插件描述，更新日志等。</p>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6ce5e5a350" alt="plugin配置.png" loading="lazy" class="medium-zoom-image"></p>
+<h3 id="创建action">创建Action</h3>
+<ol>
+<li>在src目录上，右键-New-Plugin DevKit-Action</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6cfb6e416b" alt="创建action.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="2">
+<li>配置action的id,name等，在下方的Groups面板中，根据实际情况，选择action需要加入的group</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d09dd17a4" alt="创建action2.png" loading="lazy" class="medium-zoom-image"></p>
+<ol start="3">
+<li>创建完成后，在Action的回调方法中实际具体的逻辑。这里作为演示，只弹出一个对话框。</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d0c02caa5" alt="创建action3.png" loading="lazy"></p>
+<h3 id="发布插件">发布插件</h3>
+<ol>
+<li>Build-Prepare Plugin Module</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d12eac698" alt="发布插件0.png" loading="lazy"></p>
+<ol start="2">
+<li>Build完成后，会生成插件包</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d28dd03dd" alt="发布插件2.png" loading="lazy"></p>
+<h2 id="应用插件">应用插件</h2>
+<ol>
+<li>File-Setting-Plugins,选择从Disk安装</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d132ac42a" alt="安装插件.png" loading="lazy"></p>
+<ol start="2">
+<li>在弹出的窗口中，选择刚才生成的插件包，确定后，需要重启IDE</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d40f7580c" alt="安装插件2.png" loading="lazy"></p>
+<ol start="3">
+<li>由于之前的插件，是在Generate的group中，我们可以文件编辑界面右键-Generate或者按Alt+Insert快捷键</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d42b063c6" alt="安装插件3.png" loading="lazy"></p>
+<ol start="4">
+<li>在弹出的界面中，选择第一项，这个就是我们定义的插件</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d4c7f4a66" alt="安装插件4.png" loading="lazy"></p>
+<ol start="5">
+<li>可以跳过步骤3,4，我们可以直接通过前面定义的快捷键来调用插件</li>
+</ol>
+<p><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/171f4c6d51c08d2e" alt="安装插件5.png" loading="lazy"></p>
+<h2 id="后记">后记</h2>
+<p>本文介绍了基于IntelliJ IDEA开发插件的最简单的流程。当然，实际插件开发，要比这个复杂得多，涉及的API更多，具体的使用可以查阅官方文档。</p>
+
+</div>
+<div id="MySignature" style="display: block;">Android代码搬运工一枚，欢迎留言讨论交流！
+<br>
+个人主页：<a href="http://www.milovetingting.cn/" target="_blank">http://www.milovetingting.cn</a></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/milovetingting/category/1406440.html" target="_blank">Android</a></div>
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/milovetingting/tag/%E6%8F%92%E4%BB%B6/">插件</a>,             <a href="https://www.cnblogs.com/milovetingting/tag/IntelliJ%20IDEA/">IntelliJ IDEA</a>,             <a href="https://www.cnblogs.com/milovetingting/tag/Android/">Android</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(12853621,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;14dfa459-9959-e211-aa8f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/milovetingting/" target="_blank"><img src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/20140324141734.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/milovetingting/">milovetingting</a><br>
+            <a href="https://home.cnblogs.com/u/milovetingting/followees/">关注 - 1</a><br>
+            <a href="https://home.cnblogs.com/u/milovetingting/followers/">粉丝 - 9</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;14dfa459-9959-e211-aa8f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(12853621,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">0</span>
+    </div>
+    <div class="buryit" onclick="votePost(12853621,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/milovetingting/p/12849498.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/milovetingting/p/12849498.html" title="发布于 2020-05-08 11:29">IOC之运行时注入-实现Activity的布局注入+控件注入+事件绑定</a>
+    <br>
+    <a href="https://www.cnblogs.com/milovetingting/p/12917905.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/milovetingting/p/12917905.html" title="发布于 2020-05-19 16:45">对AQS的简单理解及自定义锁的实现</a>
+
+</div>
+</div>
+		</div>
+		<div class="postDesc">posted @ 
+<span id="post-date">2020-05-08 22:56</span>&nbsp;
+<a href="https://www.cnblogs.com/milovetingting/">milovetingting</a>&nbsp;
+阅读(<span id="post_view_count">1469</span>)&nbsp;
+评论(<span id="post_comment_count">2</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=12853621" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(12853621);return false;">收藏</a></div>
+	</div>
+	
+	
+</div><!--end: topics 文章、评论容器-->
+<script src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 180151, cb_blogApp = 'milovetingting', cb_blogUserGuid = '14dfa459-9959-e211-aa8f-842b2b196315';
+    var cb_entryId = 12853621, cb_entryCreatedDate = '2020-05-08 22:56', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<!--done-->
+<br>
+<div class="feedback_area_title">评论</div>
+<div class="feedbackNoItems">
+    <div class="feedbackNoItems"></div>
+</div>
+
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/milovetingting/p/12853621.html#4572099" class="layer">#1楼</a>
+<a name="4572099" id="comment_anchor_4572099"></a>
+
+<span class="comment_date">2020-05-09 17:31</span>
+
+ | 
+        <a id="a_comment_author_4572099" href="https://www.cnblogs.com/erfsfj-dbc/" target="_blank">image_erfsfj</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_4572099" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>棒棒的</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4572099, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4572099, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4572099_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1491595/20190413132848.png
+        </span>
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/milovetingting/p/12853621.html#4581368" class="layer">#2楼</a>
+<a name="4581368" id="comment_anchor_4581368"></a>
+[<span class="louzhu">楼主</span>]    <span id="comment-maxId" style="display: none">4581368</span>
+    <span id="comment-maxDate" style="display: none">2020/5/19 下午4:43:01</span>
+
+<span class="comment_date">2020-05-19 16:43</span>
+
+ | 
+        <a id="a_comment_author_4581368" href="https://www.cnblogs.com/milovetingting/" target="_blank">milovetingting</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_4581368" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p><a href="https://www.cnblogs.com/milovetingting/p/12853621.html#4572099" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,4572099);">@</a>image_erfsfj<br>
+感谢支持!</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4581368, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4581368, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4581368_avatar" style="display:none">
+            https://pic.cnblogs.com/face/487702/20140324141734.png
+        </span>
+
+        </div>
+    </div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/milovetingting/p/12853621.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/milovetingting/p/12853621.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页
+</div>
+</div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="http://www.uccpsoft.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】大型组态、工控、仿真、CAD\GIS 50万行VC++源码免费下载!</a><br><a href="https://www.cnblogs.com/cmt/p/14408628.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-AWS&#39;)">【求助】注册 Amazon Web Services(AWS) 账户，助园子一臂之力</a><br><a href="https://brands.cnblogs.com/huawei" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】万物互联的时代，由你的代码定义，创建HarmonyOS应用</a><br><a href="http://www.javamall.com.cn/" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-javashop&#39;)">【推荐】Javashop--基于SPRING BOOT架构的企业级电商系统</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CPyEsvfTmu8CFZBEvAodsMcAjg"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_card1"><div class="under-post-card"><b>AWS免费产品</b>：<br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/webapps/?trk=ba_a134p000006vc6OAAQ&amp;trkCampaign=webapps&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">如何在AWS上免费构建网站</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/storage/?trk=ba_a134p000006vc7JAAQ&amp;trkCampaign=storage&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS免费云存储解决方案</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/database/?trk=ba_a134p000006vc7YAAQ&amp;trkCampaign=database&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">在AWS上免费构建数据库</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/machine-learning/?trk=ba_a134p000006vc7nAAA&amp;trkCampaign=ML&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS上的免费机器学习</a></div></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="CP2EsvfTmu8CFZBEvAodsMcAjg"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_card2"><div class="itnews under-post-card">
+    <b>最新新闻</b>：
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/689603/" target="_blank">被围殴的pdd、打假赛的选手：假赛阴云包围下的中国电竞</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689602/" target="_blank">苹果是运气股，不是价值股</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689601/" target="_blank">销量骤降，宝沃最终还是被陆正耀拖累了</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689600/" target="_blank">美毅力号在火星上迈出第一步：可以边行驶边思考</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689599/" target="_blank">首次超越华为：OPPO成中国最大智能手机制造商</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="under-post-card">
+<b>历史上的今天：</b>
+<br>
+
+2020-05-08    <a href="https://www.cnblogs.com/milovetingting/p/12849498.html">IOC之运行时注入-实现Activity的布局注入+控件注入+事件绑定</a>
+    <br>
+</div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem"><!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/milovetingting/">
+            milovetingting
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/milovetingting/" title="入园时间：2013-01-08">
+            8年1个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/milovetingting/followers/">
+            9
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/milovetingting/followees/">
+            1
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;14dfa459-9959-e211-aa8f-842b2b196315&#39;)">+加关注</a></div>
+        <script>getFollowStatus('14dfa459-9959-e211-aa8f-842b2b196315');</script>
+    </div>
+</div>
+</div>
+
+</div>
+<div id="sidebar_c3" style="display: block;"><a href="https://www.cnblogs.com/cmt/p/14408628.html" target="_blank"><img width="300" height="250" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/35695-20210218212809457-1819036843.jpg" alt="注册AWS账号，助力园子新发展" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;C3-AWS&#39;);"></a></div>
+			<div id="calendar"><div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/02/06&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2021年3月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/04/06&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">28</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                        <td class="" align="center">
+                            5
+                        </td>
+                    <td class="CalTodayDay" align="center">
+                        6
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            7
+                        </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            14
+                        </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            21
+                        </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            28
+                        </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="" align="center">
+                                31
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            4
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            10
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block"><div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/milovetingting/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/milovetingting/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/milovetingting/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/milovetingting/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/milovetingting/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+    <li><a id="itemListLink" onclick="this.blur();WarpClass(&#39;itemListLink&#39;, &#39;itemListLin_con&#39;);return false;" href="https://www.cnblogs.com/milovetingting/p/12853621.html#">更多链接</a></li>
+</ul>
+</div>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+<!-- 我的标签 -->
+
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+
+    <div class="catListPostCategory">
+        <h3 class="catListTitle">
+            
+随笔分类
+
+
+
+        </h3>
+
+        <ul>
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1406440.html" rel="" target="">
+    Android(51)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1406442.html" rel="" target="">
+    Android开发艺术探索(9)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1886211.html" rel="" target="">
+    C++(3)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1794588.html" rel="" target="">
+    Flutter(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1534561.html" rel="" target="">
+    Gradle(11)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1425138.html" rel="" target="">
+    Java(19)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1854615.html" rel="" target="">
+    Kotlin(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1478002.html" rel="" target="">
+    Web(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/category/1630447.html" rel="" target="">
+    设计模式(24)
+</a>
+ 
+
+                </li>                
+            
+        </ul>
+    </div>    
+    <div class="catListPostArchive">
+        <h3 class="catListTitle">
+            
+随笔档案
+
+
+
+        </h3>
+
+        <ul>
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2021/01.html" rel="" target="">
+    2021年1月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/12.html" rel="" target="">
+    2020年12月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/11.html" rel="" target="">
+    2020年11月(3)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/10.html" rel="" target="">
+    2020年10月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/09.html" rel="" target="">
+    2020年9月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/06.html" rel="" target="">
+    2020年6月(3)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/05.html" rel="" target="">
+    2020年5月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/04.html" rel="" target="">
+    2020年4月(14)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/03.html" rel="" target="">
+    2020年3月(8)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/02.html" rel="" target="">
+    2020年2月(27)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2020/01.html" rel="" target="">
+    2020年1月(17)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/09.html" rel="" target="">
+    2019年9月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/08.html" rel="" target="">
+    2019年8月(11)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/06.html" rel="" target="">
+    2019年6月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/04.html" rel="" target="">
+    2019年4月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/03.html" rel="" target="">
+    2019年3月(3)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/milovetingting/archive/2019/02.html" rel="" target="">
+    2019年2月(12)
+</a>
+ 
+
+                </li>                
+            <li><a href="javascript:void(0)" onclick="sideColumnManager.loadMore(this)">更多</a></li>
+        </ul>
+    </div>    
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block"><div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/milovetingting/p/12364333.html">1. Re:ASM字节码插桩</a></li>
+                    <li class="recent_comment_body">@xiaomifeng1010 查看class文件的一个插件...</li>
+                    <li class="recent_comment_author">--milovetingting</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/milovetingting/p/12853621.html">2. Re:IntelliJ IDEA插件开发的简单流程</a></li>
+                    <li class="recent_comment_body">@image_erfsfj 感谢支持!...</li>
+                    <li class="recent_comment_author">--milovetingting</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/milovetingting/p/12364333.html">3. Re:ASM字节码插桩</a></li>
+                    <li class="recent_comment_body"><p>ASMified的作用是什么？是修改字节码文件吗？</p>
+</li>
+                    <li class="recent_comment_author">--xiaomifeng1010</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/milovetingting/p/12853621.html">4. Re:IntelliJ IDEA插件开发的简单流程</a></li>
+                    <li class="recent_comment_body"><p>棒棒的</p>
+</li>
+                    <li class="recent_comment_author">--image_erfsfj</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/milovetingting/p/12399314.html">5. Re:Artifactory搭建本地仓库</a></li>
+                    <li class="recent_comment_body">@你的月亮我的心cy build.gradle中的maven地址配置正确了没有？你好像配置的是本地仓库吧？我看好像是从android_local下载的资源，我那边是配置的虚拟仓库android_gro...</li>
+                    <li class="recent_comment_author">--milovetingting</li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block"><div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/10451195.html">
+                            1. 【Android】组件化开发的简单应用(4634)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/12159100.html">
+                            2. 【Web】Hexo+Butterfly+Github+Coding搭建个人博客(2947)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/10436721.html">
+                            3. 【Android】VirtualAPK的简单使用(2165)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/12632521.html">
+                            4. Android应用加固的简单实现方案(2027)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/10573123.html">
+                            5. 【Java】简体中文、繁体中文转换(1807)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block"><div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/12853621.html">
+                            1. IntelliJ IDEA插件开发的简单流程(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/12399314.html">
+                            2. Artifactory搭建本地仓库(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/12364333.html">
+                            3. ASM字节码插桩(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/10985456.html">
+                            4. 【Web】解决简书图片不显示问题“系统维护中，图片暂时无法加载”(2)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/milovetingting/p/10436746.html">
+                            5. 【Android】动态更新Icon(2)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/milovetingting/p/12689103.html">
+                                1. 基于Netty实现服务端与客户端通信(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/milovetingting/p/12632521.html">
+                                2. Android应用加固的简单实现方案(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/milovetingting/p/12264027.html">
+                                3. 备忘录模式(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/milovetingting/p/10985456.html">
+                                4. 【Web】解决简书图片不显示问题“系统维护中，图片暂时无法加载”(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/milovetingting/p/10451195.html">
+                                5. 【Android】组件化开发的简单应用(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div></div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2021 milovetingting
+<br><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8EklyHYHyB5Oj4onWtxTnxaLnt0xplwVqPZBtKd73uruqQN9qXMzXjxv18PQATL407HR4uO1MrPVATRDeoUDMu1n2kJm9XFODZCoYk3nJSgG5uiYv_Lv_YYHiU6tAiCjJZMoHgkORDq-TF7uDCBbzx0">
+
+
+<iframe id="google_osd_static_frame_4435265059426" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./IntelliJ IDEA插件开发的简单流程 - milovetingting - 博客园_files/saved_resource(2).html"></iframe></body></html>

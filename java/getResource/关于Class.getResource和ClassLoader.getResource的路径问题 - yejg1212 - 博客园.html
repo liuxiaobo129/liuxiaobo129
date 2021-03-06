@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<!-- saved from url=(0047)https://www.cnblogs.com/yejg1212/p/3270152.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="Java中取资源时，经常用到Class.getResource和ClassLoader.getResource，这里来看看他们在取资源文件时候的路径问题。Class.getResource(Strin">
+    <meta property="og:description" content="Java中取资源时，经常用到Class.getResource和ClassLoader.getResource，这里来看看他们在取资源文件时候的路径问题。Class.getResource(Strin">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/bundle-darkgreentrip.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/bundle-darkgreentrip-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/yejg1212/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/yejg1212/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/yejg1212/wlwmanifest.xml">
+    <script src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/osd.js"></script><script async="" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/analytics.js"></script><script type="text/javascript" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/encoder.js"></script><script>
+        var currentBlogId = 114026;
+        var currentBlogApp = 'yejg1212';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'darkgreentrip';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2013-08-20 02:37';
+        </script>
+    <script src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/jquery-2.2.0.min.js"></script>
+    <script src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/blog-common.min.js"></script>
+    
+    
+    
+<meta http-equiv="origin-trial" content="A+pvvGjoiNPDAn2JQFsT0CQbtlBZ8PLmAA4ReIHeP5mnOrPRuXf1nuQa1Dlu/MdwAmPuAC7cVDJLU1oBuOqMkQkAAAB5eyJvcmlnaW4iOiJodHRwczovL2dvb2dsZWFwaS5jb206NDQzIiwiZmVhdHVyZSI6IlRydXN0VG9rZW5zIiwiZXhwaXJ5IjoxNjI2MjIwNzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ=="><meta http-equiv="origin-trial" content="A9ZgbRtm4pU3oZiuNzOsKcC8ppFSZdcjP2qYcdQrFKVzkmiWH1kdYY1Mi9x7G8+PS8HV9Ha9Cz0gaMdKsiVZIgMAAAB7eyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="AxL6oBxcpn5rQDPKSAs+d0oxNyJYq2/4esBUh3Yx5z8QfcLu+AU8iFCXYRcr/CEEfDnkxxLTsvXPJFQBxHfvkgMAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXRhZ3NlcnZpY2VzLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A9KPtG5kl3oLTk21xqynDPGQ5t18bSOpwt0w6kGa6dEWbuwjpffmdUpR3W+faZDubGT+KIk2do0BX2ca16x8qAcAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXN5bmRpY2F0aW9uLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A3HucHUo1oW9s+9kIKz8mLkbcmdaj5lxt3eiIMp1Nh49dkkBlg1Fhg4Fd/r0vL69mRRA36YutI9P/lJUfL8csQoAAACFeyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiQ29udmVyc2lvbk1lYXN1cmVtZW50IiwiZXhwaXJ5IjoxNjI2MjIwNzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ=="><script src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/pubads_impl_2021022301.js" async=""></script><link rel="preload" href="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/f.txt"></script><link rel="prefetch" href="https://49c119974fb552d0fcccc33f182856d2.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/vision/3?utm_content=g_1000241565" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;aliyun-blog-mobile-banner&#39;)">
+                <img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/1-20210221123548373-1171207978.jpg" alt="">
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔" style="display: none;">
+                        <img id="new_post_icon" class="navbar-icon" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/newpost.svg" alt="写随笔">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/yejg1212/"><img id="blogLogo" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/yejg1212/">幻影</a>
+</h1>
+<h2><a href="https://yejg.top/" target="_blank">不积跬步，无以至千里 @yejg.top</a></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/yejg1212/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/yejg1212">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/yejg1212/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<span id="stats_post_count">随笔 - 91&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 35&nbsp; </span>
+<span id="stats-total-view-count">阅读 - 
+<span title="总阅读数: 460943">
+46万</span></span>
+
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/yejg1212/p/3270152.html">
+    <span>关于Class.getResource和ClassLoader.getResource的路径问题</span>
+    
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body">
+    <p>Java中取资源时，经常用到Class.getResource和ClassLoader.getResource，这里来看看他们在取资源文件时候的路径问题。</p>
+<h2>Class.getResource(String path)</h2>
+<div class="cnblogs_code">
+<pre>path不以’/'开头时，默认是从此类所在的包下取资源；
+path  以’/'开头时，则是从ClassPath根下获取；</pre>
+</div>
+<p>什么意思呢？看下面这段代码的输出结果就明白了：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">package</span><span style="color: rgba(0, 0, 0, 1)"> testpackage;
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> TestMain {
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String[] args) {
+        System.out.println(TestMain.</span><span style="color: rgba(0, 0, 255, 1)">class</span>.getResource(""<span style="color: rgba(0, 0, 0, 1)">));
+        System.out.println(TestMain.</span><span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("/"<span style="color: rgba(0, 0, 0, 1)">));
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>输出结果：</p>
+<div class="cnblogs_code">
+<pre>file:/E:/workspace/Test/bin/testpackage/<span style="color: rgba(0, 0, 0, 1)">
+file:</span>/E:/workspace/Test/bin/</pre>
+</div>
+<p>上面说到的【path以’/'开头时，则是从ClassPath根下获取；】在这里就是相当于bin目录(Eclipse环境下)。</p>
+<p>再来一个实例，假设有如下Project结构：</p>
+<p><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/o_PackageStructure.PNG" alt="" width="354" height="154"></p>
+<p>如果我们想在TestMain.java中分别取到1~3.properties文件，该怎么写路径呢？代码如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">package</span><span style="color: rgba(0, 0, 0, 1)"> testpackage;
+
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> TestMain {
+
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String[] args) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 当前类(class)所在的包目录</span>
+        System.out.println(TestMain.<span style="color: rgba(0, 0, 255, 1)">class</span>.getResource(""<span style="color: rgba(0, 0, 0, 1)">));
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> class path根目录</span>
+        System.out.println(TestMain.<span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("/"<span style="color: rgba(0, 0, 0, 1)">));
+        
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> TestMain.class在&lt;bin&gt;/testpackage包中
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2.properties  在&lt;bin&gt;/testpackage包中</span>
+        System.out.println(TestMain.<span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("2.properties"<span style="color: rgba(0, 0, 0, 1)">));
+        
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> TestMain.class在&lt;bin&gt;/testpackage包中
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3.properties  在&lt;bin&gt;/testpackage.subpackage包中</span>
+        System.out.println(TestMain.<span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("subpackage/3.properties"<span style="color: rgba(0, 0, 0, 1)">));
+        
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> TestMain.class在&lt;bin&gt;/testpackage包中
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1.properties  在bin目录（class根目录）</span>
+        System.out.println(TestMain.<span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("/1.properties"<span style="color: rgba(0, 0, 0, 1)">));
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>※Class.getResource和Class.getResourceAsStream在使用时，路径选择上是一样的。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h2>Class.getClassLoader（）.getResource(String path)</h2>
+<div class="cnblogs_code">
+<pre>path不能以’/'开头时；
+path是从ClassPath根下获取；</pre>
+</div>
+<p>还是先看一下下面这段代码的输出：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">package</span><span style="color: rgba(0, 0, 0, 1)"> testpackage;
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> TestMain {
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String[] args) {
+        TestMain t </span>= <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> TestMain();
+        System.out.println(t.getClass());
+        System.out.println(t.getClass().getClassLoader());
+        System.out.println(t.getClass().getClassLoader().getResource(</span>""<span style="color: rgba(0, 0, 0, 1)">));
+        System.out.println(t.getClass().getClassLoader().getResource(</span>"/"));<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">null</span>
+<span style="color: rgba(0, 0, 0, 1)">    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>输出结果：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> testpackage.TestMain
+sun.misc.Launcher$AppClassLoader@1fb8ee3
+file:</span>/E:/workspace/Test/bin/
+<span style="color: rgba(0, 0, 255, 1)">null</span></pre>
+</div>
+<p>从结果来看【<span style="color: rgba(0, 0, 0, 1)">TestMain.</span><span style="color: rgba(0, 0, 255, 1)">class</span>.getResource("/"<span style="color: rgba(0, 0, 0, 1)">)</span> == <span style="color: rgba(0, 0, 0, 1)">t.getClass().getClassLoader().getResource(</span>""<span style="color: rgba(0, 0, 0, 1)">)】</span></p>
+<p><span style="color: rgba(0, 0, 0, 1)">如果有同样的Project结构</span></p>
+<p><span style="color: rgba(0, 0, 0, 1)"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/o_PackageStructure.PNG" alt="" width="354" height="154"></span></p>
+<p><span style="color: rgba(0, 0, 0, 1)">使用Class.getClassLoader（）.getResource(String path)可以这么写：</span></p>
+<p>&nbsp;</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">package</span><span style="color: rgba(0, 0, 0, 1)"> testpackage;
+
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> TestMain {
+    </span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String[] args) {
+        TestMain t </span>= <span style="color: rgba(0, 0, 255, 1)">new</span><span style="color: rgba(0, 0, 0, 1)"> TestMain();
+        System.out.println(t.getClass().getClassLoader().getResource(</span>""<span style="color: rgba(0, 0, 0, 1)">));
+        
+        System.out.println(t.getClass().getClassLoader().getResource(</span>"1.properties"<span style="color: rgba(0, 0, 0, 1)">));
+        System.out.println(t.getClass().getClassLoader().getResource(</span>"testpackage/2.properties"<span style="color: rgba(0, 0, 0, 1)">));
+        System.out.println(t.getClass().getClassLoader().getResource(</span>"testpackage/subpackage/3.properties"<span style="color: rgba(0, 0, 0, 1)">));
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>※<span style="color: rgba(0, 0, 0, 1)">Class.getClassLoader（）.getResource</span>和<span style="color: rgba(0, 0, 0, 1)">Class.getClassLoader（）</span>.getResourceAsStream在使用时，路径选择上也是一样的。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/yejg1212/tag/java/">java</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3270152,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;f8b4cf44-c67f-e111-aa3f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/yejg1212/" target="_blank"><img src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/u395749.jpg" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/yejg1212/">yejg1212</a><br>
+            <a href="https://home.cnblogs.com/u/yejg1212/followees/">关注 - 14</a><br>
+            <a href="https://home.cnblogs.com/u/yejg1212/followers/">粉丝 - 29</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;f8b4cf44-c67f-e111-aa3f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3270152,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">30</span>
+    </div>
+    <div class="buryit" onclick="votePost(3270152,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/yejg1212/p/3256690.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/yejg1212/p/3256690.html" title="发布于 2013-08-14 10:54">Java虚拟机_运行时数据区</a>
+    <br>
+    <a href="https://www.cnblogs.com/yejg1212/p/3378064.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/yejg1212/p/3378064.html" title="发布于 2013-10-19 17:07">开源许可证知多少</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2013-08-20 14:37</span>&nbsp;
+<a href="https://www.cnblogs.com/yejg1212/">yejg1212</a>&nbsp;
+阅读(<span id="post_view_count">162386</span>)&nbsp;
+评论(<span id="post_comment_count">12</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3270152" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(3270152);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 114026, cb_blogApp = 'yejg1212', cb_blogUserGuid = 'f8b4cf44-c67f-e111-aa3f-842b2b196315';
+    var cb_entryId = 3270152, cb_entryCreatedDate = '2013-08-20 14:37', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems">
+    <div class="feedbackNoItems"></div>
+</div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3181181" class="layer">#1楼</a>
+<a name="3181181" id="comment_anchor_3181181"></a>
+ 
+<span class="comment_date">2015-05-11 20:20</span>
+
+ 
+        <a id="a_comment_author_3181181" href="https://home.cnblogs.com/u/739764/" target="_blank">netwelfare</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3181181" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    说实话，文章写的很浅显，底层的实现原理并没有说清楚，从网上看到一篇文章，讲解的很仔细，推荐一下：<a href="http://swiftlet.net/archives/868" target="_blank">Class.getResource和ClassLoader.getResource的区别分析</a>
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3181181, &#39;Digg&#39;, this.parentElement, false);">
+                支持(6)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3181181, &#39;Bury&#39;, this.parentElement, false);">
+                反对(5)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3187173" class="layer">#2楼</a>
+<a name="3187173" id="comment_anchor_3187173"></a>
+ 
+<span class="comment_date">2015-05-19 16:32</span>
+
+ 
+        <a id="a_comment_author_3187173" href="https://www.cnblogs.com/shysky77/" target="_blank">shysky123</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3187173" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    写的不错 简单易懂 ！！支持
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3187173, &#39;Digg&#39;, this.parentElement, false);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3187173, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3210257" class="layer">#3楼</a>
+<a name="3210257" id="comment_anchor_3210257"></a>
+ 
+<span class="comment_date">2015-06-17 15:03</span>
+
+ 
+        <a id="a_comment_author_3210257" href="https://www.cnblogs.com/wlb-cs/" target="_blank">王龙彪</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3210257" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    这个写的很不错
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3210257, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3210257, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3215733" class="layer">#4楼</a>
+<a name="3215733" id="comment_anchor_3215733"></a>
+ 
+<span class="comment_date">2015-06-26 11:16</span>
+
+ 
+        <a id="a_comment_author_3215733" href="https://home.cnblogs.com/u/746539/" target="_blank">Haisen123</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3215733" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    看完之后  至少这一块内容以后不会再混淆了，不过希望能更深入点全面了解原理。感谢分享
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3215733, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3215733, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3251767" class="layer">#5楼</a>
+<a name="3251767" id="comment_anchor_3251767"></a>
+ 
+<span class="comment_date">2015-08-21 15:22</span>
+
+ 
+        <a id="a_comment_author_3251767" href="https://home.cnblogs.com/u/788347/" target="_blank">软件小学徒</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3251767" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    总结的很不错，让人一看就懂，谢了！
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3251767, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3251767, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3292952" class="layer">#6楼</a>
+<a name="3292952" id="comment_anchor_3292952"></a>
+ 
+<span class="comment_date">2015-10-27 11:36</span>
+
+ 
+        <a id="a_comment_author_3292952" href="https://www.cnblogs.com/dengyizhang/" target="_blank">风扬花落</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3292952" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    简单易懂
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3292952, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3292952, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3292952_avatar" style="display:none">
+            https://pic.cnblogs.com/face/617260/20141219141904.png
+        </span>
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3388311" class="layer">#7楼</a>
+<a name="3388311" id="comment_anchor_3388311"></a>
+ 
+<span class="comment_date">2016-03-22 16:56</span>
+
+ 
+        <a id="a_comment_author_3388311" href="https://www.cnblogs.com/winclpt/" target="_blank">暗夜心慌方</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3388311" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    很好的文字，通俗易懂
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3388311, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3388311, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3388311_avatar" style="display:none">
+            https://pic.cnblogs.com/face/663108/20151207095007.png
+        </span>
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3489181" class="layer">#8楼</a>
+<a name="3489181" id="comment_anchor_3489181"></a>
+ 
+<span class="comment_date">2016-08-14 18:45</span>
+
+ 
+        <a id="a_comment_author_3489181" href="https://www.cnblogs.com/byron0918/" target="_blank">不将就！</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3489181" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    很有帮助
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3489181, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3489181, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3489181_avatar" style="display:none">
+            https://pic.cnblogs.com/face/643405/20190321223640.png
+        </span>
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3761619" class="layer">#9楼</a>
+<a name="3761619" id="comment_anchor_3761619"></a>
+ 
+<span class="comment_date">2017-08-19 10:29</span>
+
+ 
+        <a id="a_comment_author_3761619" href="https://www.cnblogs.com/zempty/" target="_blank">Zempty</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3761619" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    总结的很好。class.getresource一般用于从当前类所在包开始查找资源。classloader.getresource一般用于从classpath下查找。class.getresource也是转调classloader的方法来干活的。只不过，相当于封装了一下下，便于我们从当前类所在包下快速查找本包下的资源，而不必关心本包的全路径。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3761619, &#39;Digg&#39;, this.parentElement, false);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3761619, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3774623" class="layer">#10楼</a>
+<a name="3774623" id="comment_anchor_3774623"></a>
+ 
+<span class="comment_date">2017-09-04 15:17</span>
+
+ 
+        <a id="a_comment_author_3774623" href="https://home.cnblogs.com/u/1088817/" target="_blank">爱丽丝威震天</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3774623" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    讲的很好，对初了解这一块的人有很大帮助，谢谢。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3774623, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3774623, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3965609" class="layer">#11楼</a>
+<a name="3965609" id="comment_anchor_3965609"></a>
+ 
+<span class="comment_date">2018-05-02 18:29</span>
+
+ 
+        <a id="a_comment_author_3965609" href="https://www.cnblogs.com/machanghai/" target="_blank">502studio</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3965609" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    wocaocao  很清晰。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3965609, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3965609, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3965609_avatar" style="display:none">
+            https://pic.cnblogs.com/face/432368/20150805213804.png
+        </span>
+
+        </div>
+    </div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/yejg1212/p/3270152.html#3997530" class="layer">#12楼</a>
+<a name="3997530" id="comment_anchor_3997530"></a>
+    <span id="comment-maxId" style="display: none">3997530</span>
+    <span id="comment-maxDate" style="display: none">2018/6/13 下午3:27:33</span>
+ 
+<span class="comment_date">2018-06-13 15:27</span>
+
+ 
+        <a id="a_comment_author_3997530" href="https://home.cnblogs.com/u/1299058/" target="_blank">睡你的椒</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_3997530" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    写得不错
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3997530, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3997530, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/yejg1212/p/3270152.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/yejg1212/p/3270152.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页
+</div>
+</div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="https://developer.aliyun.com/learning/topic/covid-19/2021?utm_content=g_1000240877" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云-充电&#39;)">【推荐】三月招聘季，充电拿Offer！阿里云携官方学习资料来给你开小灶啦</a><br><a href="https://developer.aliyun.com/learning/trainingcamp/vision/3?utm_content=g_1000241565" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云-AI&#39;)">【推荐】阿里云达摩院特别版--趣味视觉AI训练营，来参营过小考赢礼品</a><br><a href="http://www.softbam.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载</a><br><a href="https://www.cnblogs.com/cmt/p/14408628.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-AWS&#39;)">【求助】注册 Amazon Web Services(AWS) 账户，助园子一臂之力</a><br><a href="https://brands.cnblogs.com/huawei/topic/harmonyos-development-tutorial" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】万物互联的时代，由你的代码定义，创建HarmonyOS应用</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CKTR7aOhh-8CFYd9vQodcRwKwA"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_card1"><div class="under-post-card"><b>AWS免费产品</b>：<br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/webapps/?trk=ba_a134p000006vc6OAAQ&amp;trkCampaign=webapps&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">如何在AWS上免费构建网站</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/storage/?trk=ba_a134p000006vc7JAAQ&amp;trkCampaign=storage&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS免费云存储解决方案</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/database/?trk=ba_a134p000006vc7YAAQ&amp;trkCampaign=database&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">在AWS上免费构建数据库</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/machine-learning/?trk=ba_a134p000006vc7nAAA&amp;trkCampaign=ML&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS上的免费机器学习</a></div></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="CKXR7aOhh-8CFYd9vQodcRwKwA"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_card2"><div class="itnews under-post-card">
+    <b>最新新闻</b>：
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/689051/" target="_blank">谷歌宣布开放Sleep API：用更省电的方式追踪用户睡眠</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689050/" target="_blank">微软解释为何很难向XSX追加更多向后兼容游戏</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689049/" target="_blank">即将推出的智能眼镜要不要加入面部识别技术？Facebook也拿不准</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689048/" target="_blank">数百家Apple Store可预约提供手语翻译服务</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689047/" target="_blank">What！嫦五带回那捧土中竟然有玻璃</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/01/26&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2021年2月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/03/26&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                        <td class="" align="center">
+                            5
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        6
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            7
+                        </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            14
+                        </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            21
+                        </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="CalTodayDay" align="center">
+                                26
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            28
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            6
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            7
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                10
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                11
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                12
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            13
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block"><div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/yejg1212/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/yejg1212/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/yejg1212/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/yejg1212/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/yejg1212/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+</div>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block"><div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/java/">java<span class="tag-count">(31)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/%E5%B0%8F%E6%8A%80%E5%B7%A7/">小技巧<span class="tag-count">(8)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/golang/">golang<span class="tag-count">(7)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/web/">web<span class="tag-count">(6)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/%E7%AE%97%E6%B3%95/">算法<span class="tag-count">(5)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/JavaScript/">JavaScript<span class="tag-count">(4)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/apache/">apache<span class="tag-count">(3)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/%E4%BB%A3%E7%90%86/">代理<span class="tag-count">(3)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/%E6%B3%A8%E8%A7%A3/">注解<span class="tag-count">(3)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/yejg1212/tag/%E9%9B%B6%E7%A2%8E%E5%B0%8F%E7%BB%93/">零碎小结<span class="tag-count">(3)</span></a>
+        </li>
+    <li>
+        <a href="https://www.cnblogs.com/yejg1212/tag/">更多</a>
+    </li>
+
+</ul>
+</div>
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+
+    <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+        <h3 class="catListTitle">
+            
+随笔档案
+<span style="font-size:11px;font-weight:normal">(91)</span>
+
+
+        </h3>
+
+        <ul>
+
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2019/12.html" rel="" target="">
+    2019年12月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2019/11.html" rel="" target="">
+    2019年11月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2019/03.html" rel="" target="">
+    2019年3月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2019/02.html" rel="" target="">
+    2019年2月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2019/01.html" rel="" target="">
+    2019年1月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2018/12.html" rel="" target="">
+    2018年12月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2018/09.html" rel="" target="">
+    2018年9月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2018/08.html" rel="" target="">
+    2018年8月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2015/03.html" rel="" target="">
+    2015年3月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2014/09.html" rel="" target="">
+    2014年9月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2014/03.html" rel="" target="">
+    2014年3月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/12.html" rel="" target="">
+    2013年12月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/11.html" rel="" target="">
+    2013年11月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/10.html" rel="" target="">
+    2013年10月(3)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/08.html" rel="" target="">
+    2013年8月(6)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/07.html" rel="" target="">
+    2013年7月(8)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/06.html" rel="" target="">
+    2013年6月(7)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/05.html" rel="" target="">
+    2013年5月(9)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/04.html" rel="" target="">
+    2013年4月(4)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/03.html" rel="" target="">
+    2013年3月(14)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/02.html" rel="" target="">
+    2013年2月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2013/01.html" rel="" target="">
+    2013年1月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2012/12.html" rel="" target="">
+    2012年12月(5)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="false" style="display: none">
+                    
+<a href="https://www.cnblogs.com/yejg1212/archive/2012/04.html" rel="" target="">
+    2012年4月(2)
+</a>
+ 
+
+                </li>                
+            <li>
+                <a href="javascript:void(0)" onclick="sideColumnManager.loadMore(this)">更多</a>
+            </li>
+        </ul>
+
+
+    </div>    
+    <div id="sidebar_links1282601" class="catList sidebar-block">
+        <h3 class="catListTitle">
+            
+Java
+
+
+
+        </h3>
+
+        <ul>
+
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://yejg.top/" rel="nofollow noopener noreferrer" target="">
+    奋斗的程序猿
+</a>
+ 
+
+                </li>                
+            
+        </ul>
+
+
+    </div>    
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block"><div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/yejg1212/p/11950508.html">1. Re:接口标记为@ResponseBody却不进入ResponseBodyAdvice</a></li>
+                    <li class="recent_comment_body">感谢。参考了你的文章，我也定位到我的问题了。 这个死活进不去返回值统一处理 @RequestMapping("/logout") public void logout() { SecurityUtil...</li>
+                    <li class="recent_comment_author">--初冬十月</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/yejg1212/p/10384775.html">2. Re:使用Swagger2时遇到的问题</a></li>
+                    <li class="recent_comment_body"><p>请问 这个fetching resource list: ****localhost:8080undefined; 问题是怎么解决的，说了很多原理，没搞明白怎么解决的</p>
+</li>
+                    <li class="recent_comment_author">--Shakaシャカ</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/yejg1212/p/3233215.html">3. Re:Eclipse的版本命名</a></li>
+                    <li class="recent_comment_body">@ 凝视薛定谔的猫@只喝三碗嘞从4.9开始就没有版本代号了，直接【Version: 2018-09 (4.9.0)】，代号被吃了 ，^_^官网看，最新的是 2018-12 R...</li>
+                    <li class="recent_comment_author">--yejg1212</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/yejg1212/p/3233215.html">4. Re:Eclipse的版本命名</a></li>
+                    <li class="recent_comment_body">我也想知道这个问题</li>
+                    <li class="recent_comment_author">--只喝三碗嘞</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/yejg1212/p/3187362.html">5. Re:Java注解（一）</a></li>
+                    <li class="recent_comment_body">干货</li>
+                    <li class="recent_comment_author">--棉花糖吃香蕉</li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block"><div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/yejg1212/p/3270152.html">
+                            1. 关于Class.getResource和ClassLoader.getResource的路径问题(162382)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/yejg1212/archive/2013/06/01/3112702.html">
+                            2. Java发送邮件(带附件)(36932)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/yejg1212/p/3402322.html">
+                            3. java自动探测文件的字符编码(24889)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/yejg1212/p/3584094.html">
+                            4. 常见的NoSQL数据库(23653)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/yejg1212/p/3969822.html">
+                            5. Java读取excel(兼容03和07格式)(23017)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 评论排行榜 -->
+
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/yejg1212/p/3270152.html">
+                                1. 关于Class.getResource和ClassLoader.getResource的路径问题(30)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/yejg1212/archive/2013/06/01/3112702.html">
+                                2. Java发送邮件(带附件)(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/yejg1212/p/3233215.html">
+                                3. Eclipse的版本命名(2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/yejg1212/p/3219896.html">
+                                4. [转]如果你觉得痛，说明到了该蜕变的阶段了(2)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/yejg1212/p/3191616.html">
+                                5. 同一台Windows机器中启动多个Memcached服务(2)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div></div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2021 yejg1212
+<br><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+
+<iframe id="google_osd_static_frame_5768748574840" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./关于Class.getResource和ClassLoader.getResource的路径问题 - yejg1212 - 博客园_files/saved_resource(2).html"></iframe></body></html>

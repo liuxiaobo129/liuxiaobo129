@@ -1,112 +1,46 @@
-CSDN首页
-首页
-博客
-程序员学院
-下载
-论坛
-问答
-代码
-直播
-电子书
-Spring
- 
-登录/注册
-会员中心
-收藏
-消息
-创作中心
-Spring MVC中的适配器模式
+ def service = rpc("xpro://biz-rcs-common-srv/biz-rcs-common.srv/com.ly.fn.biz.rcs.common.api.ensure.EnsureListService");
 
-孤落 2018-01-21 00:52:52  2000  收藏 1
-分类专栏： Web开发 文章标签： Spring 适配器模式
-版权
-Spring MVC中的适配器模式主要用于执行目标Controller中的请求处理方法。
-
-适配器模式
-
-适配器的类图如下所示：
-这里写图片描述
-在Spring MVC中，DispatcherServlet作为用户，HandlerAdapter作为期望接口，具体的适配器实现类用于对目标类进行适配，Controller作为需要适配的类。
-
-为什么要在Spring MVC中使用适配器模式？Spring MVC中的Controller种类众多，不同类型的Controller通过不同的方法来对请求进行处理。如果不利用适配器模式的话，DispatcherServlet直接获取对应类型的Controller，需要的自行来判断，像下面这段代码一样：
-
-if(mappedHandler.getHandler() instanceof MultiActionController){  
-   ((MultiActionController)mappedHandler.getHandler()).xxx  
-}else if(mappedHandler.getHandler() instanceof XXX){  
-    ...  
-}else if(...){  
-   ...  
-}  
-1
-2
-3
-4
-5
-6
-7
-这样假设如果我们增加一个HardController,就要在代码中加入一行 if(mappedHandler.getHandler() instanceof HardController)
-这种形式就使得程序难以维护，也违反了设计模式中的开闭原则 – 对扩展开放，对修改关闭。
-
-因此也就引入了适配器模式，来看看它是怎么运用的：
-
-首先定义一个适配器接口：
-
-public interface HandlerAdapter {  
-
-    boolean supports(Object handler);
-
-    ModelAndView handle(HttpServletRequest request, HttpServletResponse 
-
-    response, Object handler) throws Exception;  
-}
-1
-2
-3
-4
-5
-6
-7
-8
-实现该接口的适配器每一个Controller都有一个适配器与之对应，这样的话，每自定义一个Controller需要定义一个实现HandlerAdapter的适配器。
-这里写图片描述
-如上图所示，（图可能不正确，但是足够说明问题了），适配器与Controller有对应关系，而各个适配器又都是适配器接口的实现类，因此，它们都遵循相同的适配器标准，因此用户可以按照相同的方式，通过不同的Controller去处理请求。
-当然了，Spring框架中也为我们定义了一些默认的Controller对应的适配器，比如说HttpRequestHandlerAdapter用于适配HttpRequestHandler：
-
-public class HttpRequestHandlerAdapter implements HandlerAdapter {
-    public HttpRequestHandlerAdapter() {
-    }
-
-    public boolean supports(Object handler) {
-        return handler instanceof HttpRequestHandler;
-    }
-
-    public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        ((HttpRequestHandler)handler).handleRequest(request, response);
-        return null;
-    }
-
-    public long getLastModified(HttpServletRequest request, Object handler) {
-        return handler instanceof LastModified ? ((LastModified)handler).getLastModified(request) : -1L;
-    }
-}
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-当Spring容器启动后，会将所有定义好的适配器对象存放在一个List集合中，当一个请求来临时，DispatcherServlet会通过handler的类型找到对应适配器，并将该适配器对象返回给用户，然后就可以统一通过适配器的hanle()方法来调用Controller中的用于处理请求的方法。
+def req = [
+  "com.ly.fn.biz.rcs.common.api.ensure.request.EnsureHitRequest":[
+    "memberId":'123',
+    "mobile":'18203948576',
+    "encIdentityNo":'18203948576',
+    "refBizId":'18203948576',
+    "optType":'18203948576',
+    "txnTime":new Date()
+  ]
+]
+return service.getHitEnsureList(req);
 
 
-举报
+applyTime   ES中没有数据
+
+http://localhost:5050/cash/events/handle?idCashCreditEvent=123145&from=view
+
+
+
+
+
+SELECT * FROM tcbiz_rcs_rem.CashCreditEvent where   refBizId =   '1501839766278';
+
+
+select * from tcbiz_fq_rcs_data.CreditApplyData  where refBizId = '1501839766278' and memberId = 'JF20181012000022226'
+
+
+
+
+
+queryCashCreditApplyInfo.  注释去除
+
+
+
+getDataFromApply.   注释去除
+
+//        request.setRiskRuleTypes(ArrayUtil.asList(CashConstant.CASH_FST_AUDIT,CashConstant.CASH_APPLY_LEVEL));
+
+
+
+
+00C0656274245A46E9A4AF0FEC8647A29E9715EC017394C5DE
+
+00C0656274245A46E9A4AF0FEC8647A29E9715EC017394C5DE
