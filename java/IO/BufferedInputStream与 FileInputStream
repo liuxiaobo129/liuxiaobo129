@@ -1,0 +1,55 @@
+狗尾巴草word
+博客园首页新随笔联系订阅管理随笔 - 79  文章 - 3  评论 - 10  阅读 - 11万
+FileInputStream与BufferedInputStream的对比
+复制代码
+复制代码
+FileInputStream inputStream = new FileInputStream("d://vv.mp4");  
+FileOutputStream outputStream = new FileOutputStream("v.mp4");
+int len; 
+// 一次读取一个字节,每读取一个字节都要实现一次与硬盘的交互操作
+ while ((len = inputStream.read()) != -1) {  
+     outputStream.write(len);  
+ } 
+复制代码
+复制代码
+ 
+
+复制代码
+复制代码
+FileInputStream inputStream = new FileInputStream("d://vv.mp4");  
+FileOutputStream outputStream = new FileOutputStream("v.mp4");
+
+int len;  
+byte[] bs = new byte[1024];  
+//这里添加了一个缓存数组，每次从硬盘读取1024个字节，也就是说，每读取1024个字节才与硬盘实现一次交互
+while ((len = inputStream.read(bs)) != -1) {  
+     outputStream.write(bs, 0, len);  
+ } 
+复制代码
+复制代码
+ 
+
+ 
+
+复制代码
+复制代码
+FileInputStream inputStream = new FileInputStream("d://vv.mp4");  
+BufferedInputStream bis = new BufferedInputStream(inputStream); //默认有8M的缓存
+FileOutputStream outputStream = new FileOutputStream("IP.mp4");  
+BufferedOutputStream bos = new BufferedOutputStream(outputStream);  
+int len;  
+
+byte[] bs = new byte[1024]; 
+
+while ((len = bis.read(bs)) != -1) {  
+    bos.write(bs, 0, len); //先从硬盘读出8M到缓存中。然后read，这里的read并不是从硬盘中读取，而是从那8M缓存（内存）中读取，自然要比从硬盘中快得多。8M缓存用完后又会从硬盘补充（也就是说，一次从硬盘获取8M字节的数据） 。每8M与硬盘交互一次
+}
+复制代码
+复制代码
+ 
+
+ 
+
+以上三种方式在效率上递增，用BufferedInputStream效率最高（特别是对小文件）。
+
+另外，对于BufferOutputStream和FileOutputStream也是一样，BufferOutputStream的write是把字节写入自带的缓存中（flush之后才向硬盘写），而FileOutputStream则是一次一个字节的向硬盘写。
